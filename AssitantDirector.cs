@@ -26,8 +26,8 @@ public class AssitantDirector : MonoBehaviour
 	public string scriptName;
 
 	string launchOnStoryline;
-//	public string launchOSX, launchWIN, launchIOS;
-	public string main, remote;
+	public string launchOSX, launchWIN, launchIOS;
+//	public string main, remote;
 
 
 	#if NETWORKED
@@ -56,17 +56,36 @@ public class AssitantDirector : MonoBehaviour
 		GENERAL.ALLTASKS = new List<StoryTask> ();
 
 
-		#if MAIN
+		#if OSX
 
-		launchOnStoryline = main;
+		Debug.Log (me+"Running OSX storyline.");
 
-
-		#else
-
-
-		launchOnStoryline = remote;
+		launchOnStoryline = launchOSX;
 
 		#endif
+
+
+		#if WIN
+
+		Debug.Log (me+"Running WINDOWS storyline.");
+
+		launchOnStoryline = launchWIN;
+
+		#endif
+
+		#if IOS
+
+		Debug.Log (me+"Running IOS storyline.");
+
+		launchOnStoryline = launchIOS;
+
+		#endif
+
+
+//
+//		launchOnStoryline = remote;
+//
+//		#endif
 
 		/*
 
