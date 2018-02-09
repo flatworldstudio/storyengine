@@ -298,7 +298,7 @@ public class Director
 
 				checkForCallBack (pointer);
 
-				if (pointer.currentTask.getStatus () != TASKSTATUS.COMPLETE) {
+				if (pointer.currentTask!=null && pointer.currentTask.getStatus () != TASKSTATUS.COMPLETE) {
 					Debug.LogWarning (me + "Encountered end of storyline, but current task didn't complete?");
 
 				}
