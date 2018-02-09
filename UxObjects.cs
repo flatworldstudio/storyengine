@@ -893,15 +893,27 @@ public class UxCamera
 	public  UxCamera (GameObject theCameraObject)
 	{
 
-		// assumes that reference's parent is interest and that camera is component on reference
+		// assumes that reference's parent is interest and that camera is component on reference or child
 
+
+		if (theCameraObject == null)
+			return;
+		
 		cameraObject = theCameraObject;
-		cameraInterest = theCameraObject.transform.parent.gameObject;
+
+		if (cameraObject.transform.parent != null) {
+			
+			cameraInterest = theCameraObject.transform.parent.gameObject;
+
+		}
 
 		camera = cameraObject.GetComponentInChildren<Camera> ();
 
-		cameraReference = camera.gameObject;
+		if (camera != null) {
 
+			cameraReference = camera.gameObject;
+
+		}
 
 	}
 
