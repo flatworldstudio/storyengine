@@ -171,19 +171,19 @@ public class AssitantDirector : MonoBehaviour
 	void Update ()
 	{
 
-		// HACK
-		string inputString = Input.inputString;
-		if (inputString.Length > 0) {
-
-			if (inputString == "p") {
-
-				Debug.Log (me + "Simulating disconnect/pause ...");
-
-				theDirector.beginStoryLine ("disconnect");
-
-			}
-
-		}
+//		// HACK
+//		string inputString = Input.inputString;
+//		if (inputString.Length > 0) {
+//
+//			if (inputString == "p") {
+//
+//				Debug.Log (me + "Simulating disconnect/pause ...");
+//
+//				theDirector.beginStoryLine ("disconnect");
+//
+//			}
+//
+//		}
 
 
 
@@ -704,7 +704,16 @@ public class AssitantDirector : MonoBehaviour
 	void applyTaskUpdate (TaskUpdate taskUpdate)
 	{
 
+
+
 		StoryPointer updatePointer = GENERAL.getPointer (taskUpdate.pointerID);
+
+		// If we receive updates for a task for which we haven't spawned a pointer yet we ignore them.
+
+		if (updatePointer == null)
+			return;
+
+
 
 		StoryTask updateTask = GENERAL.getTask (taskUpdate.taskID);
 
@@ -725,6 +734,10 @@ public class AssitantDirector : MonoBehaviour
 			} else {
 
 				updatePointer.currentTask = updateTask;
+//				updateTask.pointer = updatePointer;
+
+//				Debug.LogWarning (me + "Pointer existed but task did not." + taskUpdate.pointerID);
+
 
 			}
 
