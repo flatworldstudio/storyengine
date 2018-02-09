@@ -56,6 +56,7 @@ public class AssitantDirector : MonoBehaviour
 		GENERAL.ALLTASKS = new List<StoryTask> ();
 
 
+		/*
 		#if OSX
 
 		Debug.Log (me+"Running OSX storyline.");
@@ -80,14 +81,14 @@ public class AssitantDirector : MonoBehaviour
 		launchOnStoryline = launchIOS;
 
 		#endif
-
+*/
 
 //
 //		launchOnStoryline = remote;
 //
 //		#endif
 
-		/*
+
 
 		#if UNITY_IOS
 
@@ -115,7 +116,7 @@ public class AssitantDirector : MonoBehaviour
 		#endif
 
 
-	*/
+	
 
 
 		#if NETWORKED
