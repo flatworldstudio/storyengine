@@ -188,6 +188,12 @@ public static class UxMethods
 		}
 
 	}
+	public static void tapNone   (object sender, UxArgs uxArgs)
+	{
+		
+		uxArgs.uiEvent.callback = uxArgs.activeInterface.tapNoneCallback; 
+	}
+
 
 	public static void highlightButton2d (object sender, UxArgs uxArgs)
 	{
@@ -1075,7 +1081,7 @@ public class UxInterface
 
 	public Material editMat, defaultMat;
 
-
+	public string tapNoneCallback ="";
 
 	public UxMapping defaultUxMap;
 
