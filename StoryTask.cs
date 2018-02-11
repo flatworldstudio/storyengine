@@ -36,8 +36,8 @@ public class StoryTask
 	int signoffs;
 	public string description;
 	TASKSTATUS status;
-		public StoryPointer pointer;
-		public SCOPE scope;
+	public StoryPointer pointer;
+	public SCOPE scope;
 
 	public float startTime, duration;
 	public float d;
@@ -47,17 +47,22 @@ public class StoryTask
 	public Dictionary<string,Quaternion> taskQuaternionValues;
 	public Dictionary<string,Vector3> taskVector3Values;
 	public Dictionary<string,string> taskStringValues;
+	public Dictionary<string,ushort[]> taskUshortValues;
+
+
+
 
 	#if NETWORKED
 
 	public Dictionary<string,bool> taskValuesChangeMask;
 	List<string> changedTaskValue;
 	public bool modified = false;
-	bool allModified=false;
+	bool allModified = false;
 	#endif
 
 
-	public void markAllAsModified(){
+	public void markAllAsModified ()
+	{
 		allModified = true;
 		modified = true;
 	}
@@ -116,6 +121,8 @@ public class StoryTask
 		taskVector3Values = new Dictionary<string,Vector3> ();
 		taskStringValues = new Dictionary<string,string> ();
 
+		taskUshortValues = new  Dictionary<string,ushort[]> ();
+
 
 		//		taskIntValues ["status"] = (Int32) TASKSTATUS.ACTIVE;
 
@@ -170,9 +177,12 @@ public class StoryTask
 		msg.updatedQuaternionValues = new List<Quaternion> ();
 		msg.updatedVector3Names = new List<string> ();
 		msg.updatedVector3Values = new List<Vector3> ();
-
 		msg.updatedStringNames = new List<string> ();
 		msg.updatedStringValues = new List<string> ();
+
+		msg.updatedUshortNames = new List<string> ();
+		msg.updatedUshortValues = new List<ushort[]> ();
+
 
 
 		string[] intNames = taskIntValues.Keys.ToArray ();
@@ -255,7 +265,7 @@ public class StoryTask
 
 		foreach (string stringName in stringNames) {
 
-			if (taskValuesChangeMask [stringName]|| allModified) {
+			if (taskValuesChangeMask [stringName] || allModified) {
 
 				msg.updatedStringNames.Add (stringName);
 
@@ -265,6 +275,25 @@ public class StoryTask
 
 				if (taskStringValues.TryGetValue (stringName, out stringValue))
 					msg.updatedStringValues.Add (stringValue);
+
+			}
+
+		}
+
+		string[] ushortNames = taskUshortValues.Keys.ToArray ();
+
+		foreach (string ushortName in ushortNames) {
+
+			if (taskValuesChangeMask [ushortName] || allModified) {
+
+				msg.updatedUshortNames.Add (ushortName);
+
+				taskValuesChangeMask [ushortName] = false;
+
+				ushort[] ushortValue;
+
+				if (taskUshortValues.TryGetValue (ushortName, out ushortValue))
+					msg.updatedUshortValues.Add (ushortValue);
 
 			}
 
@@ -328,6 +357,12 @@ public class StoryTask
 
 		}
 
+		for (int i = 0; i < update.updatedUshortNames.Count; i++) {
+			
+			taskUshortValues [update.updatedUshortNames [i]] = update.updatedUshortValues [i];
+			taskValuesChangeMask [update.updatedUshortNames [i]] = changeMask;
+
+		}
 
 
 
@@ -399,6 +434,29 @@ public class StoryTask
 	{
 
 		if (!taskFloatValues.TryGetValue (valueName, out value)) {
+			return false;
+		}
+
+		return true;
+
+	}
+
+	public void setUshortValue (string valueName, ushort[] value)
+	{
+
+		taskUshortValues [valueName] = value;
+
+		#if NETWORKED
+		taskValuesChangeMask [valueName] = true;
+		modified = true;
+		#endif
+
+	}
+
+	public bool getUshortValue (string valueName, out ushort[] value)
+	{
+
+		if (!taskUshortValues.TryGetValue (valueName, out value)) {
 			return false;
 		}
 
@@ -561,7 +619,7 @@ public class StoryTask
 	//
 	//
 	//			} else {
-	//				
+	//
 	//				return true;
 	//
 	//			}
@@ -781,6 +839,9 @@ public class TaskUpdate : MessageBase
 	public List<string> updatedStringNames;
 	public List<string> updatedStringValues;
 
+	public List<string> updatedUshortNames;
+	public List<ushort[]> updatedUshortValues;
+
 	public string debug;
 
 	public override void Deserialize (NetworkReader reader)
@@ -898,6 +959,36 @@ public class TaskUpdate : MessageBase
 
 		}
 
+
+		// Deserialise updated ushort values.
+
+		updatedUshortNames = new List<string> ();
+		updatedUshortValues = new List<ushort[]> ();
+
+		int ushortCount = reader.ReadInt32 ();
+
+		debug += "/ updated ushort arrays: " + ushortCount;
+
+		for (int i = 0; i < ushortCount; i++) {
+			
+			string ushortName = reader.ReadString ();
+			updatedUshortNames.Add (ushortName);
+
+			int ushortArrayLength = reader.ReadInt32 ();
+
+			ushort[] ushortArray = new ushort[ushortArrayLength];
+
+			for (int j = 0; j < ushortArrayLength; j++) {
+		
+				ushortArray [j] = reader.ReadUInt16 ();
+			
+			}
+					
+			updatedUshortValues.Add (ushortArray);
+
+		}
+
+
 		//		Debug.Log (debug);
 
 	}
@@ -988,6 +1079,30 @@ public class TaskUpdate : MessageBase
 			writer.Write (updatedStringValues [i]);
 
 		}
+
+		// Serialise updated string values.
+
+		writer.Write (updatedUshortNames.Count);
+
+		debug += "/ updated ushorts: " + updatedUshortNames.Count;
+
+		for (int i = 0; i < updatedUshortNames.Count; i++) {
+
+			writer.Write (updatedUshortNames [i]); // name
+
+			writer.Write (updatedUshortValues [i].Length); // length
+
+			for (int j = 0; j < updatedUshortValues [i].Length; j++) {
+
+				writer.Write (updatedUshortValues [i] [j]); // data
+
+			}
+
+
+		}
+
+
+
 
 		//		Debug.Log (debug);
 
