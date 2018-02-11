@@ -389,8 +389,8 @@ public class DeusController : MonoBehaviour
 		newPointerUi.transform.SetParent (DeusCanvas.transform);
 
 //		Debug.LogWarning (me + "Placing pointer");
-		newPointerUi.GetComponent<RectTransform> ().anchoredPosition3D = new Vector3 (0, 360, 0);
-		newPointerUi.GetComponent<RectTransform> ().localScale = new Vector3 (1, 1, 1);
+		//newPointerUi.GetComponent<RectTransform> ().localPosition = new Vector3 (0, 0, 0);
+	//	newPointerUi.GetComponent<RectTransform> ().localScale = new Vector3 (1, 1, 1);
 
 
 		targetPointer.pointerObject = newPointerUi;
@@ -427,18 +427,34 @@ public class DeusController : MonoBehaviour
 
 		float xSize = 320f * scalar;
 		float xAnchor = 160f * scalar;
-		float yAnchor = -0.5f * Screen.height + 80f * scalar;
+		float ySize = 160f * scalar;
+		//float yAnchor = -0.5f * Screen.height + 80f * scalar;
+
+		float screenCorrection =  Screen.width /1280f;
+
+		Debug.Log( "CORR: "+screenCorrection);
+			
+
+
+
+		float yAnchor = GENERAL.pointerScreenScalar * Screen.height   + ySize * GENERAL.pointerRectScalar * screenCorrection;
+
+		//float yAnchor =0;
+
 
 		for (int i = 0; i < 10; i++) {
 			if (pointerPositions [i] != null) {
-					
-				pointerPositions [i].pointerTextObject.GetComponent<RectTransform> ().anchoredPosition3D = new Vector3 (-640f + xAnchor + i * xSize, yAnchor, 0);
-				pointerPositions [i].pointerTextObject.GetComponent<RectTransform> ().localScale = new Vector3 (scalar, scalar, 1);
+				pointerPositions[i].pointerObject.GetComponent<RectTransform> ().localPosition = new Vector3 ((-640f + xAnchor + i * xSize)*screenCorrection, yAnchor, 0);
+				pointerPositions[i].pointerObject.GetComponent<RectTransform> ().localScale =new Vector3 (scalar*screenCorrection, scalar*screenCorrection, 1);
+
+			//	pointerPositions [i].pointerTextObject.GetComponent<RectTransform> ().localPosition = new Vector3 (-640f + xAnchor + i * xSize, yAnchor, 0);
+		//		pointerPositions [i].pointerTextObject.GetComponent<RectTransform> ().localScale = new Vector3 (scalar, scalar, 1);
 
 			}
 		}
 				
 	}
+
 
 	void handleUi ()
 	{

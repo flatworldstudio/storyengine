@@ -34,6 +34,12 @@ public static class GENERAL
 
 	public static AUTHORITY AUTHORITY=AUTHORITY.LOCAL;
 
+	//GENERAL.pointerScreenScalar
+
+	public static float pointerScreenScalar= -0.5f;
+	public static float pointerRectScalar = 0.5f;
+
+
 
 	public static int SIGNOFFS;
 	public static Dictionary <string,StoryPoint> storyPoints;
