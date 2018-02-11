@@ -582,12 +582,62 @@ public static class UxMethods
 
 			euler.z = 0; 
 
-			if (euler.x > 70 && euler.x <= 180) {
-				euler.x = 70;
+			UiConstraint orbitConstraint = uxArgs.activeInterface.camera.constraint;
+
+			if (orbitConstraint.pitchClamp) {
+
+				// transform to plus minus range
+				float pitch = euler.x <= 180f ? euler.x : euler.x - 360f;
+
+				pitch = Mathf.Clamp (pitch, orbitConstraint.pitchClampMin, orbitConstraint.pitchClampMax);
+
+				euler.x = pitch >= 0f ? pitch : pitch + 360f;
+
+
+				/*
+
+				if (euler.x <= 180) {
+
+					// rotated up
+
+					if orbitConstraint.pitchClampUp <= 180 (euler.x > orbitConstraint.pitchClampUp) {
+						euler.x = orbitConstraint.pitchClampUp;
+					}
+
+					if (euler.x < orbitConstraint.pitchClampDown) {
+						euler.x = orbitConstraint.pitchClampUp;
+					}
+
+
+
+				} else {
+
+					// euler.x > 180
+
+
+
+
+
+				}
+
+
+				if (euler.x > orbitConstraint.pitchClampUp && euler.x <= 180) {
+					euler.x = orbitConstraint.pitchClampUp;
+				}
+
+				if (euler.x < orbitConstraint.pitchClampDown && euler.x <= 180) {
+					euler.x = orbitConstraint.pitchClampUp;
+				}
+
+
+				if (euler.x <  orbitConstraint.pitchClampDown && euler.x > 180) {
+					euler.x =  orbitConstraint.pitchClampDown;
+				}
+
+*/
 			}
-			if (euler.x < 290 && euler.x > 180) {
-				euler.x = 290;
-			}
+
+	
 
 //			if (isSpringing) {
 //				isSpringing = false;
@@ -1202,6 +1252,9 @@ public class UiConstraint
 	public float radiusClampMin, radiusClampMax;
 	public bool radiusClamp;
 
+	public bool pitchClamp;
+	public float pitchClampMin, pitchClampMax;
+
 
 
 	public UiConstraint ()
@@ -1210,6 +1263,7 @@ public class UiConstraint
 		edgeSprings = false;
 		springs = false;
 		radiusClamp = false;
+		pitchClamp = false;
 	}
 }
 
