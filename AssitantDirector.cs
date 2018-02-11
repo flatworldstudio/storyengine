@@ -413,7 +413,7 @@ public class AssitantDirector : MonoBehaviour
 
 					if (task.scope == SCOPE.GLOBAL) {
 
-						Debug.Log (me + "Global task " + task.description + " changed, sending update to server. ID: " + task.ID);
+				//		Debug.Log (me + "Global task " + task.description + " changed, sending update to server. ID: " + task.ID);
 
 						sendTaskUpdateToServer (task.getUpdateMessage ());
 
@@ -425,7 +425,7 @@ public class AssitantDirector : MonoBehaviour
 
 					if (task.scope == SCOPE.GLOBAL) {
 
-						Debug.Log (me + "Global task " + task.description + " changed, sending update to clients. ID: " + task.ID);
+				//		Debug.Log (me + "Global task " + task.description + " changed, sending update to clients. ID: " + task.ID);
 
 						sendTaskUpdateToClients (task.getUpdateMessage ());
 
@@ -697,7 +697,7 @@ public class AssitantDirector : MonoBehaviour
 
 		}
 
-				Debug.Log (me+debug);
+			//	Debug.Log (me+debug);
 
 	}
 
@@ -746,7 +746,7 @@ public class AssitantDirector : MonoBehaviour
 
 			updateTask.ApplyUpdateMessage (taskUpdate);
 
-			Debug.Log (me + "Applied update to existing task.");
+		//	Debug.Log (me + "Applied update to existing task.");
 
 			if (updatePointer == null) {
 
