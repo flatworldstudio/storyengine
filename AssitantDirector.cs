@@ -691,7 +691,7 @@ public class AssitantDirector : MonoBehaviour
 
 			} else {
 
-				debug += ("client connection null.");
+				debug += (" skipping null connection ID "+ nc.connectionId);
 
 			}
 
