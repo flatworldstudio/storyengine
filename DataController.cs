@@ -27,11 +27,11 @@ public class DataController : MonoBehaviour
 
 	public List <StoryTask> taskList;
 
-	string me = "Data controller: ";
+	string me = "Data controller";
 
 	void Start ()
 	{
-		Debug.Log (me + "Starting...");
+		Log.Message ("Starting.",me);
 
 		taskList = new List <StoryTask> ();
 
@@ -41,7 +41,7 @@ public class DataController : MonoBehaviour
 
 		if (NetworkObject == null) {
 
-			Debug.LogWarning (me + "NetworkObject not found.");
+			Log.Warning ("NetworkObject not found.",me);
 
 		} else {
 
@@ -56,7 +56,7 @@ public class DataController : MonoBehaviour
 
 		if (StoryEngineObject == null) {
 
-			Debug.LogWarning (me + "StoryEngineObject not found.");
+			Log.Warning ("StoryEngineObject not found.",me);
 
 		} else {
 			
@@ -76,8 +76,8 @@ public class DataController : MonoBehaviour
 
 		if (paused) {
 
-			Debug.Log (me + "pauzing ...");
-			Debug.Log (me + "Disconnecting client ...");
+			Log.Message ("pauzing ...",me);
+			Log.Message ("Disconnecting client ...",me);
 
 
 			if (networkManager.client != null) {
@@ -104,7 +104,7 @@ public class DataController : MonoBehaviour
 
 		} else {
 
-			Debug.Log (me + "resuming ...");
+			Log.Message ("resuming ...",me);
 
 		}
 	}
@@ -145,7 +145,7 @@ public class DataController : MonoBehaviour
 	public void startBroadcastClient ()
 	{
 
-		Debug.Log (me + "Starting broadcast client.");
+		Log.Message ("Starting broadcast client.",me);
 
 		networkBroadcast.StartClient ();
 
@@ -154,7 +154,7 @@ public class DataController : MonoBehaviour
 	public void startBroadcastServer ()
 	{
 
-		Debug.Log (me + "Starting broadcast server.");
+		Log.Message ("Starting broadcast server.",me);
 
 		networkBroadcast.StartServer ();
 
@@ -163,7 +163,7 @@ public class DataController : MonoBehaviour
 	public void stopBroadcast ()
 	{
 
-		Debug.Log (me + "Stopping broadcast server.");
+		Log.Message ("Stopping broadcast server.",me);
 
 		networkBroadcast.Stop ();
 
@@ -173,11 +173,11 @@ public class DataController : MonoBehaviour
 	{
 		
 		if (server == "") {
-			Debug.LogError (me + "trying to start client without server address");
+			Log.Error ("trying to start client without server address",me);
 			return;
 		}
 
-		Debug.Log (me + "Starting client for remote server " + server);
+		Log.Message ("Starting client for remote server " + server,me);
 
 		networkManager.StartNetworkClient (server);
 
@@ -185,7 +185,7 @@ public class DataController : MonoBehaviour
 
 	public void StopNetworkClient(){
 
-		Debug.Log (me + "Stopping network client.");
+		Log.Message ("Stopping network client.",me);
 
 		networkManager.StopClient ();
 
@@ -237,7 +237,7 @@ public class DataController : MonoBehaviour
 	public void addTaskHandler (DataTaskHandler theHandler)
 	{
 		dataTaskHandler = theHandler;
-		Debug.Log (me + "Handler added");
+		Log.Message ("Handler added.",me);
 	}
 
 	void Update ()
@@ -253,7 +253,7 @@ public class DataController : MonoBehaviour
 				
 			if (!GENERAL.ALLTASKS.Exists(at => at==task )) {
 					
-				Debug.Log (me + "Removing task:" + task.description);
+				Log.Message ("Removing task:" + task.description,me);
 
 				// Task was removed, so stop executing it.
 
@@ -278,7 +278,8 @@ public class DataController : MonoBehaviour
 					
 					if (!handlerWarning) {
 						
-						Debug.LogWarning (me + "No handler available, blocking task while waiting.");
+						Log.Warning ("No handler available, blocking task while waiting.",me);
+
 						handlerWarning = true;
 						t++;
 

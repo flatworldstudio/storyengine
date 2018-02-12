@@ -9,12 +9,10 @@ using System.Linq;
 #if NETWORKED
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
-
 #endif
 
 public enum SCOPE
 {
-//	SOLO,
 	LOCAL,
 	GLOBAL
 
@@ -54,13 +52,14 @@ public static class GENERAL
 
 	public static string broadcastServer,networkServer;
 
+	public static string me = "General";
 
 	public static StoryPoint getStoryPointByID (string pointID)
 	{
 		StoryPoint r;
 
 		if (!storyPoints.TryGetValue (pointID, out r)) {
-			Debug.LogWarning ("Storypoint " + pointID + " not found.");
+			Log.Warning ("Storypoint " + pointID + " not found.",me);
 		}
 
 		return r;
@@ -71,7 +70,7 @@ public static class GENERAL
 	{
 
 		if (ALLPOINTERS.Count > 10) {
-			Debug.LogWarning ("Potential pointer overflow.");
+			Log.Warning ("Potential pointer overflow.",me);
 		}
 
 	}
@@ -80,7 +79,7 @@ public static class GENERAL
 	{
 
 		if (ALLTASKS.Count > 10) {
-			Debug.LogWarning ("Potential task overflow.");
+			Log.Warning ("Potential task overflow.",me);
 
 
 			//			foreach (Task t in ALLTASKS) {

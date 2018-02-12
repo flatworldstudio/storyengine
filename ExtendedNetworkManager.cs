@@ -29,13 +29,13 @@ public delegate void OnServerDisconnectDelegate (NetworkConnection connection);
 
 public class ExtendedNetworkManager : NetworkManager
 {
-	string me = "Network Manager: ";
+	string me = "Network manager";
 
-	const short  connectionMessageCode = 1001;
+	const short connectionMessageCode = 1001;
 
 	//
 
-	void OnApplicationQuit()
+	void OnApplicationQuit ()
 	{
 		if (client != null)
 			StopNetworkClient ();
@@ -63,9 +63,8 @@ public class ExtendedNetworkManager : NetworkManager
 	}
 
 	public override void OnStartClient (NetworkClient theClient)
-
 	{
-		Debug.Log (me + "Client has started.");
+		Log.Message ("Client has started.", me);
 
 		if (onStartClientDelegate != null)
 			onStartClientDelegate (theClient);
@@ -73,10 +72,9 @@ public class ExtendedNetworkManager : NetworkManager
 	}
 
 	public override void OnClientConnect (NetworkConnection conn)
-
 	{
 		
-		Debug.Log (me + "Client connected to server.");
+		Log.Message ("Client connected to server.", me);
 
 		if (onClientConnectDelegate != null)
 			onClientConnectDelegate (conn);
@@ -86,7 +84,7 @@ public class ExtendedNetworkManager : NetworkManager
 	public override void OnClientDisconnect (NetworkConnection connection)
 	{
 
-		Debug.Log (me+"Client disconnected from server.");
+		Log.Message ("Client disconnected from server.", me);
 
 		if (onClientDisconnectDelegate != null)
 			onClientDisconnectDelegate (connection);
@@ -103,7 +101,7 @@ public class ExtendedNetworkManager : NetworkManager
 	public override void OnStopClient ()
 	{
 
-		Debug.Log (me+"Client has stopped.");
+		Log.Message ("Client has stopped.", me);
 
 		if (onStopClientDelegate != null)
 			onStopClientDelegate ();
@@ -134,9 +132,8 @@ public class ExtendedNetworkManager : NetworkManager
 	}
 
 	public override void OnStartServer ()
-
 	{
-		Debug.Log (me + "Server started.");
+		Log.Message ("Server started.", me);
 
 		if (onStartServerDelegate != null)
 			onStartServerDelegate ();
@@ -144,9 +141,8 @@ public class ExtendedNetworkManager : NetworkManager
 	}
 
 	public override void OnStopServer ()
-
 	{
-		Debug.Log (me + "Server stopped.");
+		Log.Message ("Server stopped.", me);
 
 		if (onStopServerDelegate != null)
 			onStopServerDelegate ();
@@ -154,9 +150,8 @@ public class ExtendedNetworkManager : NetworkManager
 	}
 
 	public override void OnServerConnect (NetworkConnection connection)
-
 	{
-		Debug.Log (me + "Remote client connected.");
+		Log.Message ("Remote client connected.", me);
 
 		if (onServerConnectDelegate != null)
 			onServerConnectDelegate (connection);
@@ -164,9 +159,8 @@ public class ExtendedNetworkManager : NetworkManager
 	}
 
 	public override void OnServerDisconnect (NetworkConnection connection)
-
 	{
-		Debug.Log (me + "Remote client disconnected.");
+		Log.Message ("Remote client disconnected.", me);
 
 		if (onServerDisconnectDelegate != null)
 			onServerDisconnectDelegate (connection);
@@ -188,28 +182,28 @@ public class ExtendedNetworkManager : NetworkManager
 	{
 		var msg = new StringMessage (value);
 		client.Send (connectionMessageCode, msg);
-		Debug.Log (me + "Sending connection message to server: " + value);
+		Log.Message ("Sending connection message to server: " + value);
 	}
 
 	public void connectionMessageToClients (string value)
 	{
 		var msg = new StringMessage (value);
 		NetworkServer.SendToAll (connectionMessageCode, msg);
-		Debug.Log (me + "Sending connection message to all clients: " + value);
+		Log.Message ("Sending connection message to all clients: " + value);
 	}
 
 
 	void onClientConnectionMessage (NetworkMessage netMsg)
 	{
 		var message = netMsg.ReadMessage<StringMessage> ();
-		Debug.Log (me + "Connection message from server: " + message.value);
+		Log.Message ("Connection message from server: " + message.value);
 	}
 
 
 	void onServerConnectionMessage (NetworkMessage netMsg)
 	{
 		var message = netMsg.ReadMessage<StringMessage> ();
-		Debug.Log (me + "Connection message from client: " + message.value);
+		Log.Message ("Connection message from client: " + message.value);
 
 		switch (message.value) {
 
@@ -221,7 +215,7 @@ public class ExtendedNetworkManager : NetworkManager
 
 		case "disconnecting":
 
-			Debug.Log (me + "Client is disconnecting, dropping their connection." + message.value);
+			Log.Message ("Client is disconnecting, dropping their connection." + message.value);
 
 //			Network.CloseConnection(netMsg.conn, true);
 

@@ -31,7 +31,7 @@ public enum TASKSTATUS
 public class StoryTask
 {
 	
-	string me = "Task: ";
+	string me = "Storytask";
 	public string ID;
 	int signoffs;
 	public string description;
@@ -308,11 +308,11 @@ public class StoryTask
 	public void ApplyUpdateMessage (TaskUpdate update, bool changeMask = false)
 	{
 
-		//		Debug.Log (me + "Applying network task update.");
+		//		Log.Message ("Applying network task update.");
 
 
 		if (update.updatedIntNames.Contains ("status")) {
-			Debug.Log (me + "incoming task status change, setting pointerstatus to taskupdated.");
+			Log.Message ("incoming task status change, setting pointerstatus to taskupdated.",me,LOGLEVEL.VERBOSE);
 
 			pointer.setStatus (POINTERSTATUS.TASKUPDATED);
 		}
@@ -321,7 +321,7 @@ public class StoryTask
 		// check task status change
 
 		//		if (update.updatedIntNames ["status"] ) {
-		//			Debug.Log (me + "incoming task status change.");
+		//			Log.Message ("incoming task status change.");
 		//			pointer.setStatus (POINTERSTATUS.TASKUPDATED);
 		//
 		//
@@ -727,7 +727,7 @@ public class StoryTask
 
 
 		} else {
-			Debug.LogWarning (me + "A task was completed more than once.");
+			Log.Warning ("A task was completed more than once.",me);
 
 		}
 
@@ -791,7 +791,7 @@ public class StoryTask
 	{
 
 		if (GENERAL.SIGNOFFS == 0) {
-			Debug.LogError ("Trying to signoff on a task with 0 required signoffs.");
+			Log.Warning ("Trying to signoff on a task with 0 required signoffs.",me);
 		}
 
 		signoffs++;
@@ -843,6 +843,8 @@ public class TaskUpdate : MessageBase
 	public List<ushort[]> updatedUshortValues;
 
 	public string debug;
+
+	string me="Taskupdate";
 
 	public override void Deserialize (NetworkReader reader)
 	{
@@ -988,6 +990,7 @@ public class TaskUpdate : MessageBase
 
 		}
 
+		Log.Message (debug, me, LOGLEVEL.VERBOSE);
 
 		//		Debug.Log (debug);
 
@@ -1103,7 +1106,7 @@ public class TaskUpdate : MessageBase
 
 
 
-
+		Log.Message (debug, me, LOGLEVEL.VERBOSE);
 		//		Debug.Log (debug);
 
 	}

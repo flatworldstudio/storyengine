@@ -15,11 +15,11 @@ public class SetController : MonoBehaviour
 
 	public List <StoryTask> taskList;
 
-	string me = "Set controller: ";
+	string me = "Set controller";
 
 	void Start ()
 	{
-		Debug.Log (me + "Starting...");
+		Log.Message ("Starting.",me);
 
 		taskList = new List <StoryTask> ();
 
@@ -27,7 +27,7 @@ public class SetController : MonoBehaviour
 
 		if (StoryEngineObject == null) {
 
-			Debug.LogWarning ("StoryEngineObject not found.");
+			Log.Warning("StoryEngineObject not found.",me);
 
 		} else {
 			
@@ -41,7 +41,7 @@ public class SetController : MonoBehaviour
 	public void addTaskHandler (SetTaskHandler theHandler)
 	{
 		setTaskHandler = theHandler;
-		Debug.Log (me + "Handler added");
+		Log.Message ("Handler added.",me);
 	}
 
 
@@ -58,7 +58,7 @@ public class SetController : MonoBehaviour
 
 			if (!GENERAL.ALLTASKS.Exists(at => at==task )) {
 
-					Debug.Log (me + "Removing task:" + task.description);
+					Log.Message ("Removing task:" + task.description,me);
 
 				taskList.RemoveAt (t);
 
@@ -79,7 +79,7 @@ public class SetController : MonoBehaviour
 				} else {
 
 					if (!handlerWarning) {
-						Debug.LogWarning (me + "No handler available, blocking task while waiting.");
+						Log.Warning ("No handler available, blocking task while waiting.",me);
 						handlerWarning = true;
 						t++;
 					} 

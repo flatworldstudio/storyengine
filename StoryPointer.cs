@@ -56,7 +56,7 @@ public class StoryPointer
 	public bool modified;
 	#endif
 
-	string me = "Storypointer says: ";
+	string me = "Storypointer";
 
 	public StoryPointer ()
 
@@ -131,7 +131,7 @@ public class StoryPointer
 //
 //			sp = new StoryPointer (point, pointerUuid);
 //
-//			Debug.Log (me + "Created a new (remotely owned) pointer with ID: " + sp.ID);
+//			Log.Message ("Created a new (remotely owned) pointer with ID: " + sp.ID);
 //
 //		} 
 //
@@ -229,7 +229,7 @@ public class StoryPointer
 
 		if (currentPoint.getNextStoryPoint () == null) {
 
-			Debug.Log (me + "No next point");
+			Log.Message ("No next point",me);
 
 		} else {
 

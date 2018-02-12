@@ -17,7 +17,7 @@ public class UxController
 	GraphicRaycaster targetRaycaster;
 	// TO DO !!!!!
 
-	string me = "UxHandler: ";
+	string me = "Uxcontroller";
 
 
 	UiEvent activeUiEvent, emptyUiEvent;
@@ -88,7 +88,7 @@ public class UxController
 
 		if (e == 0) {
 			
-			Debug.Log (me + "no ui event found, adding a temp one");
+			Log.Message ( "No ui event found, adding a temp one",me);
 
 			UiEvent springEvent = new UiEvent ();
 
@@ -104,7 +104,7 @@ public class UxController
 
 		if (e > 1) {
 			
-			Debug.LogWarning (me + "Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ");
+			Log.Warning ("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ",me);
 
 		}
 
@@ -194,7 +194,7 @@ public class UxController
 
 			UiEvent uiEvent = uiEventStack [i];
 
-//			Debug.Log (me + "handling event stack of size " + uiEventStack.Count);
+//			Log.Message ( "handling event stack of size " + uiEventStack.Count);
 
 			processUiEvent (uiEvent, activeInterface);
 
@@ -252,12 +252,12 @@ public class UxController
 
 		if (stackSize != stackSizeNew) {
 			
-//			Debug.Log (me + cycle + " Event stack size changed: " + stackSizeNew);
+//			Log.Message ( cycle + " Event stack size changed: " + stackSizeNew);
 
 		}
 
 		if (stackSizeNew > 10)
-			Debug.LogWarning (me + "Ui event stack exceeds 10, potential overflow.");	
+			Log.Warning ( "Ui event stack exceeds 10, potential overflow.",me);	
 
 		return callbackResult;
 
@@ -451,7 +451,7 @@ public class UxController
 
 		if (ui.dx > -10f && ui.dx < 10f && ui.dy > -10f && ui.dy < 10f && ui.tapCount > 0 && ui.tapCount < 0.25f) {
 			result = true;
-			//				Debug.Log (me + cycle + " tap detected");
+			//				Log.Message ( cycle + " tap detected");
 		}
 		ui.tapCount = 0;
 		return result;
@@ -649,7 +649,7 @@ public class UxController
 
 			// Event is inert.
 
-//			Debug.Log (me + cycle + "inertia " + ui.dx + " " + ui.dy);
+//			Log.Message ( cycle + "inertia " + ui.dx + " " + ui.dy);
 
 //			Debug.Log ("inertia creeps..." + ui.dx+" "+ui.dy);
 

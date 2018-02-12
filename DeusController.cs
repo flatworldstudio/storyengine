@@ -6,16 +6,14 @@ using UnityEngine.UI;
 
 public class DeusController : MonoBehaviour
 {
-	//	float smoothMouseX, smoothMouseY;
 
 	GameObject DeusCanvas, StoryEngineObject, PointerBlock;
-
-	//	public STORYMODE storyMode;
 
 
 	AssitantDirector ad;
 
-	string me = "Deus Controller: ";
+	string me = "Deus Controller";
+
 	List <StoryTask> taskList;
 	List <StoryPointer> pointerList;
 	StoryPointer[] pointerPositions;
@@ -24,7 +22,7 @@ public class DeusController : MonoBehaviour
 	void Start ()
 	{
 		
-		Debug.Log (me + "Starting...");
+		Log.Message ("Starting...",me);
 
 		taskList = new List <StoryTask> ();
 		pointerList = new List <StoryPointer> ();
@@ -37,7 +35,7 @@ public class DeusController : MonoBehaviour
 
 		if (StoryEngineObject == null) {
 
-			Debug.LogWarning ("StoryEngineObject with central command script not found.");
+			Log.Warning ("StoryEngineObject with central command script not found.",me);
 
 		} else {
 			ad = StoryEngineObject.GetComponent <AssitantDirector> ();
@@ -47,13 +45,13 @@ public class DeusController : MonoBehaviour
 		DeusCanvas = GameObject.Find ("DeusCanvas");
 
 		if (DeusCanvas == null) {
-			Debug.LogWarning ("DeusCanvas not found.");
+			Log.Warning  ("DeusCanvas not found.",me);
 		} 
 
 		DeusCanvas = GameObject.Find ("DeusCanvas");
 
 		if (DeusCanvas == null) {
-			Debug.LogWarning ("DeusCanvas not found.");
+			Log.Warning  ("DeusCanvas not found.",me);
 		} else {
 			DeusCanvas.SetActive (false);
 		}
@@ -62,7 +60,7 @@ public class DeusController : MonoBehaviour
 
 
 		if (PointerBlock == null) {
-			Debug.LogWarning ("PointerBlock not found.");
+			Log.Warning  ("PointerBlock not found.",me);
 		} else {
 //			PointerBlock.SetActive (false);
 		}
@@ -103,7 +101,7 @@ public class DeusController : MonoBehaviour
 					
 			if (!GENERAL.ALLTASKS.Exists(at => at==task )) {
 				
-				Debug.Log (me + "Removing task:" + task.description);
+				Log.Message ("Removing task:" + task.description,me);
 
 				taskList.RemoveAt (t);
 
@@ -144,7 +142,7 @@ public class DeusController : MonoBehaviour
 
 
 
-//					Debug.Log (me + "Destroying ui for pointer for storyline " + task.pointer.currentPoint.storyLineName);
+//					Log.Message ("Destroying ui for pointer for storyline " + task.pointer.currentPoint.storyLineName);
 //
 //					// update first. some pointers reach end in a single go - we want those to be aligned.
 //
@@ -197,7 +195,7 @@ public class DeusController : MonoBehaviour
 
 			if (!pointerList.Contains (pointer)) {
 				
-				Debug.Log (me + "Pointer is new, added display for storyline " + pointer.currentPoint.storyLineName);
+				Log.Message ("Pointer is new, added display for storyline " + pointer.currentPoint.storyLineName,me);
 
 				pointerList.Add (pointer);
 
@@ -220,7 +218,7 @@ public class DeusController : MonoBehaviour
 
 			if (!GENERAL.ALLPOINTERS.Contains (pointer)) {
 
-				Debug.Log (me + "Destroying ui for pointer for storyline " + pointer.currentPoint.storyLineName);
+				Log.Message ("Destroying ui for pointer for storyline " + pointer.currentPoint.storyLineName,me);
 
 				// update first. some pointers reach end in a single go - we want those to be aligned.
 
@@ -304,7 +302,7 @@ public class DeusController : MonoBehaviour
 
 				//			if (task.description == "end") {
 
-				Debug.Log (me + "Destroying ui for pointer for storyline " + task.pointer.currentPoint.storyLineName);
+				Log.Message ("Destroying ui for pointer for storyline " + task.pointer.currentPoint.storyLineName);
 
 				// update first. some pointers reach end in a single go - we want those to be aligned.
 
@@ -336,7 +334,7 @@ public class DeusController : MonoBehaviour
 
 		if (!pointerList.Contains (theTask.pointer)) {
 			
-			Debug.Log (me + "Pointer is new, added display for storyline " + theTask.pointer.currentPoint.storyLineName);
+			Log.Message ("Pointer is new, added display for storyline " + theTask.pointer.currentPoint.storyLineName);
 
 			pointerList.Add (theTask.pointer);
 
@@ -344,7 +342,7 @@ public class DeusController : MonoBehaviour
 
 		}
 
-//			Debug.Log (me + "Setting UI info for task: " + theTask.description);
+//			Log.Message ("Setting UI info for task: " + theTask.description);
 
 
 		if (theTask.description != "wait") {
@@ -371,10 +369,10 @@ public class DeusController : MonoBehaviour
 
 		}
 
-//		Debug.Log (me + "Updated pointer displays ");
+//		Log.Message ("Updated pointer displays ");
 //		for (int i = 0; i < 10; i++) {
 //			if (pointerPositions [i] != null) {
-//				Debug.Log (me + "position: " + i + " : " + pointerPositions [i].currentPoint.storyLineName);
+//				Log.Message ("position: " + i + " : " + pointerPositions [i].currentPoint.storyLineName);
 //			}
 //		}
 	}
@@ -432,7 +430,7 @@ public class DeusController : MonoBehaviour
 
 		float screenCorrection =  Screen.width /1280f;
 
-		Debug.Log( "CORR: "+screenCorrection);
+	//	Debug.Log( "CORR: "+screenCorrection);
 			
 
 
@@ -505,7 +503,7 @@ public class DeusController : MonoBehaviour
 
 			if (pointerPositions.Length > storyPointerIndex && storyPointerIndex != -1) {
 				if (pointerPositions [storyPointerIndex] != null) {
-					Debug.Log (me + "Progressing storyline" + pointerPositions [storyPointerIndex].currentPoint.storyLineName);
+					Log.Message ("Progressing storyline" + pointerPositions [storyPointerIndex].currentPoint.storyLineName);
 
 //					cc.progressPointer (pointerPositions [storyPointerIndex].uid);
 
@@ -527,7 +525,7 @@ public class DeusController : MonoBehaviour
 	{
 
 		if (Input.GetKey ("escape")) {
-			Debug.Log (me + "Quitting application.");
+			Log.Message ("Quitting application.");
 			Application.Quit ();
 		}
 		

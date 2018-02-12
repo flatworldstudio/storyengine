@@ -25,7 +25,8 @@ public class Director
 
 	List <StoryPointer> pointerStack;
 	public DIRECTORSTATUS status;
-	string me = "Director: ";
+
+	string me = "Director";
 
 	public Director ()
 	{
@@ -50,7 +51,7 @@ public class Director
 					
 				// if a pointer was killed, remove it now.
 
-				Debug.Log (me + "Removing pointer uuid: " + sp.ID);
+				Log.Message ("Removing pointer uuid: " + sp.ID ,me);
 
 				GENERAL.ALLPOINTERS.RemoveAt (p);
 
@@ -60,22 +61,18 @@ public class Director
 
 				// pointer needs evaluating. but we only do this if pointer is local OR if pointer is global and we are the server
 
-
 				if ((sp.scope == SCOPE.GLOBAL && GENERAL.AUTHORITY == AUTHORITY.GLOBAL) || (sp.scope == SCOPE.LOCAL)) {
 
 					pointerStack.Add (sp);
 
 				}
 
-	
-
-
 			}
 
 		}
 
 		if (pointerStack.Count > 0)
-			Debug.Log (me + "Evaluating " + pointerStack.Count + " of " + GENERAL.ALLPOINTERS.Count + " storypointers.");
+			Log.Message ("Evaluating " + pointerStack.Count + " of " + GENERAL.ALLPOINTERS.Count + " storypointers.",me);
 		
 		while (pointerStack.Count > 0) {
 
@@ -88,7 +85,7 @@ public class Director
 
 			pointer = pointerStack [0];
 
-			Debug.Log (me + "Evaluating pointer uid: " + pointer.ID + " on storyline " + pointer.currentPoint.storyLineName);
+			Log.Message ("Evaluating pointer uid: " + pointer.ID + " on storyline " + pointer.currentPoint.storyLineName,me);
 
 			switch (pointer.currentPoint.taskType) {
 
@@ -102,7 +99,7 @@ public class Director
 
 					// Put this pointer on hold. Remove from stack.
 
-					Debug.Log (me + "Pausing pointer.");
+					Log.Message ("Pausing pointer.",me);
 
 					pointer.setStatus (POINTERSTATUS.PAUSED);
 
@@ -131,17 +128,17 @@ public class Director
 
 						} else {
 
-							Debug.LogWarning (me + "Tell was unable to find the indicated storypoint.");
+							Log.Warning ("Tell was unable to find the indicated storypoint.",me);
 
 						}
 
 						targetPointer.setStatus (POINTERSTATUS.EVALUATE);
 
-						Debug.Log (me + "Telling pointer on storyline " + targetPointerName + " to move to point " + targetValue);
+						Log.Message ("Telling pointer on storyline " + targetPointerName + " to move to point " + targetValue,me);
 
 					} else {
 							
-						Debug.LogWarning (me + "Tell was unable to find the indicated storypointer.");
+						Log.Warning ("Tell was unable to find the indicated storypointer.",me);
 
 					}
 
@@ -161,11 +158,11 @@ public class Director
 
 						pointer.currentPoint = targetPoint;
 
-						Debug.Log (me + "Go to point " + targetValue);
+						Log.Message ("Go to point " + targetValue,me);
 
 					} else {
 							
-						Debug.LogWarning (me + "Goto point not found.");
+						Log.Warning ("Goto point not found.",me);
 
 					}
 
@@ -185,7 +182,7 @@ public class Director
 
 					if (GENERAL.getPointerOnStoryline (targetPointerName) == null) {
 														
-						Debug.Log (me + "Starting new pointer for storypoint: " + targetPointerName);
+						Log.Message ("Starting new pointer for storypoint: " + targetPointerName,me);
 
 						newPointer = new StoryPointer (targetPoint);
 
@@ -193,7 +190,7 @@ public class Director
 
 					} else {
 
-						Debug.Log (me + "Storyline already active for storypoint " + targetPointerName);
+						Log.Message ("Storyline already active for storypoint " + targetPointerName,me);
 					}
 
 					moveToNextPoint (pointer);
@@ -212,7 +209,7 @@ public class Director
 
 							if (stp != pointer) {
 									
-								Debug.Log (me + "Stopping pointer " + pointer.ID + " on " + stp.currentPoint.storyLineName);
+								Log.Message ("Stopping pointer " + pointer.ID + " on " + stp.currentPoint.storyLineName,me);
 
 //								targetPointer.killPointerAndTask ();
 
@@ -220,11 +217,11 @@ public class Director
 
 								if (GENERAL.ALLTASKS.Remove (stp.currentTask)) {
 
-									Debug.Log (me + "Removing task " + stp.currentTask.description);
+									Log.Message ("Removing task " + stp.currentTask.description,me);
 
 								} else {
 
-									Debug.LogWarning (me + "Failed removing task " + stp.currentTask.description);
+									Log.Warning ("Failed removing task " + stp.currentTask.description,me);
 
 								}
 
@@ -248,7 +245,7 @@ public class Director
 
 						if (targetPointer != null) {
 												
-							Debug.Log (me + "Stopping pointer " + targetPointer.ID + " on " + targetPointer.currentPoint.storyLineName);
+							Log.Message ("Stopping pointer " + targetPointer.ID + " on " + targetPointer.currentPoint.storyLineName,me);
 
 							pointerStack.Remove (targetPointer);
 
@@ -262,18 +259,18 @@ public class Director
 
 							if (GENERAL.ALLTASKS.Remove (targetPointer.currentTask)) {
 								
-								Debug.Log (me + "Removing task " + targetPointer.currentTask.description);
+								Log.Message ("Removing task " + targetPointer.currentTask.description,me);
 
 							} else {
 								
-								Debug.LogWarning (me + "Failed removing task " + targetPointer.currentTask.description);
+								Log.Warning ("Failed removing task " + targetPointer.currentTask.description,me);
 
 							}
 
 
 						} else {
 
-							Debug.Log (me + "No pointer found for " + targetPointerName);
+							Log.Message ("No pointer found for " + targetPointerName,me);
 							
 						}
 
@@ -299,7 +296,7 @@ public class Director
 				checkForCallBack (pointer);
 
 				if (pointer.currentTask!=null && pointer.currentTask.getStatus () != TASKSTATUS.COMPLETE) {
-					Debug.LogWarning (me + "Encountered end of storyline, but current task didn't complete?");
+					Log.Warning ("Encountered end of storyline, but current task didn't complete?",me);
 
 				}
 
@@ -324,7 +321,7 @@ public class Director
 
 					// A normal task to be executed. Assistant director will generate task.
 
-					Debug.Log (me + "Task to be executed: " + pointer.currentPoint.task [0]);
+					Log.Message ("Task to be executed: " + pointer.currentPoint.task [0],me);
 
 					pointer.setStatus (POINTERSTATUS.NEWTASK);
 
@@ -344,7 +341,7 @@ public class Director
 
 						// Task was completed, progress to the next point.
 
-						Debug.Log (me + "task completed: " + pointer.currentTask.description);
+						Log.Message ("task completed: " + pointer.currentTask.description,me);
 
 						pointer.setStatus (POINTERSTATUS.EVALUATE);
 
@@ -378,7 +375,7 @@ public class Director
 
 				// This shouldn't occur.
 
-				Debug.LogWarning (me + "Error: unkown storypoint type. ");
+				Log.Warning ("Error: unkown storypoint type. ",me);
 
 				pointerStack.RemoveAt (0);
 
@@ -419,7 +416,7 @@ public class Director
 
 			if (GENERAL.getPointerOnStoryline (pointer.currentTask.getCallBack ()) == null) {
 
-				Debug.Log (me + "New callback storyline: " + callBackValue);
+			Log.Message ("New callback storyline: " + callBackValue,me);
 
 				StoryPointer newStoryPointer = new StoryPointer (targetPoint);
 
@@ -437,7 +434,7 @@ public class Director
 //					newStoryPointer.scope=SCOPE.GLOBAL;
 //					newStoryPointer.hasChanged=true;
 //
-//					Debug.Log (me + "Callback: new pointer also set to global");
+//					Log.Message ("Callback: new pointer also set to global");
 //
 //
 //				}
@@ -450,7 +447,7 @@ public class Director
 
 			} else {
 
-				Debug.Log (me + "Callback storyline already started: " + callBackValue);
+			Log.Message ("Callback storyline already started: " + callBackValue,me);
 			}
 
 			return true;
@@ -478,7 +475,7 @@ public class Director
 	public void beginStoryLine (string beginName)
 	{
 
-		StoryPointer newStoryPointer = new StoryPointer (GENERAL.getStoryPointByID (beginName));
+		new StoryPointer (GENERAL.getStoryPointByID (beginName)); // constructor adds pointer to GENERAL.allpointers
 
 	}
 
@@ -486,7 +483,7 @@ public class Director
 	{
 		if (!thePointer.moveToNextPoint ()) {
 			
-			Debug.Log (me + "Error: killing pointer ");
+			Log.Warning ("Error: killing pointer ",me);
 			thePointer.setStatus (POINTERSTATUS.KILLED);
 
 			pointerStack.RemoveAt (0);

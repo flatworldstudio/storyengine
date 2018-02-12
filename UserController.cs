@@ -15,11 +15,11 @@ public class UserController : MonoBehaviour
 
 	public List <StoryTask> taskList;
 
-	string me = "User controller: ";
+	string me = "User controller";
 
 	void Start ()
 	{
-		Debug.Log (me + "Starting...");
+		Log.Message ("Starting...",me);
 
 		taskList = new List <StoryTask> ();
 
@@ -27,7 +27,7 @@ public class UserController : MonoBehaviour
 
 		if (StoryEngineObject == null) {
 
-			Debug.LogWarning ("StoryEngineObject not found.");
+			Log.Warning ("StoryEngineObject not found.",me);
 
 		} else {
 			
@@ -41,7 +41,7 @@ public class UserController : MonoBehaviour
 	public void addTaskHandler (UserTaskHandler theHandler)
 	{
 		userTaskHandler = theHandler;
-		Debug.Log (me + "Handler added");
+		Log.Message ("Handler added",me);
 	}
 
 
@@ -58,7 +58,7 @@ public class UserController : MonoBehaviour
 
 			if (!GENERAL.ALLTASKS.Exists(at => at==task )) {
 
-				Debug.Log (me + "Removing task:" + task.description);
+				Log.Message ("Removing task:" + task.description);
 
 				taskList.RemoveAt (t);
 

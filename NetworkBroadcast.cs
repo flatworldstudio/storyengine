@@ -8,7 +8,7 @@ public class NetworkBroadcast : NetworkDiscovery
 	
 	public string serverAddress, serverMessage;
 
-	string me = "Networkbroadcast: ";
+	string me = "Networkbroadcast";
 
 	bool resumeClient = false;
 	bool resumeServer = false;
@@ -40,7 +40,7 @@ public class NetworkBroadcast : NetworkDiscovery
 				resumeClient = true;
 				Stop ();
 
-				Debug.Log (me + "Pausing broadcast client.");
+				Log.Message ("Pausing broadcast client.",me);
 
 			}
 
@@ -49,7 +49,7 @@ public class NetworkBroadcast : NetworkDiscovery
 				resumeServer = true;
 				Stop ();
 
-				Debug.Log (me + "Pausing broadcast server.");
+				Log.Message ("Pausing broadcast server.",me);
 
 			}
 
@@ -60,7 +60,7 @@ public class NetworkBroadcast : NetworkDiscovery
 				resumeClient = false;
 				StartClient ();
 
-				Debug.Log (me + "Resuming broadcast client.");
+				Log.Message ("Resuming broadcast client.",me);
 
 			}
 
@@ -69,7 +69,7 @@ public class NetworkBroadcast : NetworkDiscovery
 				resumeServer = false;
 				StartServer ();
 
-				Debug.Log (me + "Resuming broadcast server.");
+				Log.Message ("Resuming broadcast server.",me);
 
 			}
 							
@@ -100,7 +100,7 @@ public class NetworkBroadcast : NetworkDiscovery
 		// Handler to respond to received broadcast message event.
 		// Since our engine is loop based, we just store the info for the loop to pick up on.
 
-		Debug.Log (me + "Received broadcast: " + data + " from " + fromAddress);
+		Log.Message ("Received broadcast: " + data + " from " + fromAddress,me);
 
 		serverMessage = data;
 		serverAddress = fromAddress;

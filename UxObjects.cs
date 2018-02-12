@@ -53,7 +53,7 @@ public class UiEvent
 	public GameObject target2D, target3D;
 	public UiButton targetButton;
 
-
+//	string me="Uievent";
 
 	public bool isInert, isSpringing;
 
@@ -149,12 +149,13 @@ public class UiEvent
 public static class UxMethods
 {
 
+//	static string me="Uxmethods";
 
 
 	public static void someAction (object sender, UxArgs uxArgs)
 	{
 
-		Debug.Log ("SOME ACTION TRIGGERRED");
+		Log.Message ("SOME ACTION TRIGGERRED");
 	}
 
 
@@ -171,7 +172,7 @@ public static class UxMethods
 	public static void select3dObject (object sender, UxArgs uxArgs)
 	{
 
-		Debug.Log ("3d target: " + uxArgs.uiEvent.target3D.transform.name);
+		Log.Message ("3d target: " + uxArgs.uiEvent.target3D.transform.name);
 
 		if (uxArgs.activeInterface.selectedObjects.IndexOf (uxArgs.uiEvent.target3D) != -1) {
 
@@ -692,7 +693,7 @@ public static class UxMethods
 
 		// catch exception: when constructing a uibutton the constructor searches for a gameobject by name, which may fail.
 		if (draggedButton != null && (draggedButton.gameObject == null || draggedButton.dragTarget == null)) {
-			Debug.Log ("ERROR: uiButton object reference not found. Is the gameobject active?");
+			Log.Error ("uiButton object reference not found. Is the gameobject active?");
 //			draggedButton.dragTarget = emptyObject;
 		}
 
@@ -844,8 +845,8 @@ public static class UxMethods
 				}
 			}
 
-			//			Debug.Log (me + "ytoolow " + yIsTooLow.ToString () + " y modded " + yUnlocked.ToString ());
-			//			Debug.Log (me + "y: " + cameraPositionOut.y + " unmod y: " + state.lockValueY);
+			//			Log.Message ( "ytoolow " + yIsTooLow.ToString () + " y modded " + yUnlocked.ToString ());
+			//			Log.Message ( "y: " + cameraPositionOut.y + " unmod y: " + state.lockValueY);
 
 		}
 
@@ -1362,7 +1363,7 @@ public class UiButton
 			image.color = brightness * color;
 		} else {
 			// catch exception
-			Debug.Log ("ERROR: uibutton gameobject not found");
+			Log.Error ("ERROR: uibutton gameobject not found");
 		}
 	}
 

@@ -13,12 +13,12 @@ public class Script
 
 {
 
-	// COULD BE MADE STATIC.
+	// COULD BE MADE STATIC??
 
 
 	List <String> manuscript;
 	public Boolean isReady;
-	string me = "Script: ";
+	string me = "Script";
 
 	public Script (string fileName)
 
@@ -38,7 +38,7 @@ public class Script
 
 		} else {
 			
-			Debug.LogWarning ("Script file didn't load.");
+			Log.Warning ("Script file didn't load.",me);
 
 		}
 
@@ -54,7 +54,7 @@ public class Script
 //		manuscript.Add ("\r");
 
 
-//		Debug.Log (me + "count: " + manuscript.Count);
+//		Log.Message ("count: " + manuscript.Count);
 
 		Dictionary <string,StoryPoint>  storyLines = new Dictionary <string,StoryPoint> ();
 
@@ -83,10 +83,10 @@ public class Script
 
 				if (storyPoint != null) {
 					
-//					Debug.Log (me + "new storyline: " + storyLine);
+//					Log.Message ("new storyline: " + storyLine);
 
 					string[] task = getTask (manuscript[l]);
-//					Debug.Log (me + "task: " + task[0]);
+//					Log.Message ("task: " + task[0]);
 
 					point = new StoryPoint (storyLine, storyLine, task);
 
@@ -102,7 +102,7 @@ public class Script
 
 				} else {
 
-					Debug.LogWarning (me + "#storyline should be followed by storypoint");
+					Log.Warning ("#storyline should be followed by storypoint",me);
 
 				}
 
@@ -119,10 +119,10 @@ public class Script
 
 				if (storyPoint != null) {
 
-//					Debug.Log (me + "new storylabel: " + storyLabel);
+//					Log.Message ("new storylabel: " + storyLabel);
 
 					string[] task = getTask (manuscript[l]);
-//					Debug.Log (me + "task: " + task[0]);
+//					Log.Message ("task: " + task[0]);
 
 					point = new StoryPoint (storyLabel, currentStoryline, task);
 
@@ -139,7 +139,7 @@ public class Script
 
 				} else {
 
-					Debug.LogWarning (me + "@storylabel should be followed by storypoint");
+					Log.Warning ("@storylabel should be followed by storypoint",me);
 
 				}
 
@@ -150,9 +150,9 @@ public class Script
 			if (storyLine==null && storyLabel==null && storyPoint != null) 
 
 			{
-//				Debug.Log (me + "storyPoint: "+l+" " + storyPoint);
+//				Log.Message ("storyPoint: "+l+" " + storyPoint);
 				string[] task = getTask (manuscript[l]);
-//				Debug.Log (me + "task: " + task[0]);
+//				Log.Message ("task: " + task[0]);
 
 //				point = new StoryPoint (storyPoint, currentStoryline, task);
 				point = new StoryPoint (UUID.getID (), currentStoryline, task);
@@ -195,7 +195,7 @@ public class Script
 			StoryPoint thePoint;
 
 			if (!storyLines.TryGetValue (key, out thePoint)) {
-//				Debug.Log (me + "Can't find point");
+//				Log.Message ("Can't find point");
 			} else {
 
 				while (thePoint.getNextStoryPoint () != null) {
