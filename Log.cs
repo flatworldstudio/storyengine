@@ -70,7 +70,7 @@ public static class Log
 		moduleLogStatus.TryGetValue (module, out moduleLevel);
 				
 		if (moduleLevel>=messageLevel) 
-			Debug.LogWarning (module + ": " + message);
+			Debug.Log (module + ": " + message);
 
 
 	}
