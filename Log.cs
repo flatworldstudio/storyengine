@@ -49,6 +49,8 @@ public static class Log
 
 		LOGLEVEL current;
 
+		Init ();
+
 		if (moduleLogStatus.TryGetValue (module, out current)) {
 
 			moduleLogStatus [module] = level;
