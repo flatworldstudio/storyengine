@@ -26,6 +26,26 @@ public enum AUTHORITY
 }
 
 
+
+public class UserCallBack
+{
+
+	public bool trigger=false;
+	public  string label="";
+	public  GameObject sender;
+
+	public UserCallBack ()
+
+	{
+	}
+		
+
+
+
+
+}
+
+
 public static class GENERAL
 {
 //	public static SCOPE SCOPE=SCOPE.LOCAL;

@@ -110,9 +110,26 @@ public class UxController
 
 	}
 
+	bool warnOnce =false;
+
 	public string update (UxInterface activeInterface)
 	{
 
+		// legacy method returned only a string.
+		if (!warnOnce) {
+			warnOnce = true;
+			Log.Warning ("Update method updated, use updateUx instead.", me);
+		}
+
+		return updateUx (activeInterface).label;
+
+
+	}
+
+
+	public UserCallBack updateUx (UxInterface activeInterface)
+
+	{
 		// log current stack count to track changes.
 
 		int stackSize = uiEventStack.Count;
@@ -186,7 +203,12 @@ public class UxController
 
 		// now handle the stack of ui events. this way, events can play out (inertia, springing) while the user starts new interaction.
 
-		string callbackResult = ""; // this works with story engine -> should be more agnostic?
+//		string callbackResult = ""; //
+
+		// create empty callback object
+
+		UserCallBack callBack = new UserCallBack (); 
+
 
 		int i = 0;
 
@@ -214,7 +236,11 @@ public class UxController
 
 		if (activeUiEvent.callback != "") {
 		
-			callbackResult = activeUiEvent.callback;
+			callBack.label = activeUiEvent.callback;
+			callBack.sender = activeUiEvent.target2D;
+			callBack.trigger = true;
+
+//			callbackResult = activeUiEvent.callback;
 
 //			Debug.Log ("callbackResult: " + callbackResult);
 
@@ -259,7 +285,7 @@ public class UxController
 		if (stackSizeNew > 10)
 			Log.Warning ( "Ui event stack exceeds 10, potential overflow.",me);	
 
-		return callbackResult;
+		return callBack;
 
 	}
 
