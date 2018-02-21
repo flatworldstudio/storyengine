@@ -45,7 +45,8 @@ public class StoryPointer
 
 	public StoryTask currentTask;
 
-	public StoryTask persistantData; // can hold generic data which will be passed onto new task.... WIP
+//	public StoryTask persistantData; // can hold generic data which will be passed onto new task.... WIP
+	public string persistantData;
 
 	public	Text deusText;
 	public	Text deusTextSuper;
@@ -76,7 +77,7 @@ public class StoryPointer
 		scope = SCOPE.LOCAL;
 		GENERAL.ALLPOINTERS.Add (this);
 
-		persistantData = new StoryTask ();
+//		persistantData = new StoryTask ();
 
 	}
 
@@ -89,7 +90,7 @@ public class StoryPointer
 		scope = SCOPE.GLOBAL;
 		GENERAL.ALLPOINTERS.Add (this);
 
-		persistantData = new StoryTask ();
+//		persistantData = new StoryTask ();
 
 	}
 
@@ -113,6 +114,15 @@ public class StoryPointer
 //		r.pointerStatus = (int)status;
 
 		return r;
+
+	}
+
+	public void loadPersistantData (){
+
+		// load carry over value from task into pointer.
+
+		if (currentTask!=null)
+		currentTask.getStringValue ("persistantData", out persistantData);
 
 	}
 

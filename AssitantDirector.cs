@@ -152,6 +152,14 @@ public class AssitantDirector : MonoBehaviour
 					if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL || task.scope == SCOPE.LOCAL) {
 
 						task.pointer.setStatus (POINTERSTATUS.TASKUPDATED);
+
+						// wip, carry over value
+
+//						string callBackValue="";
+//
+//						if (task.getStringValue ("callBackValue", out callBackValue))
+//							task.pointer.carryOver = callBackValue;
+
 					}
 
 				}
@@ -182,6 +190,7 @@ public class AssitantDirector : MonoBehaviour
 
 								StoryTask task = new StoryTask (pointer, SCOPE.GLOBAL);
 
+//								task.loadPersistantData (pointer);
 								task.loadPersistantData (pointer);
 
 								pointer.currentTask = task;
@@ -208,7 +217,9 @@ public class AssitantDirector : MonoBehaviour
 
 							StoryTask task = new StoryTask (pointer, SCOPE.LOCAL);
 
+//							task.loadPersistantData (pointer);
 							task.loadPersistantData (pointer);
+
 
 							pointer.currentTask = task;
 

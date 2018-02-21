@@ -138,23 +138,30 @@ public class StoryTask
 
 	}
 
+//	public void loadPersistantData (StoryPointer referencePointer)
+//	{
+//
+//		// we use the update message internally to transfer values from the carry over task
+//
+//		if (referencePointer.scope == SCOPE.GLOBAL) {
+//
+//			// mark changemask as true so these values get distributed over the network.
+//
+//			ApplyUpdateMessage (referencePointer.persistantData.getUpdateMessage (), true);
+//
+//
+//		} else {
+//
+//			ApplyUpdateMessage (referencePointer.persistantData.getUpdateMessage ());
+//
+//		}
+//
+//	}
+
 	public void loadPersistantData (StoryPointer referencePointer)
 	{
 
-		// we use the update message internally to transfer values from the carry over task
-
-		if (referencePointer.scope == SCOPE.GLOBAL) {
-
-			// mark changemask as true so these values get distributed over the network.
-
-			ApplyUpdateMessage (referencePointer.persistantData.getUpdateMessage (), true);
-
-
-		} else {
-
-			ApplyUpdateMessage (referencePointer.persistantData.getUpdateMessage ());
-
-		}
+		setStringValue ("persistantData", referencePointer.persistantData);
 
 	}
 
@@ -733,34 +740,23 @@ public class StoryTask
 
 	}
 
+//	public void setCallBack (string theCallBackPoint, string callBackValue)
+//	{
+//
+//		setStringValue ("carryOver", callBackValue);
+//		setStringValue ("callBackPoint", theCallBackPoint);
+//
+//	}
+
 	public void setCallBack (string theCallBackPoint)
 	{
-
-		//		Debug.Log ("performing callback: " + theCallBackPoint);
-
-		//		callBackPoint = theCallBackPoint;
-
-
+		
 		setStringValue ("callBackPoint", theCallBackPoint);
 
-
-
-		//		setPointerToUpdated ();
-
-
-
-
-
-		//		pointer.setStatus (POINTERSTATUS.TASKUPDATED);
-
-		//		#if NETWORKED
-		//
-		//		taskValuesChangeMask ["callBackPoint"] = true;
-		//		hasChanged = true;
-		//
-		//		#endif
-
 	}
+
+
+
 
 	public void clearCallBack ()
 	{

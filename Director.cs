@@ -87,6 +87,8 @@ public class Director
 
 			Log.Message ("Evaluating pointer uid: " + pointer.ID + " on storyline " + pointer.currentPoint.storyLineName,me);
 
+			pointer.loadPersistantData ();
+
 			switch (pointer.currentPoint.taskType) {
 
 			case TASKTYPE.ROUTING:
@@ -424,6 +426,10 @@ public class Director
 				newStoryPointer.modified=true;
 
 				pointerStack.Add (newStoryPointer);
+
+			newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task.
+
+
 
 //				#if NETWORKED
 //
