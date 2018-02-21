@@ -71,7 +71,7 @@ public static class Log
 
 		moduleLogStatus.TryGetValue (module, out moduleLevel);
 				
-		if (moduleLevel>=messageLevel) 
+		if (messageLevel>=moduleLevel) 
 			Debug.Log (module + ": " + message);
 
 
@@ -86,7 +86,7 @@ public static class Log
 
 		moduleLogStatus.TryGetValue (module, out moduleLevel);
 
-		if (moduleLevel>=messageLevel) 
+		if (messageLevel>=moduleLevel) 
 			Debug.LogWarning (module + ": " + message);
 		
 
@@ -102,7 +102,7 @@ public static class Log
 
 		moduleLogStatus.TryGetValue (module, out moduleLevel);
 
-		if (moduleLevel>=messageLevel) 
+		if (messageLevel>=moduleLevel) 
 			Debug.LogError (module + ": " + message);
 
 
