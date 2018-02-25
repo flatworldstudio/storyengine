@@ -38,7 +38,7 @@ public class Script
 
 		} else {
 			
-			Log.Warning ("Script file didn't load.",me);
+			Log.Warning ("Script file didn't load.");
 
 		}
 
@@ -102,7 +102,7 @@ public class Script
 
 				} else {
 
-					Log.Warning ("#storyline should be followed by storypoint",me);
+					Log.Warning ("#storyline should be followed by storypoint");
 
 				}
 
@@ -139,7 +139,7 @@ public class Script
 
 				} else {
 
-					Log.Warning ("@storylabel should be followed by storypoint",me);
+					Log.Warning ("@storylabel should be followed by storypoint");
 
 				}
 

@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 using System;
-
+using System.Diagnostics;
 
 
 
@@ -21,8 +21,6 @@ public enum LOGLEVEL
 
 public static class Log
 {
-
-//	public static bool logToConsole = true;
 
 	static Dictionary<string,LOGLEVEL> moduleLogStatus;
 
@@ -64,54 +62,118 @@ public static class Log
 	}
 
 
-	public static void Message (string message, string module = "Unkown", LOGLEVEL messageLevel=LOGLEVEL.NORMAL)
+	public static void Message (string message,LOGLEVEL messageLevel = LOGLEVEL.NORMAL)
 
 	{
-		LOGLEVEL moduleLevel = LOGLEVEL.NORMAL; // normal by default.
+		#if UNITY_EDITOR
 
-		moduleLogStatus.TryGetValue (module, out moduleLevel);
-				
-		if (messageLevel>=moduleLevel) 
-			Debug.Log (module + ": " + message);
+		StackFrame callStack = new StackFrame(1, true);
 
+		Char[] delimiter = {'/','.'};
+		string[] caller = callStack.GetFileName().Split (delimiter);
+		string callerId = caller [caller.Length - 2];
+
+		string line = "" + callStack.GetFileLineNumber();
+
+		#else
+
+		string callerId = "";
+		string line = "";
+
+		#endif
+
+		LOGLEVEL moduleLevel;
+
+		if (!moduleLogStatus.TryGetValue (callerId, out moduleLevel)){
+			
+			moduleLevel = LOGLEVEL.NORMAL; // normal by default.
+
+		}
+						
+		if (messageLevel <= moduleLevel) {
+
+			UnityEngine.Debug.Log(callerId + ": " + message + ", Line: " + line);
+
+		}
 
 	}
 
-	public static void Warning (string message, string module = "Unkown")
+	public static void Warning (string message)
 
 	{
 		LOGLEVEL messageLevel = LOGLEVEL.WARNINGS;
 
-		LOGLEVEL moduleLevel = LOGLEVEL.NORMAL; // normal by default
+		#if UNITY_EDITOR
 
-		moduleLogStatus.TryGetValue (module, out moduleLevel);
+		StackFrame callStack = new StackFrame(1, true);
 
-		if (messageLevel>=moduleLevel) 
-			Debug.LogWarning (module + ": " + message);
-		
+		Char[] delimiter = {'/','.'};
+		string[] caller = callStack.GetFileName().Split (delimiter);
+		string callerId = caller [caller.Length - 2];
 
+		string line = "" + callStack.GetFileLineNumber();
+
+		#else
+
+		string callerId = "";
+		string line = "";
+
+		#endif
+
+		LOGLEVEL moduleLevel;
+
+		if (!moduleLogStatus.TryGetValue (callerId, out moduleLevel)){
+
+			moduleLevel = LOGLEVEL.NORMAL; // normal by default.
+
+		}
+
+		if (messageLevel <= moduleLevel) {
+
+			UnityEngine.Debug.LogWarning(callerId + ": " + message + ", Line: " + line);
+
+		}
 
 	}
 
-	public static void Error (string message, string module = "Unkown")
+	public static void Error (string message)
 
 	{
-		LOGLEVEL messageLevel = LOGLEVEL.ERRORS;
+		LOGLEVEL messageLevel = LOGLEVEL.WARNINGS;
 
-		LOGLEVEL moduleLevel = LOGLEVEL.NORMAL; // normal by default
+		#if UNITY_EDITOR
 
-		moduleLogStatus.TryGetValue (module, out moduleLevel);
+		StackFrame callStack = new StackFrame(1, true);
 
-		if (messageLevel>=moduleLevel) 
-			Debug.LogError (module + ": " + message);
+		Char[] delimiter = {'/','.'};
+		string[] caller = callStack.GetFileName().Split (delimiter);
+		string callerId = caller [caller.Length - 2];
 
+		string line = "" + callStack.GetFileLineNumber();
 
+		#else
+
+		string callerId = "";
+		string line = "";
+
+		#endif
+
+		LOGLEVEL moduleLevel;
+
+		if (!moduleLogStatus.TryGetValue (callerId, out moduleLevel)){
+
+			moduleLevel = LOGLEVEL.NORMAL; // normal by default.
+
+		}
+
+		if (messageLevel <= moduleLevel) {
+
+			UnityEngine.Debug.LogWarning(callerId + ": " + message + ", Line: " + line);
+
+		}
 
 	}
-
-
-
-		
+			
 }
 
 

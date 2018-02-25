@@ -45,11 +45,11 @@ public class AssitantDirector : MonoBehaviour
 	void Start ()
 	{
 
-		Log.Message ("Starting.",me);
+		Log.Message ("Starting.");
 
 		UUID.setIdentity ();
 
-		Log.Message ("Identity stamp " + UUID.identity,me);
+		Log.Message ("Identity stamp " + UUID.identity);
 
 		GENERAL.AUTHORITY = AUTHORITY.LOCAL;
 
@@ -57,17 +57,9 @@ public class AssitantDirector : MonoBehaviour
 
 		GENERAL.ALLTASKS = new List<StoryTask> ();
 
-		#if UNITY_IOS
-
-		Log.Message ("Running on IOS platform. ",me);
-
-		launchOnStoryline = launchIOS;
-
-		#endif
-
 		#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
 
-		Log.Message ("Running on OSX platform.",me);
+		Log.Message ("Running on OSX platform.");
 
 		launchOnStoryline = launchOSX;
 
@@ -76,9 +68,17 @@ public class AssitantDirector : MonoBehaviour
 
 		#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 
-		Log.Message ("Running on WINDOWS platform.",me);
+		Log.Message ("Running on WINDOWS platform.");
 
 		launchOnStoryline = launchWIN;
+
+		#endif
+
+		#if UNITY_IOS
+
+		Log.Message ("Running on IOS platform. ");
+
+		launchOnStoryline = launchIOS;
 
 		#endif
 
@@ -97,8 +97,6 @@ public class AssitantDirector : MonoBehaviour
 
 	}
 
-
-
 	void OnApplicationPause (bool paused)
 
 	{
@@ -107,11 +105,11 @@ public class AssitantDirector : MonoBehaviour
 	
 		if (paused) {
 
-			Log.Message ("pauzing ...",me);
+			Log.Message ("pauzing ...");
 
 		} else {
 
-			Log.Message ("resuming ...",me);
+			Log.Message ("resuming ...");
 
 		}
 
@@ -123,11 +121,11 @@ public class AssitantDirector : MonoBehaviour
 		
 		if (focus) {
 
-			Log.Message ("entering focus ...",me);
+			Log.Message ("entering focus ...");
 
 		} else {
 
-			Log.Message ("leaving focus ...",me);
+			Log.Message ("leaving focus ...");
 
 		}
 
@@ -151,14 +149,7 @@ public class AssitantDirector : MonoBehaviour
 
 					if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL || task.scope == SCOPE.LOCAL) {
 
-						task.pointer.setStatus (POINTERSTATUS.TASKUPDATED);
-
-						// wip, carry over value
-
-//						string callBackValue="";
-//
-//						if (task.getStringValue ("callBackValue", out callBackValue))
-//							task.pointer.carryOver = callBackValue;
+						task.pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
 
 					}
 
@@ -184,21 +175,17 @@ public class AssitantDirector : MonoBehaviour
 
 						if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL) {
 
-							if (pointer.getStatus () == POINTERSTATUS.NEWTASK) {
+							if (pointer.GetStatus () == POINTERSTATUS.NEWTASK) {
 
-								pointer.setStatus (POINTERSTATUS.PAUSED);
+								pointer.SetStatus (POINTERSTATUS.PAUSED);
 
 								StoryTask task = new StoryTask (pointer, SCOPE.GLOBAL);
+								task.LoadPersistantData (pointer);
 
-//								task.loadPersistantData (pointer);
-								task.loadPersistantData (pointer);
-
-								pointer.currentTask = task;
 								newTasks.Add (task);
-
 								task.modified = true;
 
-								Log.Message ("Creating and distributing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName,me);
+								Log.Message ("Creating and distributing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
 
 							}
 
@@ -211,21 +198,16 @@ public class AssitantDirector : MonoBehaviour
 
 						// If pointer scope is local, check if new tasks have to be generated.
 
-						if (pointer.getStatus () == POINTERSTATUS.NEWTASK) {
+						if (pointer.GetStatus () == POINTERSTATUS.NEWTASK) {
 
-							pointer.setStatus (POINTERSTATUS.PAUSED);
+							pointer.SetStatus (POINTERSTATUS.PAUSED);
 
 							StoryTask task = new StoryTask (pointer, SCOPE.LOCAL);
-
-//							task.loadPersistantData (pointer);
-							task.loadPersistantData (pointer);
-
-
-							pointer.currentTask = task;
+							task.LoadPersistantData (pointer);
 
 							newTasks.Add (task);
 
-							Log.Message ("Creating local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName,me);
+							Log.Message ("Creating local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
 
 						}
 
@@ -250,19 +232,17 @@ public class AssitantDirector : MonoBehaviour
 
 			if (GENERAL.SIGNOFFS == 0) {
 
-				Log.Warning ("No handlers registred. Pausing director.",me);
+				Log.Warning ("No handlers registred. Pausing director.");
 				theDirector.status = DIRECTORSTATUS.PAUSED;
 
 			} else {
 
-				Log.Message (""+GENERAL.SIGNOFFS + " handlers registred.",me);
+				Log.Message (""+GENERAL.SIGNOFFS + " handlers registred.");
 
-				Log.Message ("Starting storyline " + launchOnStoryline,me);
+				Log.Message ("Starting storyline " + launchOnStoryline);
 
 				theDirector.beginStoryLine (launchOnStoryline);
 				theDirector.status = DIRECTORSTATUS.ACTIVE;
-
-//				Log.Message ( "Started storyline " + launchOnStoryline);
 
 			}
 
@@ -271,6 +251,11 @@ public class AssitantDirector : MonoBehaviour
 		case DIRECTORSTATUS.NOTREADY:
 
 			theDirector.loadScript (scriptName);
+
+			// create globals by default.
+
+			GENERAL.storyPoints.Add ("GLOBALS", new StoryPoint ("GLOBALS","none",new string[] {"GLOBALS"}));
+			GENERAL.GLOBALS = new StoryTask ("GLOBALS", SCOPE.GLOBAL);
 
 			break;
 
@@ -284,69 +269,24 @@ public class AssitantDirector : MonoBehaviour
 
 	void LateUpdate ()
 	{
-
-		// Iterate over all pointers.
+		
+		// Iterate over all pointers to see if any were killed. Clients cannot tell by themselves.
 
 		for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++) {
 
 			StoryPointer pointer = GENERAL.ALLPOINTERS [p];
 
-			if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified) {
+			if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified && pointer.GetStatus()==POINTERSTATUS.KILLED) {
 
-				Log.Message ("Sending pointer update to clients. ID: " + pointer.ID,me);
+				Log.Message ("Sending pointer (killed) update to clients: " + pointer.currentPoint.storyLineName);
 
-				sendPointerUpdateToClients (pointer.getUpdateMessage ());
+				sendPointerUpdateToClients (pointer.GetUpdateMessage ());
 
 				pointer.modified = false;
 
 			}
 
 		}
-
-		/*
-
-		for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++) {
-
-			StoryPointer pointer = GENERAL.ALLPOINTERS [p];
-
-			if (pointer.modified) {
-								
-				switch (GENERAL.AUTHORITY) {
-
-				case AUTHORITY.LOCAL:
-
-					if (pointer.scope == SCOPE.GLOBAL) {
-
-						Log.MessageWarning ( "Global pointer " + pointer.ID + " | " + pointer.currentTask.description + " was changed locally.");
-
-					}
-
-					break;
-
-				case AUTHORITY.GLOBAL:
-
-					if (pointer.scope == SCOPE.GLOBAL) {
-
-						Log.Message ( "Global pointer, global AD -> sending pointer update for " + pointer.ID);
-
-						sendPointerUpdateToClients (pointer.getUpdateMessage ());
-
-					}
-
-					break;
-
-				default:
-
-					break;
-
-				}
-
-				pointer.modified = false;
-
-			}
-
-		}
-		*/
 
 		// Iterate over all tasks.
 
@@ -360,7 +300,7 @@ public class AssitantDirector : MonoBehaviour
 				
 				GENERAL.ALLTASKS.RemoveAt (i);
 
-				Log.Message ( "Task " + task.description + " completed, removing from alltasks. ID: " + task.ID,me);
+				Log.Message ( "Task " + task.description + " completed, removing from alltasks. ");
 
 			}
 
@@ -374,9 +314,9 @@ public class AssitantDirector : MonoBehaviour
 
 					if (task.scope == SCOPE.GLOBAL) {
 
-						Log.Message ( "Global task " + task.description + " changed, sending update to server. ID: " + task.ID,me);
+						Log.Message ( "Global task " + task.description + " changed, sending update to server.");
 
-						sendTaskUpdateToServer (task.getUpdateMessage ());
+						sendTaskUpdateToServer (task.GetUpdateMessage ());
 
 					}
 
@@ -386,9 +326,9 @@ public class AssitantDirector : MonoBehaviour
 
 					if (task.scope == SCOPE.GLOBAL) {
 
-						Log.Message ( "Global task " + task.description + " changed, sending update to clients. ID: " + task.ID,me);
+						Log.Message ( "Global task " + task.description + " changed, sending update to clients." );
 
-						sendTaskUpdateToClients (task.getUpdateMessage ());
+						sendTaskUpdateToClients (task.GetUpdateMessage ());
 
 					}
 
@@ -420,7 +360,7 @@ public class AssitantDirector : MonoBehaviour
 
 		GENERAL.SETNEWCONNECTION (-1);
 
-		Log.Message ( "Registering server message handlers." ,me);
+		Log.Message ( "Registering server message handlers." );
 
 		NetworkServer.RegisterHandler (stringCode, onMessageFromClient);
 		NetworkServer.RegisterHandler (taskCode, onTaskUpdateFromClient);
@@ -437,7 +377,7 @@ public class AssitantDirector : MonoBehaviour
 	void onStartClient (NetworkClient theClient)
 	{
 
-		Log.Message ( "Registering client message handlers.",me);
+		Log.Message ( "Registering client message handlers.");
 		theClient.RegisterHandler (stringCode, onMessageFromServer);
 		theClient.RegisterHandler (pointerCode, onPointerUpdateFromServer);
 		theClient.RegisterHandler (taskCode, onTaskUpdateFromServer);
@@ -447,7 +387,7 @@ public class AssitantDirector : MonoBehaviour
 	void OnStopClient ()
 	{
 
-		Log.Message ( "Client stopped. Resetting scope to local.",me);
+		Log.Message ( "Client stopped. Resetting scope to local.");
 
 		revertAllToLocal ();
 
@@ -457,7 +397,7 @@ public class AssitantDirector : MonoBehaviour
 	void OnServerConnect (NetworkConnection conn)
 	{
 
-		Log.Message ( "incoming server connection delegate called",me);
+		Log.Message ( "incoming server connection delegate called");
 
 		GENERAL.SETNEWCONNECTION (conn.connectionId);
 
@@ -466,7 +406,7 @@ public class AssitantDirector : MonoBehaviour
 	void OnClientConnect (NetworkConnection conn)
 	{
 
-		Log.Message ( "Client connection delegate called",me);
+		Log.Message ( "Client connection delegate called");
 
 		GENERAL.AUTHORITY = AUTHORITY.LOCAL; 
 
@@ -474,6 +414,8 @@ public class AssitantDirector : MonoBehaviour
 
 	void revertAllToLocal ()
 	{
+
+		//WIP
 
 		GENERAL.AUTHORITY = AUTHORITY.LOCAL;
 
@@ -483,7 +425,7 @@ public class AssitantDirector : MonoBehaviour
 
 		foreach (StoryPointer sp in GENERAL.ALLPOINTERS) {
 			sp.scope = SCOPE.LOCAL;
-			sp.setStatus ( POINTERSTATUS.PAUSED);
+			sp.SetStatus ( POINTERSTATUS.PAUSED);
 
 		}
 
@@ -498,7 +440,7 @@ public class AssitantDirector : MonoBehaviour
 	void OnClientDisconnect (NetworkConnection conn)
 	{
 
-		Log.Message ( "Lost client connection. Resetting scope to local.",me);
+		Log.Message ( "Lost client connection. Resetting scope to local.");
 
 		revertAllToLocal ();
 
@@ -510,7 +452,7 @@ public class AssitantDirector : MonoBehaviour
 	{
 		var message = netMsg.ReadMessage<StringMessage> ();
 
-		Log.Message ( "Message received from client: " + message.value,me);
+		Log.Message ( "Message received from client: " + message.value);
 
 	}
 
@@ -518,11 +460,11 @@ public class AssitantDirector : MonoBehaviour
 	{
 		var message = netMsg.ReadMessage<StringMessage> ();
 
-		Log.Message ( "Message received from server: " + message.value,me);
+		Log.Message ( "Message received from server: " + message.value);
 
 		if (message.value == "suspending") {
 			
-			Log.Message ( "Client will be suspending, closing their connection.",me);
+			Log.Message ( "Client will be suspending, closing their connection.");
 
 			netMsg.conn.Disconnect ();
 
@@ -530,75 +472,28 @@ public class AssitantDirector : MonoBehaviour
 
 	}
 
-	// Handle pointer messages.
+		// Handle pointer messages.
 
 	void onPointerUpdateFromServer (NetworkMessage netMsg)
 	{
+
+		// Right now the only update we send for pointers is when they are killed.
+
 		var message = netMsg.ReadMessage<PointerUpdate> ();
 
-		StoryPoint point = GENERAL.getStoryPointByID (message.storyPoint);
+		StoryPointer pointer = GENERAL.GetStorylinePointerForPointID (message.storyPointID);
 
-		if (point == null)
-			return; // Warning already logged.
-
-		Log.Message ( "Server update for pointer " + point.storyLineName + " ID: " + message.pointerUuid + " | " + message.storyPoint,me);
-				
-		StoryPointer sp = GENERAL.getPointer (message.pointerUuid);
-
-		if (sp == null) {
-		
-			sp = new StoryPointer (point, message.pointerUuid);
-		
-			Log.Message ( "Created an instance of global pointer: " + point.storyLineName+ " ID: " + message.pointerUuid,me);
-
-
-
-		} 
-
-		sp.currentPoint = point;
+		Log.Message ( "Server update for pointer. ");
 
 		if (message.killed)
-			sp.killPointerOnly ();
-
-
-
-//		applyPointerUpdate (message.pointerUuid, message.storyPoint, message.pointerStatus);
-			
+			pointer.Kill ();
+		
 	}
-
-	//	void applyPointerUpdate (string pointerUuid, string pointName, int pointerStatus)
-	//	{
-	//
-	//		// get the story point
-	//
-	//		StoryPoint point = GENERAL.getStoryPointByID (pointName);
-	//
-	//		// see if the pointer exists, update or create new
-	//
-	//		StoryPointer sp = GENERAL.getPointer (pointerUuid);
-	//
-	//		if (sp == null) {
-	//
-	//			sp = new StoryPointer (point, pointerUuid);
-	//
-	//			Log.Message ( "Created a new (remotely owned) pointer with ID: " + sp.ID);
-	//
-	//		}
-	//
-	//		sp.currentPoint = point;
-	//
-	////		sp.setStatus ((POINTERSTATUS)pointerStatus);
-	//
-	////		sp.setStatus (POINTERSTATUS.PAUSED); // overrule the status sent over the network, since global pointers aren't updated locally.
-	//
-	//	}
 
 	public void sendPointerUpdateToClients (PointerUpdate pointerMessage)
 	{
 	
 		NetworkServer.SendToAll (pointerCode, pointerMessage);
-
-		Log.Message ( "Sending pointer update to all clients: " + pointerMessage.pointerUuid + " " + pointerMessage.storyPoint,me);
 
 	}
 
@@ -609,8 +504,7 @@ public class AssitantDirector : MonoBehaviour
 
 		var taskUpdate = networkMessage.ReadMessage<TaskUpdate> ();
 
-		Log.Message ( "Incoming task update for "+taskUpdate.description + " ID: "+taskUpdate.taskID,me);
-
+		Log.Message ( "Incoming task update for point: "+taskUpdate.pointID);
 
 		applyTaskUpdate (taskUpdate);
 
@@ -658,68 +552,55 @@ public class AssitantDirector : MonoBehaviour
 
 		}
 
-		Log.Message (debug,me);
+		Log.Message (debug);
 
 	}
 
 	void applyTaskUpdate (TaskUpdate taskUpdate)
 	{
 
+		// See if we have a task on this storypoint.
 
-
-		StoryPointer updatePointer = GENERAL.getPointer (taskUpdate.pointerID);
-
-		// If we receive updates for a task for which we haven't spawned a pointer yet we ignore them.
-
-		if (updatePointer == null)
-			return;
-
-
-
-		StoryTask updateTask = GENERAL.getTask (taskUpdate.taskID);
+		StoryTask updateTask = GENERAL.GetTaskForPoint (taskUpdate.pointID);
 
 		if (updateTask == null) {
-			
-			updateTask = new StoryTask (taskUpdate.description, updatePointer, taskUpdate.taskID);
 
+			// If not, we create the task.
+			
+			updateTask = new StoryTask (taskUpdate.pointID,SCOPE.GLOBAL);
 			updateTask.ApplyUpdateMessage (taskUpdate);
 
-			Log.Message ( "Created an instance of global task " + updateTask.description + " ID: " + taskUpdate.taskID,me);
+			Log.Message ( "Created an instance of global task " + updateTask.description );
 
-			DistributeTasks (new TaskArgs (updateTask));
+			if (taskUpdate.pointID != "GLOBALS") {
 
-			if (updatePointer == null) {
+				// Now find a pointer.
 
-				Log.Warning ( "update pointer not found: " + taskUpdate.pointerID,me);
+				StoryPointer updatePointer = GENERAL.GetStorylinePointerForPointID (taskUpdate.pointID);
 
-			} else {
+				if (updatePointer == null) {
 
-				updatePointer.currentTask = updateTask;
-//				updateTask.pointer = updatePointer;
+					updatePointer = new StoryPointer ();
 
-//				Log.MessageWarning ( "Pointer existed but task did not." + taskUpdate.pointerID);
+					Log.Message ("Created a new pointer for new task.");
 
+				} 
+
+				updatePointer.PopulateWithTask (updateTask);
+
+				Log.Message ("Populated pointer from task. " + updatePointer.currentPoint.storyLineName);
+
+				DistributeTasks (new TaskArgs (updateTask));
 
 			}
 
 		} else {
-
-
+			
 			updateTask.ApplyUpdateMessage (taskUpdate);
 
-		//	Log.Message ( "Applied update to existing task.");
+			updateTask.scope = SCOPE.GLOBAL;
 
-			if (updatePointer == null) {
-
-				Log.Warning ( "update pointer not found: " + taskUpdate.pointerID,me);
-
-			} else {
-
-				updatePointer.currentTask = updateTask;
-
-			}
-
-
+			Log.Message ( "Applied update to existing task.");
 
 		}
 
@@ -749,14 +630,14 @@ public class AssitantDirector : MonoBehaviour
 	{
 		var msg = new StringMessage (value);
 		networkManager.client.Send (stringCode, msg);
-		Log.Message ( "Sending message to server: " + value,me);
+		Log.Message ( "Sending message to server: " + value);
 	}
 
 	public void sendMessageToClients (string value)
 	{
 		var msg = new StringMessage (value);
 		NetworkServer.SendToAll (stringCode, msg);
-		Log.Message ( "Sending message to all clients: " + value,me);
+		Log.Message ( "Sending message to all clients: " + value);
 	}
 
 
@@ -792,8 +673,6 @@ public class TaskArgs : EventArgs
 {
 
 	public List <StoryTask> theTasks;
-//	public bool removeTask;
-
 
 	public TaskArgs (List <StoryTask> tasks) : base () // extend the constructor 
 	{ 
@@ -805,13 +684,6 @@ public class TaskArgs : EventArgs
 		theTasks = new List <StoryTask> ();
 		theTasks.Add (task);
 	}
-
-//	public TaskArgs (StoryTask task, bool remove) : base () // extend the constructor 
-//	{ 
-//		removeTask = remove;
-//		theTasks = new List <StoryTask> ();
-//		theTasks.Add (task);
-//	}
 
 }
 

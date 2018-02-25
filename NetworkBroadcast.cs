@@ -40,7 +40,7 @@ public class NetworkBroadcast : NetworkDiscovery
 				resumeClient = true;
 				Stop ();
 
-				Log.Message ("Pausing broadcast client.",me);
+				Log.Message ("Pausing broadcast client.");
 
 			}
 
@@ -49,7 +49,7 @@ public class NetworkBroadcast : NetworkDiscovery
 				resumeServer = true;
 				Stop ();
 
-				Log.Message ("Pausing broadcast server.",me);
+				Log.Message ("Pausing broadcast server.");
 
 			}
 
@@ -60,7 +60,7 @@ public class NetworkBroadcast : NetworkDiscovery
 				resumeClient = false;
 				StartClient ();
 
-				Log.Message ("Resuming broadcast client.",me);
+				Log.Message ("Resuming broadcast client.");
 
 			}
 
@@ -69,7 +69,7 @@ public class NetworkBroadcast : NetworkDiscovery
 				resumeServer = false;
 				StartServer ();
 
-				Log.Message ("Resuming broadcast server.",me);
+				Log.Message ("Resuming broadcast server.");
 
 			}
 							
@@ -100,7 +100,7 @@ public class NetworkBroadcast : NetworkDiscovery
 		// Handler to respond to received broadcast message event.
 		// Since our engine is loop based, we just store the info for the loop to pick up on.
 
-		Log.Message ("Received broadcast: " + data + " from " + fromAddress,me);
+		Log.Message ("Received broadcast: " + data + " from " + fromAddress);
 
 		serverMessage = data;
 		serverAddress = fromAddress;

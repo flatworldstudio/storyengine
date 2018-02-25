@@ -64,7 +64,7 @@ public class ExtendedNetworkManager : NetworkManager
 
 	public override void OnStartClient (NetworkClient theClient)
 	{
-		Log.Message ("Client has started.", me);
+		Log.Message ("Client has started.");
 
 		if (onStartClientDelegate != null)
 			onStartClientDelegate (theClient);
@@ -74,7 +74,7 @@ public class ExtendedNetworkManager : NetworkManager
 	public override void OnClientConnect (NetworkConnection conn)
 	{
 		
-		Log.Message ("Client connected to server.", me);
+		Log.Message ("Client connected to server.");
 
 		if (onClientConnectDelegate != null)
 			onClientConnectDelegate (conn);
@@ -84,7 +84,7 @@ public class ExtendedNetworkManager : NetworkManager
 	public override void OnClientDisconnect (NetworkConnection connection)
 	{
 
-		Log.Message ("Client disconnected from server.", me);
+		Log.Message ("Client disconnected from server.");
 
 		if (onClientDisconnectDelegate != null)
 			onClientDisconnectDelegate (connection);
@@ -101,7 +101,7 @@ public class ExtendedNetworkManager : NetworkManager
 	public override void OnStopClient ()
 	{
 
-		Log.Message ("Client has stopped.", me);
+		Log.Message ("Client has stopped.");
 
 		if (onStopClientDelegate != null)
 			onStopClientDelegate ();
@@ -133,7 +133,7 @@ public class ExtendedNetworkManager : NetworkManager
 
 	public override void OnStartServer ()
 	{
-		Log.Message ("Server started.", me);
+		Log.Message ("Server started.");
 
 		if (onStartServerDelegate != null)
 			onStartServerDelegate ();
@@ -142,7 +142,7 @@ public class ExtendedNetworkManager : NetworkManager
 
 	public override void OnStopServer ()
 	{
-		Log.Message ("Server stopped.", me);
+		Log.Message ("Server stopped.");
 
 		if (onStopServerDelegate != null)
 			onStopServerDelegate ();
@@ -151,7 +151,7 @@ public class ExtendedNetworkManager : NetworkManager
 
 	public override void OnServerConnect (NetworkConnection connection)
 	{
-		Log.Message ("Remote client connected.", me);
+		Log.Message ("Remote client connected.");
 
 		if (onServerConnectDelegate != null)
 			onServerConnectDelegate (connection);
@@ -160,7 +160,7 @@ public class ExtendedNetworkManager : NetworkManager
 
 	public override void OnServerDisconnect (NetworkConnection connection)
 	{
-		Log.Message ("Remote client disconnected.", me);
+		Log.Message ("Remote client disconnected.");
 
 		if (onServerDisconnectDelegate != null)
 			onServerDisconnectDelegate (connection);

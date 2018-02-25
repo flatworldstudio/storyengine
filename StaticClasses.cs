@@ -25,8 +25,6 @@ public enum AUTHORITY
 
 }
 
-
-
 public class UserCallBack
 {
 
@@ -38,32 +36,26 @@ public class UserCallBack
 
 	{
 	}
-		
-
-
-
 
 }
 
 
 public static class GENERAL
 {
-//	public static SCOPE SCOPE=SCOPE.LOCAL;
 
 	public static AUTHORITY AUTHORITY=AUTHORITY.LOCAL;
 
-	//GENERAL.pointerScreenScalar
-
 	public static float pointerScreenScalar= -0.5f;
 	public static float pointerRectScalar = 0.5f;
-
-
 
 	public static int SIGNOFFS;
 	public static Dictionary <string,StoryPoint> storyPoints;
 	public static List <StoryPointer> ALLPOINTERS;
 	public static List <StoryTask> ALLTASKS;
 	public static STORYMODE STORYMODE;
+
+	public static StoryTask GLOBALS;
+
 
 	public static bool isPauzed=false;
 	public static bool hasFocus=true;
@@ -74,12 +66,12 @@ public static class GENERAL
 
 	public static string me = "General";
 
-	public static StoryPoint getStoryPointByID (string pointID)
+	public static StoryPoint GetStoryPointByID (string pointID)
 	{
 		StoryPoint r;
 
 		if (!storyPoints.TryGetValue (pointID, out r)) {
-			Log.Warning ("Storypoint " + pointID + " not found.",me);
+			Log.Error ("Storypoint " + pointID + " not found.");
 		}
 
 		return r;
@@ -90,7 +82,7 @@ public static class GENERAL
 	{
 
 		if (ALLPOINTERS.Count > 10) {
-			Log.Warning ("Potential pointer overflow.",me);
+			Log.Warning ("Potential pointer overflow.");
 		}
 
 	}
@@ -99,7 +91,7 @@ public static class GENERAL
 	{
 
 		if (ALLTASKS.Count > 10) {
-			Log.Warning ("Potential task overflow.",me);
+			Log.Warning ("Potential task overflow.");
 
 
 			//			foreach (Task t in ALLTASKS) {
@@ -111,7 +103,30 @@ public static class GENERAL
 
 	}
 
-	public static StoryPointer getPointerOnStoryline (string theStoryLine)
+	public static StoryPointer GetStorylinePointerForPointID (string pointID)
+	{
+
+		string storyline = GetStoryPointByID (pointID).storyLineName;
+			
+		flagPointerOverflow ();
+
+		StoryPointer r = null;
+
+		foreach (StoryPointer p in GENERAL.ALLPOINTERS) {
+
+			if (p.currentPoint.storyLineName == storyline) {
+				r = p;
+				break;
+			}
+
+		}
+
+		return r;
+	}
+
+
+
+	public static StoryPointer GetPointerForStoryline (string theStoryLine)
 	{
 
 		flagPointerOverflow ();
@@ -130,15 +145,15 @@ public static class GENERAL
 		return r;
 	}
 
-	public static StoryPointer getPointer (string pointerUuid)
+	public static StoryPointer GetPointerForPoint (string pointID)
 	{
 
 		flagPointerOverflow ();
 
 		for (int i = 0; i < ALLPOINTERS.Count; i++) {
 
-			if (ALLPOINTERS [i].ID.Equals (pointerUuid)) {
-				//				Debug.Log ("found storypoint with id " + storyPointerUid);
+			if (ALLPOINTERS [i].currentPoint.ID.Equals( pointID)) {
+				
 				return ALLPOINTERS [i];
 			}
 
@@ -148,14 +163,14 @@ public static class GENERAL
 
 	}
 
-	public static StoryTask getTask (string taskID)
+	public static StoryTask GetTaskForPoint (string pointID)
 	{
 
 		flagTaskOverflow ();
 
 		for (int t = 0; t < ALLTASKS.Count; t++) {
 
-			if (ALLTASKS [t].ID == taskID) {
+			if (ALLTASKS [t].pointID == pointID) {
 
 				return ALLTASKS [t];
 
@@ -171,7 +186,6 @@ public static class GENERAL
 
 	static int NEWCONNECTION;
 
-//	public static bool LOSTCONNECTION;
 
 	public static void SETNEWCONNECTION (int value)
 	{

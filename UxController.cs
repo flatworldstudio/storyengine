@@ -88,7 +88,7 @@ public class UxController
 
 		if (e == 0) {
 			
-			Log.Message ( "No ui event found, adding a temp one",me);
+			Log.Message ( "No ui event found, adding a temp one");
 
 			UiEvent springEvent = new UiEvent ();
 
@@ -104,7 +104,7 @@ public class UxController
 
 		if (e > 1) {
 			
-			Log.Warning ("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ",me);
+			Log.Warning ("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ");
 
 		}
 
@@ -118,7 +118,7 @@ public class UxController
 		// legacy method returned only a string.
 		if (!warnOnce) {
 			warnOnce = true;
-			Log.Warning ("Update method updated, use updateUx instead.", me);
+			Log.Warning ("Update method updated, use updateUx instead.");
 		}
 
 		return updateUx (activeInterface).label;
@@ -283,7 +283,7 @@ public class UxController
 		}
 
 		if (stackSizeNew > 10)
-			Log.Warning ( "Ui event stack exceeds 10, potential overflow.",me);	
+			Log.Warning ( "Ui event stack exceeds 10, potential overflow.");	
 
 		return callBack;
 

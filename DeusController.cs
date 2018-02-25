@@ -22,7 +22,7 @@ public class DeusController : MonoBehaviour
 	void Start ()
 	{
 		
-		Log.Message ("Starting...",me);
+		Log.Message ("Starting...");
 
 		taskList = new List <StoryTask> ();
 		pointerList = new List <StoryPointer> ();
@@ -35,7 +35,7 @@ public class DeusController : MonoBehaviour
 
 		if (StoryEngineObject == null) {
 
-			Log.Warning ("StoryEngineObject with central command script not found.",me);
+			Log.Warning ("StoryEngineObject with central command script not found.");
 
 		} else {
 			ad = StoryEngineObject.GetComponent <AssitantDirector> ();
@@ -45,13 +45,13 @@ public class DeusController : MonoBehaviour
 		DeusCanvas = GameObject.Find ("DeusCanvas");
 
 		if (DeusCanvas == null) {
-			Log.Warning  ("DeusCanvas not found.",me);
+			Log.Warning  ("DeusCanvas not found.");
 		} 
 
 		DeusCanvas = GameObject.Find ("DeusCanvas");
 
 		if (DeusCanvas == null) {
-			Log.Warning  ("DeusCanvas not found.",me);
+			Log.Warning  ("DeusCanvas not found.");
 		} else {
 			DeusCanvas.SetActive (false);
 		}
@@ -60,7 +60,7 @@ public class DeusController : MonoBehaviour
 
 
 		if (PointerBlock == null) {
-			Log.Warning  ("PointerBlock not found.",me);
+			Log.Warning  ("PointerBlock not found.");
 		} else {
 //			PointerBlock.SetActive (false);
 		}
@@ -101,7 +101,7 @@ public class DeusController : MonoBehaviour
 					
 			if (!GENERAL.ALLTASKS.Exists(at => at==task )) {
 				
-				Log.Message ("Removing task:" + task.description,me);
+				Log.Message ("Removing task:" + task.description);
 
 				taskList.RemoveAt (t);
 
@@ -195,7 +195,7 @@ public class DeusController : MonoBehaviour
 
 			if (!pointerList.Contains (pointer)) {
 				
-				Log.Message ("Pointer is new, added display for storyline " + pointer.currentPoint.storyLineName,me);
+				Log.Message ("Pointer is new, added display for storyline " + pointer.currentPoint.storyLineName);
 
 				pointerList.Add (pointer);
 
@@ -218,7 +218,7 @@ public class DeusController : MonoBehaviour
 
 			if (!GENERAL.ALLPOINTERS.Contains (pointer)) {
 
-				Log.Message ("Destroying ui for pointer for storyline " + pointer.currentPoint.storyLineName,me);
+				Log.Message ("Destroying ui for pointer for storyline " + pointer.currentPoint.storyLineName);
 
 				// update first. some pointers reach end in a single go - we want those to be aligned.
 
@@ -261,15 +261,25 @@ public class DeusController : MonoBehaviour
 
 			string displayText;
 
+			// If global
+
+			if (theTask.scope == SCOPE.GLOBAL) {
+				displayText = "G | ";
+			} else {
+				displayText = "L | ";
+
+			}
+
+			displayText = displayText + theTask.description + " | ";
+				
 			// If a task has a value for "debug" we display it along with task description.
 
-			if (theTask.getStringValue ("debug", out displayText)) {
+			string debugText;
 
-				displayText = theTask.description + " | " + displayText;
+			if (theTask.getStringValue ("debug", out debugText)) {
 
-			} else {
+				displayText =displayText+ debugText;
 
-				displayText = theTask.description;
 			}
 
 			theTask.pointer.deusText.text = displayText;
@@ -279,117 +289,16 @@ public class DeusController : MonoBehaviour
 			
 			theTask.pointer.deusTextSuper.text = theTask.pointer.currentPoint.storyLineName;
 
-
 		}
-
-
-
-
 
 	}
-
-	/*
-
-	void updateTaskDisplaysBAK ()
-	{
-
-		//		Debug.Log (GENERAL.ALLTASKS.Count);
-
-		foreach (StoryTask task in GENERAL.ALLTASKS) {
-
-
-			if (task.pointer.getStatus () == POINTERSTATUS.KILLED) {
-
-				//			if (task.description == "end") {
-
-				Log.Message ("Destroying ui for pointer for storyline " + task.pointer.currentPoint.storyLineName);
-
-				// update first. some pointers reach end in a single go - we want those to be aligned.
-
-				//				updateTaskDisplay (task);
-
-				pointerList.Remove (task.pointer);
-
-				pointerPositions [task.pointer.position] = null;
-
-				Destroy (task.pointer.pointerObject);
-
-
-			} else {
-
-				updateTaskDisplayBAK (task);
-
-
-			}
-
-			//			updateTaskDisplay (task);
-
-
-		}
-
-
-	}
-	void updateTaskDisplayBAK (StoryTask theTask)
-	{
-
-		if (!pointerList.Contains (theTask.pointer)) {
-			
-			Log.Message ("Pointer is new, added display for storyline " + theTask.pointer.currentPoint.storyLineName);
-
-			pointerList.Add (theTask.pointer);
-
-			createNewPointerUi (theTask.pointer);
-
-		}
-
-//			Log.Message ("Setting UI info for task: " + theTask.description);
-
-
-		if (theTask.description != "wait") {
-
-			string displayText;
-
-			// If a task has a value for "debug" we display it along with task description.
-
-			if (theTask.getStringValue ("debug", out displayText)) {
-				
-				displayText = theTask.description + " | " + displayText;
-
-			} else {
-
-				displayText = theTask.description;
-			}
-						
-			theTask.pointer.deusText.text = displayText;
-			theTask.pointer.deusTextSuper.text = theTask.pointer.currentPoint.storyLineName;
-
-		} else {
-			theTask.pointer.deusTextSuper.text = theTask.pointer.currentPoint.storyLineName;
-
-
-		}
-
-//		Log.Message ("Updated pointer displays ");
-//		for (int i = 0; i < 10; i++) {
-//			if (pointerPositions [i] != null) {
-//				Log.Message ("position: " + i + " : " + pointerPositions [i].currentPoint.storyLineName);
-//			}
-//		}
-	}
-*/
 
 	void createNewPointerUi (StoryPointer targetPointer)
 	{
 		GameObject newPointerUi;
 
 		newPointerUi = Instantiate (PointerBlock);
-
 		newPointerUi.transform.SetParent (DeusCanvas.transform);
-
-//		Debug.LogWarning (me + "Placing pointer");
-		//newPointerUi.GetComponent<RectTransform> ().localPosition = new Vector3 (0, 0, 0);
-	//	newPointerUi.GetComponent<RectTransform> ().localScale = new Vector3 (1, 1, 1);
-
 
 		targetPointer.pointerObject = newPointerUi;
 		targetPointer.pointerTextObject = newPointerUi.transform.Find ("textObject").gameObject;
@@ -398,13 +307,13 @@ public class DeusController : MonoBehaviour
 		targetPointer.deusTextSuper = newPointerUi.transform.Find ("textObject/TextSuper").GetComponent<Text> ();
 
 		// find empty spot
+
 		int p = 0;
 		while (pointerPositions [p] != null) {
 			p++;
 		}
 
 //		Debug.Log ("found point position: " + p);
-
 
 		pointerPositions [p] = targetPointer;
 		targetPointer.position = p;
@@ -432,33 +341,21 @@ public class DeusController : MonoBehaviour
 
 	//	Debug.Log( "CORR: "+screenCorrection);
 			
-
-
-
 		float yAnchor = GENERAL.pointerScreenScalar * Screen.height   + ySize * GENERAL.pointerRectScalar * screenCorrection;
-
-		//float yAnchor =0;
-
 
 		for (int i = 0; i < 10; i++) {
 			if (pointerPositions [i] != null) {
 				pointerPositions[i].pointerObject.GetComponent<RectTransform> ().localPosition = new Vector3 ((-640f + xAnchor + i * xSize)*screenCorrection, yAnchor, 0);
 				pointerPositions[i].pointerObject.GetComponent<RectTransform> ().localScale =new Vector3 (scalar*screenCorrection, scalar*screenCorrection, 1);
-
-			//	pointerPositions [i].pointerTextObject.GetComponent<RectTransform> ().localPosition = new Vector3 (-640f + xAnchor + i * xSize, yAnchor, 0);
-		//		pointerPositions [i].pointerTextObject.GetComponent<RectTransform> ().localScale = new Vector3 (scalar, scalar, 1);
-
 			}
 		}
 				
 	}
 
-
 	void handleUi ()
 	{
 			
-
-		string inputString = Input.inputString;
+				string inputString = Input.inputString;
 		if (inputString.Length > 0) {
 				
 			int storyPointerIndex = -1;
@@ -509,7 +406,7 @@ public class DeusController : MonoBehaviour
 
 					pointerPositions [storyPointerIndex].currentTask.setStatus (TASKSTATUS.COMPLETE);
 
-					pointerPositions [storyPointerIndex].setStatus (POINTERSTATUS.TASKUPDATED);
+					pointerPositions [storyPointerIndex].SetStatus (POINTERSTATUS.TASKUPDATED);
 
 
 				}

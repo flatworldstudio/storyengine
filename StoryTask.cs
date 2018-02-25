@@ -32,15 +32,15 @@ public class StoryTask
 {
 	
 	string me = "Storytask";
-	public string ID;
-	int signoffs;
-	public string description;
-	TASKSTATUS status;
+
+	public string pointID;
+	public StoryPoint point;
 	public StoryPointer pointer;
 	public SCOPE scope;
+	public string description;
 
-	public float startTime, duration;
-	public float d;
+	int signoffs;
+	TASKSTATUS status;
 
 	public Dictionary<string,Int32> taskIntValues;
 	public Dictionary<string,float> taskFloatValues;
@@ -48,9 +48,6 @@ public class StoryTask
 	public Dictionary<string,Vector3> taskVector3Values;
 	public Dictionary<string,string> taskStringValues;
 	public Dictionary<string,ushort[]> taskUshortValues;
-
-
-
 
 	#if NETWORKED
 
@@ -60,36 +57,26 @@ public class StoryTask
 	bool allModified = false;
 	#endif
 
-
-	public void markAllAsModified ()
+	public void MarkAllAsModified ()
 	{
 		allModified = true;
 		modified = true;
 	}
 
-	public StoryTask ()
+	public StoryTask (string storyPointID, SCOPE setScope)
 	{
 
-		// a minimal version with just data. no references. used for data carry-over task. 
-
-		pointer = new StoryPointer ();
-
-		setDefaults ();
-
-	}
-
-	public StoryTask (string myDescription, StoryPointer fromStoryPointer, string setID)
-	{
-
-		// Task created from network, so global scope and with passed in ID.
-
-		description = myDescription;
-		pointer = fromStoryPointer;
-		ID = setID;
-		scope = SCOPE.GLOBAL;
+		// Creating a task from a storypoint -> pointer to be created from this task.
+		
+		pointID = storyPointID;
+		point = GENERAL.GetStoryPointByID (storyPointID);
+		description = point.task [0];
+		scope = setScope;
+		pointer = null;
 
 		setDefaults ();
 		GENERAL.ALLTASKS.Add (this);
+
 	}
 
 	public StoryTask (StoryPointer fromStoryPointer, SCOPE setScope)
@@ -98,14 +85,15 @@ public class StoryTask
 		// Create a task based on the current storypoint of the pointer.
 		// Note that setting scope is explicit, but in effect the scope of the task is the same as the scope of the pointer.
 
-		description = fromStoryPointer.currentPoint.task [0];
-
 		pointer = fromStoryPointer;
-		ID = UUID.getGlobalID ();
+		description = pointer.currentPoint.task [0];
+		pointID = pointer.currentPoint.ID;
+		fromStoryPointer.currentTask = this;
 		scope = setScope;
 
 		setDefaults ();
 		GENERAL.ALLTASKS.Add (this);
+
 	}
 
 	void setDefaults ()
@@ -113,18 +101,12 @@ public class StoryTask
 
 		signoffs = 0;
 
-		//		GENERAL.ALLTASKS.Add (this);
-
 		taskIntValues = new Dictionary<string,int> ();
 		taskFloatValues = new Dictionary<string,float> ();
 		taskQuaternionValues = new Dictionary<string,Quaternion> ();
 		taskVector3Values = new Dictionary<string,Vector3> ();
 		taskStringValues = new Dictionary<string,string> ();
-
 		taskUshortValues = new  Dictionary<string,ushort[]> ();
-
-
-		//		taskIntValues ["status"] = (Int32) TASKSTATUS.ACTIVE;
 
 		#if NETWORKED
 		taskValuesChangeMask = new Dictionary<string,bool> ();
@@ -132,33 +114,9 @@ public class StoryTask
 
 		setStatus (TASKSTATUS.ACTIVE);
 
-		//		taskIntValues ["status"] = (Int32)TASKSTATUS.ACTIVE;
-
-		//		taskValuesChangeMask ["status"] = false;
-
 	}
 
-//	public void loadPersistantData (StoryPointer referencePointer)
-//	{
-//
-//		// we use the update message internally to transfer values from the carry over task
-//
-//		if (referencePointer.scope == SCOPE.GLOBAL) {
-//
-//			// mark changemask as true so these values get distributed over the network.
-//
-//			ApplyUpdateMessage (referencePointer.persistantData.getUpdateMessage (), true);
-//
-//
-//		} else {
-//
-//			ApplyUpdateMessage (referencePointer.persistantData.getUpdateMessage ());
-//
-//		}
-//
-//	}
-
-	public void loadPersistantData (StoryPointer referencePointer)
+	public void LoadPersistantData (StoryPointer referencePointer)
 	{
 
 		setStringValue ("persistantData", referencePointer.persistantData);
@@ -167,14 +125,12 @@ public class StoryTask
 
 	#if NETWORKED
 
-	public TaskUpdate getUpdateMessage ()
+	public TaskUpdate GetUpdateMessage ()
 	{
 
 		TaskUpdate msg = new TaskUpdate ();
 
-		msg.pointerID = pointer.ID;
-		msg.taskID = ID;
-		msg.description = description;
+		msg.pointID = pointID;
 
 		msg.updatedIntNames = new List<string> ();
 		msg.updatedIntValues = new List<Int32> ();
@@ -186,11 +142,8 @@ public class StoryTask
 		msg.updatedVector3Values = new List<Vector3> ();
 		msg.updatedStringNames = new List<string> ();
 		msg.updatedStringValues = new List<string> ();
-
 		msg.updatedUshortNames = new List<string> ();
 		msg.updatedUshortValues = new List<ushort[]> ();
-
-
 
 		string[] intNames = taskIntValues.Keys.ToArray ();
 
@@ -317,22 +270,12 @@ public class StoryTask
 
 		//		Log.Message ("Applying network task update.");
 
+//		if (update.updatedIntNames.Contains ("status")) {
+//			Log.Message ("incoming task status change, setting pointerstatus to taskupdated.", LOGLEVEL.VERBOSE);
+//
+//			pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
+//		}
 
-		if (update.updatedIntNames.Contains ("status")) {
-			Log.Message ("incoming task status change, setting pointerstatus to taskupdated.",me,LOGLEVEL.VERBOSE);
-
-			pointer.setStatus (POINTERSTATUS.TASKUPDATED);
-		}
-
-
-		// check task status change
-
-		//		if (update.updatedIntNames ["status"] ) {
-		//			Log.Message ("incoming task status change.");
-		//			pointer.setStatus (POINTERSTATUS.TASKUPDATED);
-		//
-		//
-		//		}
 
 		for (int i = 0; i < update.updatedIntNames.Count; i++) {
 			taskIntValues [update.updatedIntNames [i]] = update.updatedIntValues [i];
@@ -370,10 +313,6 @@ public class StoryTask
 			taskValuesChangeMask [update.updatedUshortNames [i]] = changeMask;
 
 		}
-
-
-
-
 
 	}
 
@@ -471,29 +410,6 @@ public class StoryTask
 
 	}
 
-	//	public void setStringValue (string valueName, string value)
-	//	{
-	//
-	//		taskStringValues [valueName] = value;
-	//
-	//		#if NETWORKED
-	//		taskValuesChangeMask [valueName] = true;
-	//		hasChanged = true;
-	//		#endif
-	//
-	//	}
-	//
-	//	public bool getStringValue (string valueName, out string value)
-	//	{
-	//
-	//		if (!taskStringValues.TryGetValue (valueName, out value)) {
-	//			return false;
-	//		}
-	//
-	//		return true;
-	//
-	//	}
-
 	public void setVector3Value (string valueName, Vector3 value)
 	{
 
@@ -540,34 +456,6 @@ public class StoryTask
 
 	}
 
-
-
-	//	public void setIntValue (string valueName, Int32 value)
-	//
-	//	{
-	//
-	//		taskIntValues [valueName] = value;
-	//
-	//		#if NETWORKED
-	//		taskValuesChangeMask [valueName] = true;
-	//		hasChanged = true;
-	//		#endif
-	//
-	//	}
-	//
-	//	public bool getIntValue (string valueName, out Int32 value)
-	//
-	//	{
-	//
-	//		if (!taskIntValues.TryGetValue (valueName, out value)) {
-	//			return false;
-	//		}
-	//
-	//		return true;
-	//
-	//	}
-
-
 	void setPointerToUpdated ()
 	{
 
@@ -578,7 +466,7 @@ public class StoryTask
 
 			// we're the global server or running solo so we can trigger the pointer. regardless of the task's scope.
 
-			pointer.setStatus (POINTERSTATUS.TASKUPDATED);
+			pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
 
 			break;
 
@@ -588,7 +476,7 @@ public class StoryTask
 
 			if (scope == SCOPE.LOCAL) {
 
-				pointer.setStatus (POINTERSTATUS.TASKUPDATED);
+				pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
 
 			}
 
@@ -607,95 +495,11 @@ public class StoryTask
 
 	}
 
-	//	bool haveAuthority ()
-	//	{
-	//
-	//		if (scope == SCOPE.LOCAL) {
-	//
-	//			// Task is local so we have authority
-	//
-	//			return true;
-	//
-	//		} else {
-	//
-	//			if (GENERAL.SCOPE == SCOPE.LOCAL) {
-	//
-	//				// Global task but local scope.
-	//
-	//				return false;
-	//
-	//
-	//			} else {
-	//
-	//				return true;
-	//
-	//			}
-	//
-	//
-	//		}
-	//
-	//
-	//
-	//	}
-
-
 	public void setStatus (TASKSTATUS theStatus)
 	{
 
 		status = theStatus;
-
-		//		taskIntValues ["status"] = (Int32)theStatus;
-
 		setPointerToUpdated ();
-
-
-
-		//		#if NETWORKED
-		//
-		//		taskValuesChangeMask ["status"] = true;
-		//		hasChanged = true;
-		//
-		//		#endif
-
-
-
-
-		//		switch (GENERAL.SCOPE) {
-		//
-		//		case SCOPE.GLOBAL:
-		//		case SCOPE.SOLO:
-		//			// we're the global server or running solo so we can trigger the pointer. regardless of the task's scope.
-		//
-		//			pointer.setStatus (POINTERSTATUS.TASKUPDATED);
-		//
-		//			break;
-		//
-		//		case SCOPE.LOCAL:
-		//
-		//			// we're a local client. only if the task is local do we trigger the pointer.
-		//
-		//			if (scope == SCOPE.LOCAL) {
-		//				
-		//				pointer.setStatus (POINTERSTATUS.TASKUPDATED);
-		//
-		//			}
-		//
-		//			break;
-		//
-		//		default:
-		//
-		//
-		//			break;
-		//
-		//
-		//
-		//		}
-
-		//		pointer.setStatus (POINTERSTATUS.TASKUPDATED);
-
-
-
-
 
 	}
 
@@ -704,20 +508,7 @@ public class StoryTask
 
 		return status;
 
-		//		Int32 value;
-		//
-		//		if (!taskIntValues.TryGetValue ("status", out value)) {
-		//					
-		//			Debug.LogError (me + "status value for task not found");
-		//
-		//			value = (Int32)TASKSTATUS.ACTIVE;
-		//		} 
-		//
-		//		return (TASKSTATUS)value;
-
 	}
-
-
 
 	void complete ()
 	{
@@ -728,25 +519,13 @@ public class StoryTask
 
 			setStatus (TASKSTATUS.COMPLETE);
 
-			//			pointer.taskStatusChanged ();
-
-			//			pointer.setStatus (POINTERSTATUS.TASKUPDATED);
-
-
 		} else {
-			Log.Warning ("A task was completed more than once.",me);
+			
+			Log.Warning ("A task was completed more than once.");
 
 		}
 
 	}
-
-//	public void setCallBack (string theCallBackPoint, string callBackValue)
-//	{
-//
-//		setStringValue ("carryOver", callBackValue);
-//		setStringValue ("callBackPoint", theCallBackPoint);
-//
-//	}
 
 	public void setCallBack (string theCallBackPoint)
 	{
@@ -755,17 +534,12 @@ public class StoryTask
 
 	}
 
-
-
-
 	public void clearCallBack ()
 	{
 
 		setStringValue ("callBackPoint", "");
 
-
 	}
-
 
 	public string getCallBack ()
 	{
@@ -787,7 +561,7 @@ public class StoryTask
 	{
 
 		if (GENERAL.SIGNOFFS == 0) {
-			Log.Warning ("Trying to signoff on a task with 0 required signoffs.",me);
+			Log.Warning ("Trying to signoff on a task with 0 required signoffs.");
 		}
 
 		signoffs++;
@@ -804,18 +578,12 @@ public class StoryTask
 
 }
 
-
-
-
-
 #if NETWORKED
 
 public class TaskUpdate : MessageBase
 {
 
-	public string pointerID, taskID;
-
-	public string description;
+	public string pointID;
 
 	Dictionary<string,Int32> intValues;
 	Dictionary<string,float> floatValues;
@@ -840,7 +608,7 @@ public class TaskUpdate : MessageBase
 
 	public string debug;
 
-	string me="Taskupdate";
+	string me = "Taskupdate";
 
 	public override void Deserialize (NetworkReader reader)
 	{
@@ -849,18 +617,9 @@ public class TaskUpdate : MessageBase
 
 		// Custom deserialisation.
 
-		//		string packetId = reader.ReadString ();
-		//		debug += "/ packetid: " + packetId;
+		pointID = reader.ReadString ();
 
-		taskID = reader.ReadString ();
-		pointerID = reader.ReadString ();
-		description = reader.ReadString ();
-
-
-		debug += "/ task: " + taskID;
-		debug += "/ pointer: " + pointerID;
-		debug += "/ description: " + description;
-
+		debug += "/ pointid: " + pointID;
 
 		// Deserialise updated int values.
 
@@ -986,7 +745,7 @@ public class TaskUpdate : MessageBase
 
 		}
 
-		Log.Message (debug, me, LOGLEVEL.VERBOSE);
+		Log.Message (debug, LOGLEVEL.VERBOSE);
 
 		//		Debug.Log (debug);
 
@@ -999,20 +758,8 @@ public class TaskUpdate : MessageBase
 
 		// Custom serialisation.
 
-		//		string packetId = UUID.getId ();
-		//		writer.Write (packetId);
-		//		debug += "/ packetid: " + packetId;
-
-		// sender ip and storypointer uuid
-
-		writer.Write (taskID);
-		writer.Write (pointerID);
-		writer.Write (description);
-
-		debug += "/ task: " + taskID;
-		debug += "/ pointer: " + pointerID;
-		debug += "/ description: " + description;
-
+		writer.Write (pointID);
+		debug += "/ pointid: " + pointID;
 
 		// Serialise updated int values.
 
@@ -1100,9 +847,7 @@ public class TaskUpdate : MessageBase
 
 		}
 
-
-
-		Log.Message (debug, me, LOGLEVEL.VERBOSE);
+		Log.Message (debug, LOGLEVEL.VERBOSE);
 		//		Debug.Log (debug);
 
 	}
