@@ -30,6 +30,7 @@ public class UxController
 
 	List <UiEvent> uiEventStack;
 
+	float currentScale=1;
 
 
 	public UxController ()
@@ -130,6 +131,11 @@ public class UxController
 	public UserCallBack updateUx (UxInterface activeInterface)
 
 	{
+
+		// Set a float for the current scale applied by the canvas. We need this to convert screen pixels to ui pixels.
+
+		currentScale = activeInterface.canvasObject.GetComponent<Canvas> ().scaleFactor;
+
 		// log current stack count to track changes.
 
 		int stackSize = uiEventStack.Count;
@@ -319,9 +325,15 @@ public class UxController
 				ui.x = Input.mousePosition.x;
 				ui.y = Input.mousePosition.y;
 				ui.dx = ui.x - ui.px;
-				ui.dx = ui.dx / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+
+//			ui.dx = ui.dx / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+
+			ui.dx = ui.dx /currentScale; 
+
 				ui.dy = ui.y - ui.py;
-				ui.dy = ui.dy / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+//				ui.dy = ui.dy / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+			ui.dy = ui.dy /currentScale; 
+
 				ui.px = ui.x;
 				ui.py = ui.y;
 
@@ -390,8 +402,14 @@ public class UxController
 
 				case TouchPhase.Moved:
 					Vector2 touchDelta = Input.GetTouch (0).deltaPosition;
-					ui.dx = touchDelta.x / Screen.height * 720f;
-					ui.dy = touchDelta.y / Screen.height * 720f;
+
+//		ui.dx = touchDelta.x / Screen.height * 720f;
+//					ui.dy = touchDelta.y / Screen.height * 720f;
+
+		ui.dx = touchDelta.x /currentScale;
+		ui.dy = touchDelta.y /currentScale;
+
+
 					ui.action = UIACTION.SINGLEDRAG;
 					ui.touch = UITOUCH.TOUCHING;
 					trackTap (ui);
@@ -452,8 +470,12 @@ public class UxController
 					Vector2 touchDelta0 = Input.GetTouch (0).deltaPosition;
 					Vector2 touchDelta1 = Input.GetTouch (1).deltaPosition;
 
-					ui.dx = (touchDelta0.x + touchDelta1.x) / 2f / Screen.height * 720f; 
-					ui.dy = (touchDelta0.y + touchDelta1.y) / 2f / Screen.height * 720f; 
+//					ui.dx = (touchDelta0.x + touchDelta1.x) / 2f / Screen.height * 720f; 
+//					ui.dy = (touchDelta0.y + touchDelta1.y) / 2f / Screen.height * 720f; 
+
+		ui.dx = (touchDelta0.x + touchDelta1.x) / 2f /currentScale; 
+		ui.dy = (touchDelta0.y + touchDelta1.y) / 2f /currentScale; 
+
 					ui.d = Vector2.Distance (tp0, tp1);
 					ui.dd = ui.d - storeUi.d;
 
