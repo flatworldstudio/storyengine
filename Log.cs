@@ -69,7 +69,7 @@ public static class Log
 
 		StackFrame callStack = new StackFrame(1, true);
 
-		Char[] delimiter = {'/','.'};
+		Char[] delimiter = {'/','.','\\'};
 		string[] caller = callStack.GetFileName().Split (delimiter);
 		string callerId = caller [caller.Length - 2];
 
