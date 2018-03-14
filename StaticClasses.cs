@@ -63,7 +63,7 @@ public static class GENERAL
 	public static Dictionary <string,StoryPoint> storyPoints;
 	public static List <StoryPointer> ALLPOINTERS;
 	public static List <StoryTask> ALLTASKS;
-	public static STORYMODE STORYMODE;
+//	public static STORYMODE STORYMODE;
 
 	public static bool isPauzed=false;
 	public static bool hasFocus=true;
