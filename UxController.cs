@@ -41,7 +41,7 @@ public class UxController
 	// 	high level
 
 
-	void initialise ()
+	public void initialise ()
 	{
 		
 		activeUiEvent = new UiEvent ();
