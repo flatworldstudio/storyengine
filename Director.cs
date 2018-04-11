@@ -404,6 +404,7 @@ public class Director
 			return false;
 
 
+//		SCOPE callBackScope = pointer.currentTask.getCallBackScope ();
 
 
 //		string callBackValue = pointer.currentTask.getCallBack ();

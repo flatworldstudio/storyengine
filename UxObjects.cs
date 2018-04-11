@@ -1358,12 +1358,13 @@ public class UiButton
 		stepBrightness = 1f / 0.25f;
 
 		gameObject = GameObject.Find (theName);
+
 		if (gameObject != null) {
 			image = gameObject.GetComponent<Image> ();
 			image.color = brightness * color;
 		} else {
 			// catch exception
-			Log.Error ("ERROR: uibutton gameobject not found");
+			Log.Error ("ERROR: uibutton gameobject not found: "+theName);
 		}
 	}
 

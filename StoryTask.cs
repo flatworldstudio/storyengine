@@ -39,6 +39,8 @@ public class StoryTask
 	public StoryPointer pointer;
 	public SCOPE scope;
 
+//	private string callBack;
+
 	public float startTime, duration;
 	public float d;
 
@@ -755,6 +757,14 @@ public class StoryTask
 
 	}
 
+//	public void setCallBack (string theCallBackPoint, SCOPE theScope)
+//	{
+//		callBack = theCallBackPoint;
+//
+//		setStringValue ("callBackPoint", theCallBackPoint);
+//		setStringValue ("callBackScope", theScope);
+//	}
+
 
 
 
@@ -765,6 +775,15 @@ public class StoryTask
 
 
 	}
+
+//	public SCOPE getCallBackScope(){
+//
+//		int scope;
+//
+//		if (getIntValue)
+//
+//
+//	}
 
 
 	public string getCallBack ()

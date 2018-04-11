@@ -82,7 +82,7 @@ public class DataController : MonoBehaviour
 
 			if (networkManager.client != null) {
 
-	StopNetworkClient();
+	stopNetworkClient();
 
 //				networkManager.client.Disconnect ();
 
@@ -183,7 +183,7 @@ public class DataController : MonoBehaviour
 
 	}
 
-	public void StopNetworkClient(){
+	public void stopNetworkClient(){
 
 		Log.Message ("Stopping network client.",me);
 
