@@ -4,171 +4,171 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 
-
-public delegate void OnClientMessageHandler (NetworkMessage netMessage);
-public delegate void messageHandler (NetworkMessage netMessage);
-
-
-
-
-// Client delegates.
-
-public delegate void OnStartClientDelegate (NetworkClient theClient);
-public delegate void OnStopClientDelegate ();
-public delegate void OnClientConnectDelegate (NetworkConnection connection);
-public delegate void OnClientDisconnectDelegate (NetworkConnection connection);
-
-// Server delegates
-
-public delegate void OnStartServerDelegate ();
-public delegate void OnStopServerDelegate ();
-public delegate void OnServerConnectDelegate (NetworkConnection connection);
-public delegate void OnServerDisconnectDelegate (NetworkConnection connection);
-
-
-
-public class ExtendedNetworkManager : NetworkManager
+namespace StoryEngine
 {
-	string me = "Network manager";
 
-	const short connectionMessageCode = 1001;
+	public delegate void OnClientMessageHandler (NetworkMessage netMessage);
+	public delegate void messageHandler (NetworkMessage netMessage);
 
-	//
+	// Client delegates.
 
-	void OnApplicationQuit ()
+	public delegate void OnStartClientDelegate (NetworkClient theClient);
+	public delegate void OnStopClientDelegate ();
+	public delegate void OnClientConnectDelegate (NetworkConnection connection);
+	public delegate void OnClientDisconnectDelegate (NetworkConnection connection);
+
+	// Server delegates
+
+	public delegate void OnStartServerDelegate ();
+	public delegate void OnStopServerDelegate ();
+	public delegate void OnServerConnectDelegate (NetworkConnection connection);
+	public delegate void OnServerDisconnectDelegate (NetworkConnection connection);
+
+
+
+	
+	public class ExtendedNetworkManager : NetworkManager
 	{
-		if (client != null)
-			StopNetworkClient ();
+		string me = "Network manager";
 
-		if (NetworkServer.active)
-			StopNetworkServer ();
+		const short connectionMessageCode = 1001;
+
+		//
+
+		void OnApplicationQuit ()
+		{
+			if (client != null)
+				StopNetworkClient ();
+
+			if (NetworkServer.active)
+				StopNetworkServer ();
 		
-	}
+		}
 
-	// Client methods.
+		// Client methods.
 
-	public OnStartClientDelegate onStartClientDelegate;
-	public OnStopClientDelegate onStopClientDelegate;
+		public OnStartClientDelegate onStartClientDelegate;
+		public OnStopClientDelegate onStopClientDelegate;
 
-	public OnClientConnectDelegate onClientConnectDelegate;
-	public OnClientDisconnectDelegate onClientDisconnectDelegate;
+		public OnClientConnectDelegate onClientConnectDelegate;
+		public OnClientDisconnectDelegate onClientDisconnectDelegate;
 
-	public void StartNetworkClient (string server)
-	{
+		public void StartNetworkClient (string server)
+		{
 		
-		networkAddress = server;
+			networkAddress = server;
 
-		StartClient ();
+			StartClient ();
 
-	}
+		}
 
-	public override void OnStartClient (NetworkClient theClient)
-	{
-		Log.Message ("Client has started.", me);
+		public override void OnStartClient (NetworkClient theClient)
+		{
+			Log.Message ("Client has started.", me);
 
-		if (onStartClientDelegate != null)
-			onStartClientDelegate (theClient);
+			if (onStartClientDelegate != null)
+				onStartClientDelegate (theClient);
 
-	}
+		}
 
-	public override void OnClientConnect (NetworkConnection conn)
-	{
+		public override void OnClientConnect (NetworkConnection conn)
+		{
 		
-		Log.Message ("Client connected to server.", me);
+			Log.Message ("Client connected to server.", me);
 
-		if (onClientConnectDelegate != null)
-			onClientConnectDelegate (conn);
+			if (onClientConnectDelegate != null)
+				onClientConnectDelegate (conn);
 
-	}
+		}
 
-	public override void OnClientDisconnect (NetworkConnection connection)
-	{
+		public override void OnClientDisconnect (NetworkConnection connection)
+		{
 
-		Log.Message ("Client disconnected from server.", me);
+			Log.Message ("Client disconnected from server.", me);
 
-		if (onClientDisconnectDelegate != null)
-			onClientDisconnectDelegate (connection);
+			if (onClientDisconnectDelegate != null)
+				onClientDisconnectDelegate (connection);
 
-	}
+		}
 
-	public void StopNetworkClient ()
-	{
+		public void StopNetworkClient ()
+		{
 
-		StopClient ();
+			StopClient ();
 
-	}
+		}
 
-	public override void OnStopClient ()
-	{
+		public override void OnStopClient ()
+		{
 
-		Log.Message ("Client has stopped.", me);
+			Log.Message ("Client has stopped.", me);
 
-		if (onStopClientDelegate != null)
-			onStopClientDelegate ();
+			if (onStopClientDelegate != null)
+				onStopClientDelegate ();
 
-	}
+		}
 
-	// Server methods.
+		// Server methods.
 
-	public OnStartServerDelegate onStartServerDelegate;
-	public OnStopServerDelegate onStopServerDelegate;
+		public OnStartServerDelegate onStartServerDelegate;
+		public OnStopServerDelegate onStopServerDelegate;
 
-	public OnServerConnectDelegate onServerConnectDelegate;
-	public OnServerDisconnectDelegate onServerDisconnectDelegate;
+		public OnServerConnectDelegate onServerConnectDelegate;
+		public OnServerDisconnectDelegate onServerDisconnectDelegate;
 
 
-	public void StartNetworkServer ()
-	{
+		public void StartNetworkServer ()
+		{
 		
-		StartServer ();
+			StartServer ();
 
-	}
+		}
 
-	public void StopNetworkServer ()
-	{
+		public void StopNetworkServer ()
+		{
 
-		StopServer ();
+			StopServer ();
 
-	}
+		}
 
-	public override void OnStartServer ()
-	{
-		Log.Message ("Server started.", me);
+		public override void OnStartServer ()
+		{
+			Log.Message ("Server started.", me);
 
-		if (onStartServerDelegate != null)
-			onStartServerDelegate ();
+			if (onStartServerDelegate != null)
+				onStartServerDelegate ();
 
-	}
+		}
 
-	public override void OnStopServer ()
-	{
-		Log.Message ("Server stopped.", me);
+		public override void OnStopServer ()
+		{
+			Log.Message ("Server stopped.", me);
 
-		if (onStopServerDelegate != null)
-			onStopServerDelegate ();
+			if (onStopServerDelegate != null)
+				onStopServerDelegate ();
 
-	}
+		}
 
-	public override void OnServerConnect (NetworkConnection connection)
-	{
-		Log.Message ("Remote client connected.", me);
+		public override void OnServerConnect (NetworkConnection connection)
+		{
+			Log.Message ("Remote client connected.", me);
 
-		if (onServerConnectDelegate != null)
-			onServerConnectDelegate (connection);
+			if (onServerConnectDelegate != null)
+				onServerConnectDelegate (connection);
 		
-	}
+		}
 
-	public override void OnServerDisconnect (NetworkConnection connection)
-	{
-		Log.Message ("Remote client disconnected.", me);
+		public override void OnServerDisconnect (NetworkConnection connection)
+		{
+			Log.Message ("Remote client disconnected.", me);
 
-		if (onServerDisconnectDelegate != null)
-			onServerDisconnectDelegate (connection);
+			if (onServerDisconnectDelegate != null)
+				onServerDisconnectDelegate (connection);
 
-	}
+		}
 
 
-	/*
+		/*
 //	public void 
 
 	public void InformServerOnDisconnect (){
@@ -232,4 +232,5 @@ public class ExtendedNetworkManager : NetworkManager
 
 
 
+	}
 }
