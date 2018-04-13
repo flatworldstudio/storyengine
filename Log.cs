@@ -65,7 +65,7 @@ namespace StoryEngine
 
 			moduleLogStatus.TryGetValue (module, out moduleLevel);
 				
-			if (messageLevel >= moduleLevel)
+			if (messageLevel <= moduleLevel)
 				Debug.Log (module + ": " + message);
 
 
@@ -79,7 +79,7 @@ namespace StoryEngine
 
 			moduleLogStatus.TryGetValue (module, out moduleLevel);
 
-			if (messageLevel >= moduleLevel)
+			if (messageLevel <= moduleLevel)
 				Debug.LogWarning (module + ": " + message);
 		
 
@@ -94,7 +94,7 @@ namespace StoryEngine
 
 			moduleLogStatus.TryGetValue (module, out moduleLevel);
 
-			if (messageLevel >= moduleLevel)
+			if (messageLevel <= moduleLevel)
 				Debug.LogError (module + ": " + message);
 
 
