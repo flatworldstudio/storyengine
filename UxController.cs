@@ -37,13 +37,13 @@ namespace StoryEngine
 
 		public UxController ()
 		{
-			initialise ();
+			reset ();
 		}
 
 		// 	high level
 
 
-		public void initialise ()
+		public void reset ()
 		{
 		
 			activeUiEvent = new UiEvent ();

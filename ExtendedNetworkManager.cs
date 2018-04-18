@@ -23,9 +23,6 @@ namespace StoryEngine
 	public delegate void OnStopServerDelegate ();
 	public delegate void OnServerConnectDelegate (NetworkConnection connection);
 	public delegate void OnServerDisconnectDelegate (NetworkConnection connection);
-
-
-
 	
 	public class ExtendedNetworkManager : NetworkManager
 	{

@@ -224,11 +224,15 @@ namespace StoryEngine
 
 		}
 
-
+		string l;
 
 		string isStoryLine (int i)
 		{
+			l = manuscript [i];
 
+			if (isComment(l))
+				return null;
+			
 			string r = null;
 
 			Char delimiter = '#';
@@ -239,14 +243,18 @@ namespace StoryEngine
 			}
 
 			return r;
-
-
+		
 		}
-
 
 		string isStoryLabel (int i)
 		{
+			
+			l = manuscript [i];
+		
 
+			if (isComment(l))
+				return null;
+			
 			string r = null;
 
 			Char delimiter = '@';
@@ -258,19 +266,21 @@ namespace StoryEngine
 
 			return r;
 
-
 		}
 
 		string isStoryPoint (int i)
 		{
-			string l = manuscript [i];
+			 l = manuscript [i];
+
+			if (isComment(l))
+				return null;
 
 			Char space = ' ';
-			string comment = "//";
-
-			if (l.IndexOf (comment) != -1) {
-				return null;
-			}
+//			string comment = "//";
+//
+//			if (l.IndexOf (comment) != -1) {
+//				return null;
+//			}
 			string r = null;
 
 			string[] s = l.Split (space);
@@ -287,7 +297,16 @@ namespace StoryEngine
 
 		}
 
+		private bool isComment(string line){
+			
+			string comment = "//";
 
+			if (line.IndexOf (comment) == -1) {
+				return false;
+			}
+
+			return true;
+		}
 
 
 
