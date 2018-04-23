@@ -49,6 +49,8 @@ public class StoryTask
 	public Dictionary<string,string> taskStringValues;
 	public Dictionary<string,ushort[]> taskUshortValues;
 
+    public Dictionary<string, byte[]> taskByteValues;
+
 	#if NETWORKED
 
 	public Dictionary<string,bool> taskValuesChangeMask;
@@ -107,6 +109,8 @@ public class StoryTask
 		taskVector3Values = new Dictionary<string,Vector3> ();
 		taskStringValues = new Dictionary<string,string> ();
 		taskUshortValues = new  Dictionary<string,ushort[]> ();
+        taskByteValues = new Dictionary<string, byte[]>();
+
 
 		#if NETWORKED
 		taskValuesChangeMask = new Dictionary<string,bool> ();
@@ -144,6 +148,9 @@ public class StoryTask
 		msg.updatedStringValues = new List<string> ();
 		msg.updatedUshortNames = new List<string> ();
 		msg.updatedUshortValues = new List<ushort[]> ();
+
+        msg.updatedByteNames = new List<string>();
+        msg.updatedByteValues = new List<byte[]>();
 
 		string[] intNames = taskIntValues.Keys.ToArray ();
 
@@ -259,6 +266,27 @@ public class StoryTask
 
 		}
 
+        string[] byteNames = taskByteValues.Keys.ToArray();
+
+        foreach (string byteName in byteNames)
+        {
+
+            if (taskValuesChangeMask[byteName] || allModified)
+            {
+
+                msg.updatedByteNames.Add(byteName);
+
+                taskValuesChangeMask[byteName] = false;
+
+                byte[] byteValue;
+
+                if (taskByteValues.TryGetValue(byteName, out byteValue))
+                    msg.updatedByteValues.Add(byteValue);
+
+            }
+
+        }
+
 		allModified = false;
 
 		return msg;
@@ -313,6 +341,14 @@ public class StoryTask
 			taskValuesChangeMask [update.updatedUshortNames [i]] = changeMask;
 
 		}
+
+        for (int i = 0; i < update.updatedByteNames.Count; i++)
+        {
+
+            taskByteValues[update.updatedByteNames[i]] = update.updatedByteValues[i];
+            taskValuesChangeMask[update.updatedByteNames[i]] = changeMask;
+
+        }
 
 	}
 
@@ -409,6 +445,30 @@ public class StoryTask
 		return true;
 
 	}
+
+    public void setByteValue (string valueName, byte[] value){
+
+        taskByteValues[valueName] = value;
+
+        #if NETWORKED
+        taskValuesChangeMask[valueName] = true;
+        modified = true;
+#endif
+
+    }
+
+    public bool getByteValue(string valueName, out byte[] value)
+    {
+
+        if (!taskByteValues.TryGetValue(valueName, out value))
+        {
+            return false;
+        }
+
+        return true;
+
+    }
+
 
 	public void setVector3Value (string valueName, Vector3 value)
 	{
@@ -606,6 +666,10 @@ public class TaskUpdate : MessageBase
 	public List<string> updatedUshortNames;
 	public List<ushort[]> updatedUshortValues;
 
+    public List<string> updatedByteNames;
+    public List<byte[]> updatedByteValues;
+
+
 	public string debug;
 
 	string me = "Taskupdate";
@@ -745,6 +809,36 @@ public class TaskUpdate : MessageBase
 
 		}
 
+        // Deserialise updated byte values.
+
+        updatedByteNames = new List<string>();
+        updatedByteValues = new List<byte[]>();
+
+        int byteCount = reader.ReadInt32();
+
+        debug += "/ updated ushort arrays: " + byteCount;
+
+        for (int i = 0; i < byteCount; i++)
+        {
+
+            string byteName = reader.ReadString();
+            updatedByteNames.Add(byteName);
+
+            int byteArrayLength = reader.ReadInt32();
+
+            byte[] byteArray = new byte[byteArrayLength];
+
+            for (int j = 0; j < byteArrayLength; j++)
+            {
+
+                byteArray[j] = reader.ReadByte();
+
+            }
+
+            updatedByteValues.Add(byteArray);
+
+        }
+
 		Log.Message (debug, LOGLEVEL.VERBOSE);
 
 		//		Debug.Log (debug);
@@ -826,7 +920,7 @@ public class TaskUpdate : MessageBase
 
 		}
 
-		// Serialise updated string values.
+		// Serialise updated ushort values.
 
 		writer.Write (updatedUshortNames.Count);
 
@@ -846,6 +940,29 @@ public class TaskUpdate : MessageBase
 
 
 		}
+
+        // Serialise updated byte values.
+
+        writer.Write(updatedByteNames.Count);
+
+        debug += "/ updated bytes: " + updatedByteNames.Count;
+
+        for (int i = 0; i < updatedByteNames.Count; i++)
+        {
+
+            writer.Write(updatedByteNames[i]); // name
+
+            writer.Write(updatedByteValues[i].Length); // length
+
+            for (int j = 0; j < updatedByteValues[i].Length; j++)
+            {
+
+                writer.Write(updatedByteValues[i][j]); // data
+
+            }
+
+
+        }
 
 		Log.Message (debug, LOGLEVEL.VERBOSE);
 		//		Debug.Log (debug);
