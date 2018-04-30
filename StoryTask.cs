@@ -57,6 +57,13 @@ public class StoryTask
 	List<string> changedTaskValue;
 	public bool modified = false;
 	bool allModified = false;
+
+
+    int LastUpdateFrame=-1;
+     int UpdatesPerFrame = 0;
+    public int LastUpdatesPerFrame = 0;
+    public int MaxUpdatesPerFrame = 0;
+
 	#endif
 
 	public void MarkAllAsModified ()
@@ -296,13 +303,34 @@ public class StoryTask
 	public void ApplyUpdateMessage (TaskUpdate update, bool changeMask = false)
 	{
 
-		//		Log.Message ("Applying network task update.");
+        //		Log.Message ("Applying network task update.");
 
-//		if (update.updatedIntNames.Contains ("status")) {
-//			Log.Message ("incoming task status change, setting pointerstatus to taskupdated.", LOGLEVEL.VERBOSE);
-//
-//			pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
-//		}
+        //		if (update.updatedIntNames.Contains ("status")) {
+        //			Log.Message ("incoming task status change, setting pointerstatus to taskupdated.", LOGLEVEL.VERBOSE);
+        //
+        //			pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
+        //		}
+
+
+
+        int CurrentFrame = Time.frameCount;
+
+        if (CurrentFrame==LastUpdateFrame){
+            
+            UpdatesPerFrame++;
+
+
+        }else{
+
+            LastUpdatesPerFrame = UpdatesPerFrame;
+            UpdatesPerFrame = 1;
+        }
+
+        LastUpdateFrame = CurrentFrame;
+
+        MaxUpdatesPerFrame = Mathf.Max(MaxUpdatesPerFrame, UpdatesPerFrame);
+
+
 
 
 		for (int i = 0; i < update.updatedIntNames.Count; i++) {
