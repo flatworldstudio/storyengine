@@ -10,444 +10,493 @@ using UnityEngine.Networking.NetworkSystem;
 
 #endif
 
-public enum DIRECTORSTATUS
-{
-	NOTREADY,
-	READY,
-	ACTIVE,
-	PASSIVE,
-	PAUSED
-	//	ASSISTANT
-}
-
-public class Director
+namespace StoryEngine
 {
 
-	List <StoryPointer> pointerStack;
-	public DIRECTORSTATUS status;
+    public enum DIRECTORSTATUS
+    {
+        NOTREADY,
+        READY,
+        ACTIVE,
+        PASSIVE,
+        PAUSED
+        //	ASSISTANT
+    }
 
-	string me = "Director";
+    public class Director
+    {
 
-	public Director ()
-	{
+        List<StoryPointer> pointerStack;
+        public DIRECTORSTATUS status;
 
-		GENERAL.ALLPOINTERS = new List <StoryPointer> ();
-		status = DIRECTORSTATUS.NOTREADY;
+        string me = "Director";
 
-	}
+        public Director()
+        {
 
-	public void evaluatePointers ()
-	{
+            GENERAL.ALLPOINTERS = new List<StoryPointer>();
+            status = DIRECTORSTATUS.NOTREADY;
 
-		// Create a stack of pointers for processing.
+        }
 
-		pointerStack = new List <StoryPointer> ();
+        public void evaluatePointers()
+        {
 
-		for (int p = GENERAL.ALLPOINTERS.Count - 1; p >= 0; p--) {
-				
-			StoryPointer sp = GENERAL.ALLPOINTERS [p];
+            // Create a stack of pointers for processing.
 
-			if (sp.GetStatus () == POINTERSTATUS.KILLED) {
-					
-				// if a pointer was killed, remove it now.
+            pointerStack = new List<StoryPointer>();
 
-				Log.Message ("Removing pointer: " + sp.currentPoint.storyLineName);
+            for (int p = GENERAL.ALLPOINTERS.Count - 1; p >= 0; p--)
+            {
 
-				GENERAL.ALLPOINTERS.RemoveAt (p);
+                StoryPointer sp = GENERAL.ALLPOINTERS[p];
 
-			}
+                if (sp.GetStatus() == POINTERSTATUS.KILLED)
+                {
 
-			if (sp.GetStatus () == POINTERSTATUS.EVALUATE || sp.GetStatus () == POINTERSTATUS.TASKUPDATED) {
+                    // if a pointer was killed, remove it now.
 
-				// pointer needs evaluating. but we only do this if pointer is local OR if pointer is global and we are the server
+                    Log.Message("Removing pointer: " + sp.currentPoint.storyLineName);
 
-				if ((sp.scope == SCOPE.GLOBAL && GENERAL.AUTHORITY == AUTHORITY.GLOBAL) || (sp.scope == SCOPE.LOCAL)) {
+                    GENERAL.ALLPOINTERS.RemoveAt(p);
 
-					pointerStack.Add (sp);
+                }
 
-				}
+                if (sp.GetStatus() == POINTERSTATUS.EVALUATE || sp.GetStatus() == POINTERSTATUS.TASKUPDATED)
+                {
 
-			}
+                    // pointer needs evaluating. but we only do this if pointer is local OR if pointer is global and we are the server
 
-		}
+                    if ((sp.scope == SCOPE.GLOBAL && GENERAL.AUTHORITY == AUTHORITY.GLOBAL) || (sp.scope == SCOPE.LOCAL))
+                    {
 
-		if (pointerStack.Count > 0)
-			Log.Message ("Evaluating " + pointerStack.Count + " of " + GENERAL.ALLPOINTERS.Count + " storypointers.");
-		
-		while (pointerStack.Count > 0) {
+                        pointerStack.Add(sp);
 
-			// Keep processing items on the stack untill empty.
-								
-			StoryPointer pointer;
-			string targetPointerName, targetValue;
-			StoryPointer newPointer, targetPointer;
-			StoryPoint targetPoint;
+                    }
 
-			pointer = pointerStack [0];
+                }
 
-			Log.Message ("Evaluating pointer: " + pointer.currentPoint.storyLineName);
+            }
 
-			pointer.LoadPersistantData ();
+            if (pointerStack.Count > 0)
+                Log.Message("Evaluating " + pointerStack.Count + " of " + GENERAL.ALLPOINTERS.Count + " storypointers.");
 
-			switch (pointer.currentPoint.taskType) {
+            while (pointerStack.Count > 0)
+            {
 
-			case TASKTYPE.ROUTING:
+                // Keep processing items on the stack untill empty.
 
-				string type = pointer.currentPoint.task [0];
+                StoryPointer pointer;
+                string targetPointerName, targetValue;
+                StoryPointer newPointer, targetPointer;
+                StoryPoint targetPoint;
 
-				switch (type) {
+                pointer = pointerStack[0];
 
-				case "hold":
+                Log.Message("Evaluating pointer: " + pointer.currentPoint.storyLineName);
 
-					// Put this pointer on hold. Remove from stack.
+                pointer.LoadPersistantData();
 
-					Log.Message ("Pausing pointer.");
+                switch (pointer.currentPoint.taskType)
+                {
 
-					pointer.SetStatus (POINTERSTATUS.PAUSED);
+                    case TASKTYPE.ROUTING:
 
-					pointerStack.RemoveAt (0);
+                        string type = pointer.currentPoint.task[0];
 
-					break;
+                        switch (type)
+                        {
 
-				case "tell":
-						
-					// Control another pointer. Finds a/the(!) pointer on the given storyline and moves it to the given storypoint, marking the pointer for evaluation.
-					// Progress this pointer, keeping it on the stack
+                            case "hold":
 
-					targetPointerName = pointer.currentPoint.task [1];
+                                // Put this pointer on hold. Remove from stack.
 
-					targetValue = pointer.currentPoint.task [2];
+                                Log.Message("Pausing pointer.");
 
-					targetPointer = GENERAL.GetPointerForStoryline (targetPointerName);
+                                pointer.SetStatus(POINTERSTATUS.PAUSED);
 
-					if (targetPointer != null) {
-							
-						targetPoint = GENERAL.GetStoryPointByID (targetValue);
+                                pointerStack.RemoveAt(0);
 
-						if (targetPoint != null) {
-							
-							targetPointer.currentPoint = targetPoint;
+                                break;
 
-						} else {
+                            case "tell":
 
-							Log.Warning ("Tell was unable to find the indicated storypoint.");
+                                // Control another pointer. Finds a/the(!) pointer on the given storyline and moves it to the given storypoint, marking the pointer for evaluation.
+                                // Progress this pointer, keeping it on the stack
 
-						}
+                                targetPointerName = pointer.currentPoint.task[1];
 
-						targetPointer.SetStatus (POINTERSTATUS.EVALUATE);
+                                targetValue = pointer.currentPoint.task[2];
 
-						Log.Message ("Telling pointer on storyline " + targetPointerName + " to move to point " + targetValue);
+                                targetPointer = GENERAL.GetPointerForStoryline(targetPointerName);
 
-					} else {
-							
-						Log.Warning ("Tell was unable to find the indicated storypointer.");
+                                if (targetPointer != null)
+                                {
 
-					}
+                                    targetPoint = GENERAL.GetStoryPointByID(targetValue);
 
-					moveToNextPoint (pointer);
+                                    if (targetPoint != null)
+                                    {
 
-					break;
+                                        targetPointer.currentPoint = targetPoint;
 
-				case "goto":
-						
-					// Moves this pointer to another point anywhere in the script. Mark for evaluation, keep on stack.
+                                    }
+                                    else
+                                    {
 
-					targetValue = pointer.currentPoint.task [1];
+                                        Log.Warning("Tell was unable to find the indicated storypoint.");
 
-					targetPoint = GENERAL.GetStoryPointByID (targetValue);
+                                    }
 
-					if (targetPoint != null) {
+                                    targetPointer.SetStatus(POINTERSTATUS.EVALUATE);
 
-						pointer.currentPoint = targetPoint;
+                                    Log.Message("Telling pointer on storyline " + targetPointerName + " to move to point " + targetValue);
 
-						Log.Message ("Go to point " + targetValue);
+                                }
+                                else
+                                {
 
-					} else {
-							
-						Log.Warning ("Goto point not found.");
+                                    Log.Warning("Tell was unable to find the indicated storypointer.");
 
-					}
+                                }
 
-					pointer.SetStatus (POINTERSTATUS.EVALUATE);
+                                moveToNextPoint(pointer);
 
-					break;
+                                break;
 
-				case "start":
-						
-					// Start a new pointer on the given storypoint.
-					// Create a new pointer, add it to the list of pointers and add it to the stack.
-					// Progress the current pointer, keeping it on the stack.
+                            case "goto":
 
-					targetPointerName = pointer.currentPoint.task [1];
+                                // Moves this pointer to another point anywhere in the script. Mark for evaluation, keep on stack.
 
-					if (GENERAL.GetPointerForStoryline (targetPointerName) == null) {
-														
-						Log.Message ("Starting new pointer for storypoint: " + targetPointerName);
+                                targetValue = pointer.currentPoint.task[1];
 
-						newPointer = new StoryPointer (targetPointerName, pointer.scope);
-						pointerStack.Add (newPointer); 
+                                targetPoint = GENERAL.GetStoryPointByID(targetValue);
 
-					} else {
+                                if (targetPoint != null)
+                                {
 
-						Log.Message ("Storyline already active for storypoint " + targetPointerName);
-					}
+                                    pointer.currentPoint = targetPoint;
 
-					moveToNextPoint (pointer);
+                                    Log.Message("Go to point " + targetValue);
 
-					break;
+                                }
+                                else
+                                {
 
-				case "stop":
-						
-					// Stop another storypointer by storyline name, or all other storylines with 'all'.
-													
-					targetPointerName = pointer.currentPoint.task [1];
+                                    Log.Warning("Goto point not found.");
 
-					if (targetPointerName == "all") {
+                                }
 
-						foreach (StoryPointer stp in GENERAL.ALLPOINTERS) {
+                                pointer.SetStatus(POINTERSTATUS.EVALUATE);
 
-							if (stp != pointer) {
-									
-								Log.Message ("Stopping pointer " + stp.currentPoint.storyLineName);
+                                break;
 
-								stp.Kill ();
+                            case "start":
 
-								if (GENERAL.ALLTASKS.Remove (stp.currentTask)) {
+                                // Start a new pointer on the given storypoint.
+                                // Create a new pointer, add it to the list of pointers and add it to the stack.
+                                // Progress the current pointer, keeping it on the stack.
 
-									Log.Message ("Removing task " + stp.currentTask.description);
+                                targetPointerName = pointer.currentPoint.task[1];
 
-								} else {
+                                if (GENERAL.GetPointerForStoryline(targetPointerName) == null)
+                                {
 
-									Log.Warning ("Failed removing task " + stp.currentTask.description);
+                                    Log.Message("Starting new pointer for storypoint: " + targetPointerName);
 
-								}
+                                    newPointer = new StoryPointer(targetPointerName, pointer.scope);
+                                    pointerStack.Add(newPointer);
 
-							}
+                                }
+                                else
+                                {
 
-						}
+                                    Log.Message("Storyline already active for storypoint " + targetPointerName);
+                                }
 
-						// Remove all pointers from stack, re-adding the one we're on.
+                                moveToNextPoint(pointer);
 
-						pointerStack.Clear ();
-						pointerStack.Add (pointer);
+                                break;
 
-					} else {
+                            case "stop":
 
-						// Stop a single storypointer on given storyline.
+                                // Stop another storypointer by storyline name, or all other storylines with 'all'.
 
-						targetPointer = GENERAL.GetPointerForStoryline (targetPointerName);
+                                targetPointerName = pointer.currentPoint.task[1];
 
-						if (targetPointer != null) {
-												
-							Log.Message ("Stopping pointer " + targetPointer.currentPoint.storyLineName);
+                                if (targetPointerName == "all")
+                                {
 
-						pointerStack.Remove (targetPointer);
-							targetPointer.Kill ();
+                                    foreach (StoryPointer stp in GENERAL.ALLPOINTERS)
+                                    {
 
-							if (GENERAL.ALLTASKS.Remove (targetPointer.currentTask)) {
-								
-								Log.Message ("Removing task " + targetPointer.currentTask.description);
+                                        if (stp != pointer)
+                                        {
 
-							} else {
-								
-								Log.Warning ("Failed removing task " + targetPointer.currentTask.description);
+                                            Log.Message("Stopping pointer " + stp.currentPoint.storyLineName);
 
-							}
+                                            stp.Kill();
 
+                                            if (GENERAL.ALLTASKS.Remove(stp.currentTask))
+                                            {
 
-						} else {
+                                                Log.Message("Removing task " + stp.currentTask.description);
 
-							Log.Message ("No pointer found for " + targetPointerName);
-							
-						}
+                                            }
+                                            else
+                                            {
 
-					}
-										
-					moveToNextPoint (pointer);
+                                                Log.Warning("Failed removing task " + stp.currentTask.description);
 
-					break;
+                                            }
 
-				default:
-					
-					break;
+                                        }
 
-				}
+                                    }
 
-				break;
+                                    // Remove all pointers from stack, re-adding the one we're on.
 
+                                    pointerStack.Clear();
+                                    pointerStack.Add(pointer);
 
-			case TASKTYPE.END:
+                                }
+                                else
+                                {
 
-				// Ends the storyline, kills the pointer.
+                                    // Stop a single storypointer on given storyline.
 
-				checkForCallBack (pointer);
+                                    targetPointer = GENERAL.GetPointerForStoryline(targetPointerName);
 
-				if (pointer.currentTask != null && pointer.currentTask.getStatus () != TASKSTATUS.COMPLETE) {
-					Log.Warning ("Encountered end of storyline, but current task didn't complete?");
+                                    if (targetPointer != null)
+                                    {
 
-				}
+                                        Log.Message("Stopping pointer " + targetPointer.currentPoint.storyLineName);
 
-				pointer.Kill ();
-				pointerStack.RemoveAt (0);
+                                        pointerStack.Remove(targetPointer);
+                                        targetPointer.Kill();
 
-				break;
+                                        if (GENERAL.ALLTASKS.Remove(targetPointer.currentTask))
+                                        {
 
-			case TASKTYPE.BASIC:
-//			case TASKTYPE.END:
-									
-				if (pointer.GetStatus () == POINTERSTATUS.EVALUATE) {
+                                            Log.Message("Removing task " + targetPointer.currentTask.description);
 
-					// A normal task to be executed. Assistant director will generate task.
+                                        }
+                                        else
+                                        {
 
-					Log.Message ("Task to be executed: " + pointer.currentPoint.task [0]);
+                                            Log.Warning("Failed removing task " + targetPointer.currentTask.description);
 
-					pointer.SetStatus (POINTERSTATUS.NEWTASK);
+                                        }
 
-					pointerStack.RemoveAt (0);
 
-				}
+                                    }
+                                    else
+                                    {
 
-				if (pointer.GetStatus () == POINTERSTATUS.TASKUPDATED) {
+                                        Log.Message("No pointer found for " + targetPointerName);
 
-					// Something has happened in the task that we need to evaluate.
-						
-					if (pointer.currentTask.getStatus () == TASKSTATUS.COMPLETE) {
+                                    }
 
-						// Task was completed. Check if there's a callback before moving on.
+                                }
 
-						checkForCallBack (pointer);
+                                moveToNextPoint(pointer);
 
-						// Task was completed, progress to the next point.
+                                break;
 
-						Log.Message ("task completed: " + pointer.currentTask.description);
+                            default:
 
-						pointer.SetStatus (POINTERSTATUS.EVALUATE);
+                                break;
 
-						moveToNextPoint (pointer);
+                        }
 
-					}
+                        break;
 
-					if (pointer.currentTask.getStatus () == TASKSTATUS.ACTIVE) {
 
-						// See if there's a callback.
+                    case TASKTYPE.END:
 
-						checkForCallBack (pointer);
+                        // Ends the storyline, kills the pointer.
 
-						// Return pointerstatus to paused and stop evaluating it for now.
+                        checkForCallBack(pointer);
 
-//						Debug.LogWarning (me + "Pointerstatus says taskupdated, but taskstatus for task " + pointer.currentTask.description + " is active.");
+                        if (pointer.currentTask != null && pointer.currentTask.getStatus() != TASKSTATUS.COMPLETE)
+                        {
+                            Log.Warning("Encountered end of storyline, but current task didn't complete?");
 
-						pointer.SetStatus (POINTERSTATUS.PAUSED);
+                        }
 
-						pointerStack.RemoveAt (0);
+                        pointer.Kill();
+                        pointerStack.RemoveAt(0);
 
-					}
+                        break;
 
-				}
+                    case TASKTYPE.BASIC:
+                        //			case TASKTYPE.END:
 
-				break;
+                        if (pointer.GetStatus() == POINTERSTATUS.EVALUATE)
+                        {
 
-			default:
+                            // A normal task to be executed. Assistant director will generate task.
 
-				// This shouldn't occur.
+                            Log.Message("Task to be executed: " + pointer.currentPoint.task[0]);
 
-				Log.Warning ("Error: unkown storypoint type. ");
+                            pointer.SetStatus(POINTERSTATUS.NEWTASK);
 
-				pointerStack.RemoveAt (0);
+                            pointerStack.RemoveAt(0);
 
-				break;
+                        }
 
-			}
+                        if (pointer.GetStatus() == POINTERSTATUS.TASKUPDATED)
+                        {
 
-		} 
+                            // Something has happened in the task that we need to evaluate.
 
-	}
+                            if (pointer.currentTask.getStatus() == TASKSTATUS.COMPLETE)
+                            {
 
-	bool checkForCallBack (StoryPointer pointer)
-	{
+                                // Task was completed. Check if there's a callback before moving on.
 
-		// checks and trigger callback on the current task for given pointer. does not touch the pointer itself.
+                                checkForCallBack(pointer);
 
+                                // Task was completed, progress to the next point.
 
-		if (pointer.currentTask == null)
-			return false;
+                                Log.Message("task completed: " + pointer.currentTask.description);
 
-		string callBackValue = pointer.currentTask.getCallBack ();
+                                pointer.SetStatus(POINTERSTATUS.EVALUATE);
 
+                                moveToNextPoint(pointer);
 
-		if (callBackValue == "")
-			return false;
+                            }
 
-		pointer.currentTask.clearCallBack (); // clear value
+                            if (pointer.currentTask.getStatus() == TASKSTATUS.ACTIVE)
+                            {
 
-		// A callback is equivalent to 'start name', launching a new storypointer on the given point.
+                                // See if there's a callback.
 
-		if (GENERAL.GetPointerForStoryline (pointer.currentTask.getCallBack ()) == null) {
+                                checkForCallBack(pointer);
 
-			Log.Message ("New callback storyline: " + callBackValue);
+                                // Return pointerstatus to paused and stop evaluating it for now.
 
-			StoryPointer newStoryPointer = new StoryPointer (callBackValue, pointer.scope);
-			newStoryPointer.modified = true;
-			pointerStack.Add (newStoryPointer);
-			newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task.
+                                //						Debug.LogWarning (me + "Pointerstatus says taskupdated, but taskstatus for task " + pointer.currentTask.description + " is active.");
 
-		} else {
+                                pointer.SetStatus(POINTERSTATUS.PAUSED);
 
-			Log.Message ("Callback storyline already started: " + callBackValue);
-		}
+                                pointerStack.RemoveAt(0);
 
-		return true;
+                            }
 
-	}
+                        }
 
+                        break;
 
-	public void loadScript (string fileName)
-	{
-		Script theScript = new Script (fileName);
+                    default:
 
-		while (!theScript.isReady) {
+                        // This shouldn't occur.
 
-		}
+                        Log.Warning("Error: unkown storypoint type. ");
 
-		status = DIRECTORSTATUS.READY;
+                        pointerStack.RemoveAt(0);
 
-	}
+                        break;
 
-	public void beginStoryLine (string beginName)
-	{
+                }
 
-		new StoryPointer (beginName, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
+            }
 
-	}
+        }
 
-	void moveToNextPoint (StoryPointer thePointer)
-	{
-		if (!thePointer.ProgressToNextPoint ()) {
-			
-			Log.Warning ("Error: killing pointer ");
+        bool checkForCallBack(StoryPointer pointer)
+        {
 
-			thePointer.SetStatus (POINTERSTATUS.KILLED);
+            // checks and trigger callback on the current task for given pointer. does not touch the pointer itself.
 
-			pointerStack.RemoveAt (0);
 
-		}
-	}
+            if (pointer.currentTask == null)
+                return false;
 
-	float getValue (string[] instructions, string var)
-	{
-		string r = "0";
-		Char delimiter = '=';
-		foreach (string e in instructions) {
+            string callBackValue = pointer.currentTask.getCallBack();
 
-			string[] splitElement = e.Split (delimiter);
-			if (splitElement [0] == var && splitElement.Length > 1) {
-				r = splitElement [1];
-			}
 
-		}
+            if (callBackValue == "")
+                return false;
 
-		return float.Parse (r);
+            pointer.currentTask.clearCallBack(); // clear value
 
-	}
+            // A callback is equivalent to 'start name', launching a new storypointer on the given point.
 
+            if (GENERAL.GetPointerForStoryline(pointer.currentTask.getCallBack()) == null)
+            {
+
+                Log.Message("New callback storyline: " + callBackValue);
+
+                StoryPointer newStoryPointer = new StoryPointer(callBackValue, pointer.scope);
+                newStoryPointer.modified = true;
+                pointerStack.Add(newStoryPointer);
+                newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task.
+
+            }
+            else
+            {
+
+                Log.Message("Callback storyline already started: " + callBackValue);
+            }
+
+            return true;
+
+        }
+
+
+        public void loadScript(string fileName)
+        {
+            Script theScript = new Script(fileName);
+
+            while (!theScript.isReady)
+            {
+
+            }
+
+            status = DIRECTORSTATUS.READY;
+
+        }
+
+        public void beginStoryLine(string beginName)
+        {
+
+            new StoryPointer(beginName, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
+
+        }
+
+        void moveToNextPoint(StoryPointer thePointer)
+        {
+            if (!thePointer.ProgressToNextPoint())
+            {
+
+                Log.Warning("Error: killing pointer ");
+
+                thePointer.SetStatus(POINTERSTATUS.KILLED);
+
+                pointerStack.RemoveAt(0);
+
+            }
+        }
+
+        float getValue(string[] instructions, string var)
+        {
+            string r = "0";
+            Char delimiter = '=';
+            foreach (string e in instructions)
+            {
+
+                string[] splitElement = e.Split(delimiter);
+                if (splitElement[0] == var && splitElement.Length > 1)
+                {
+                    r = splitElement[1];
+                }
+
+            }
+
+            return float.Parse(r);
+
+        }
+
+    }
 }

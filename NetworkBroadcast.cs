@@ -3,110 +3,122 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class NetworkBroadcast : NetworkDiscovery
+
+namespace StoryEngine
 {
-	
-	public string serverAddress, serverMessage;
 
-	string me = "Networkbroadcast";
+    public class NetworkBroadcast : NetworkDiscovery
+    {
 
-	bool resumeClient = false;
-	bool resumeServer = false;
+        public string serverAddress, serverMessage;
 
-	public void ResetMessage ()
-	{
+        string me = "Networkbroadcast";
 
-		serverAddress = "";
-		serverMessage = "";
+        bool resumeClient = false;
+        bool resumeServer = false;
 
-	}
+        public void ResetMessage()
+        {
 
-	public void StartClient ()
-	{
+            serverAddress = "";
+            serverMessage = "";
 
-		Initialize ();
-		ResetMessage (); // just to be sure.
-		StartAsClient ();
+        }
 
-	}
+        public void StartClient()
+        {
 
-	void OnApplicationPause (bool paused)
-	{
+            Initialize();
+            ResetMessage(); // just to be sure.
+            StartAsClient();
 
-		if (paused) {
-			
-			if (isClient) {
+        }
 
-				resumeClient = true;
-				Stop ();
+        void OnApplicationPause(bool paused)
+        {
 
-				Log.Message ("Pausing broadcast client.");
+            if (paused)
+            {
 
-			}
+                if (isClient)
+                {
 
-			if (isServer) {
+                    resumeClient = true;
+                    Stop();
 
-				resumeServer = true;
-				Stop ();
+                    Log.Message("Pausing broadcast client.");
 
-				Log.Message ("Pausing broadcast server.");
+                }
 
-			}
+                if (isServer)
+                {
 
-		} else {
-			
-			if (resumeClient) {
-				
-				resumeClient = false;
-				StartClient ();
+                    resumeServer = true;
+                    Stop();
 
-				Log.Message ("Resuming broadcast client.");
+                    Log.Message("Pausing broadcast server.");
 
-			}
+                }
 
-			if (resumeServer) {
+            }
+            else
+            {
 
-				resumeServer = false;
-				StartServer ();
+                if (resumeClient)
+                {
 
-				Log.Message ("Resuming broadcast server.");
+                    resumeClient = false;
+                    StartClient();
 
-			}
-							
-		}
+                    Log.Message("Resuming broadcast client.");
 
-	}
+                }
 
-	public void StartServer ()
-	{
+                if (resumeServer)
+                {
 
-		Initialize ();
-		ResetMessage (); // just to be sure.
-		StartAsServer ();
+                    resumeServer = false;
+                    StartServer();
 
-	}
+                    Log.Message("Resuming broadcast server.");
 
-	public void Stop ()
-	{
-		
-		StopBroadcast ();
-		ResetMessage ();
+                }
 
-	}
+            }
 
-	public override void OnReceivedBroadcast (string fromAddress, string data)
-	{
+        }
 
-		// Handler to respond to received broadcast message event.
-		// Since our engine is loop based, we just store the info for the loop to pick up on.
+        public void StartServer()
+        {
 
-		Log.Message ("Received broadcast: " + data + " from " + fromAddress);
+            Initialize();
+            ResetMessage(); // just to be sure.
+            StartAsServer();
 
-		serverMessage = data;
-		serverAddress = fromAddress;
+        }
 
-		GENERAL.broadcastServer = fromAddress;
+        public void Stop()
+        {
 
-	}
+            StopBroadcast();
+            ResetMessage();
 
+        }
+
+        public override void OnReceivedBroadcast(string fromAddress, string data)
+        {
+
+            // Handler to respond to received broadcast message event.
+            // Since our engine is loop based, we just store the info for the loop to pick up on.
+
+            Log.Message("Received broadcast: " + data + " from " + fromAddress);
+
+            serverMessage = data;
+            serverAddress = fromAddress;
+
+            GENERAL.broadcastServer = fromAddress;
+
+        }
+
+    }
 }

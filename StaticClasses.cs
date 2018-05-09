@@ -11,230 +11,245 @@ using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 #endif
 
-public enum SCOPE
-{
-	LOCAL,
-	GLOBAL
-
-}
-
-public enum AUTHORITY
-{
-	LOCAL,
-	GLOBAL
-
-}
-
-public class UserCallBack
+namespace StoryEngine
 {
 
-	public bool trigger=false;
-	public  string label="";
-	public  GameObject sender;
+    public enum SCOPE
+    {
+        LOCAL,
+        GLOBAL
 
-	public UserCallBack ()
+    }
 
-	{
-	}
+    public enum AUTHORITY
+    {
+        LOCAL,
+        GLOBAL
 
-}
+    }
 
+    public class UserCallBack
+    {
 
-public static class GENERAL
-{
+        public bool trigger = false;
+        public string label = "";
+        public GameObject sender;
 
-	public static AUTHORITY AUTHORITY=AUTHORITY.LOCAL;
+        public UserCallBack()
 
-	public static float pointerScreenScalar= -0.5f;
-	public static float pointerRectScalar = 0.5f;
+        {
+        }
 
-	public static int SIGNOFFS;
-	public static Dictionary <string,StoryPoint> storyPoints;
-	public static List <StoryPointer> ALLPOINTERS;
-	public static List <StoryTask> ALLTASKS;
-//	public static STORYMODE STORYMODE;
+    }
 
-	public static StoryTask GLOBALS;
 
+    public static class GENERAL
+    {
 
-	public static bool isPauzed=false;
-	public static bool hasFocus=true;
+        public static AUTHORITY AUTHORITY = AUTHORITY.LOCAL;
 
-	public static bool wasConnected = false;
+        public static float pointerScreenScalar = -0.5f;
+        public static float pointerRectScalar = 0.5f;
 
-	public static string broadcastServer,networkServer;
+        public static int SIGNOFFS;
+        public static Dictionary<string, StoryPoint> storyPoints;
+        public static List<StoryPointer> ALLPOINTERS;
+        public static List<StoryTask> ALLTASKS;
+        //	public static STORYMODE STORYMODE;
 
-	public static string me = "General";
+        public static StoryTask GLOBALS;
 
-	public static StoryPoint GetStoryPointByID (string pointID)
-	{
-		StoryPoint r;
 
-		if (!storyPoints.TryGetValue (pointID, out r)) {
-			Log.Error ("Storypoint " + pointID + " not found.");
-		}
+        public static bool isPauzed = false;
+        public static bool hasFocus = true;
 
-		return r;
+        public static bool wasConnected = false;
 
-	}
+        public static string broadcastServer, networkServer;
 
-	static void flagPointerOverflow ()
-	{
+        public static string me = "General";
 
-		if (ALLPOINTERS.Count > 10) {
-			Log.Warning ("Potential pointer overflow.");
-		}
+        public static StoryPoint GetStoryPointByID(string pointID)
+        {
+            StoryPoint r;
 
-	}
+            if (!storyPoints.TryGetValue(pointID, out r))
+            {
+                Log.Error("Storypoint " + pointID + " not found.");
+            }
 
-	static void flagTaskOverflow ()
-	{
+            return r;
 
-		if (ALLTASKS.Count > 10) {
-			Log.Warning ("Potential task overflow.");
+        }
 
+        static void flagPointerOverflow()
+        {
 
-			//			foreach (Task t in ALLTASKS) {
-			//				Debug.Log (t.pointer.ID + " " + t.description);
-			//
-			//			}
+            if (ALLPOINTERS.Count > 10)
+            {
+                Log.Warning("Potential pointer overflow.");
+            }
 
-		}
+        }
 
-	}
+        static void flagTaskOverflow()
+        {
 
-	public static StoryPointer GetStorylinePointerForPointID (string pointID)
-	{
+            if (ALLTASKS.Count > 10)
+            {
+                Log.Warning("Potential task overflow.");
 
-		string storyline = GetStoryPointByID (pointID).storyLineName;
-			
-		flagPointerOverflow ();
 
-		StoryPointer r = null;
+                //			foreach (Task t in ALLTASKS) {
+                //				Debug.Log (t.pointer.ID + " " + t.description);
+                //
+                //			}
 
-		foreach (StoryPointer p in GENERAL.ALLPOINTERS) {
+            }
 
-			if (p.currentPoint.storyLineName == storyline) {
-				r = p;
-				break;
-			}
+        }
 
-		}
+        public static StoryPointer GetStorylinePointerForPointID(string pointID)
+        {
 
-		return r;
-	}
+            string storyline = GetStoryPointByID(pointID).storyLineName;
 
+            flagPointerOverflow();
 
+            StoryPointer r = null;
 
-	public static StoryPointer GetPointerForStoryline (string theStoryLine)
-	{
+            foreach (StoryPointer p in GENERAL.ALLPOINTERS)
+            {
 
-		flagPointerOverflow ();
+                if (p.currentPoint.storyLineName == storyline)
+                {
+                    r = p;
+                    break;
+                }
 
-		StoryPointer r = null;
+            }
 
-		foreach (StoryPointer p in GENERAL.ALLPOINTERS) {
+            return r;
+        }
 
-			if (p.currentPoint.storyLineName == theStoryLine) {
-				r = p;
-				break;
-			}
 
-		}
 
-		return r;
-	}
+        public static StoryPointer GetPointerForStoryline(string theStoryLine)
+        {
 
-	public static StoryPointer GetPointerForPoint (string pointID)
-	{
+            flagPointerOverflow();
 
-		flagPointerOverflow ();
+            StoryPointer r = null;
 
-		for (int i = 0; i < ALLPOINTERS.Count; i++) {
+            foreach (StoryPointer p in GENERAL.ALLPOINTERS)
+            {
 
-			if (ALLPOINTERS [i].currentPoint.ID.Equals( pointID)) {
-				
-				return ALLPOINTERS [i];
-			}
+                if (p.currentPoint.storyLineName == theStoryLine)
+                {
+                    r = p;
+                    break;
+                }
 
-		}
+            }
 
-		return null;
+            return r;
+        }
 
-	}
+        public static StoryPointer GetPointerForPoint(string pointID)
+        {
 
-	public static StoryTask GetTaskForPoint (string pointID)
-	{
+            flagPointerOverflow();
 
-		flagTaskOverflow ();
+            for (int i = 0; i < ALLPOINTERS.Count; i++)
+            {
 
-		for (int t = 0; t < ALLTASKS.Count; t++) {
+                if (ALLPOINTERS[i].currentPoint.ID.Equals(pointID))
+                {
 
-			if (ALLTASKS [t].pointID == pointID) {
+                    return ALLPOINTERS[i];
+                }
 
-				return ALLTASKS [t];
+            }
 
-			}
+            return null;
 
-		}
+        }
 
-		return null;
+        public static StoryTask GetTaskForPoint(string pointID)
+        {
 
-	}
+            flagTaskOverflow();
 
-	public static int CONNECTIONINDEX;
+            for (int t = 0; t < ALLTASKS.Count; t++)
+            {
 
-	static int NEWCONNECTION;
+                if (ALLTASKS[t].pointID == pointID)
+                {
 
+                    return ALLTASKS[t];
 
-	public static void SETNEWCONNECTION (int value)
-	{
-		NEWCONNECTION = value;
+                }
 
-	}
+            }
 
-	public static int GETNEWCONNECTION ()
-	{
+            return null;
 
-		int r = NEWCONNECTION;
-		NEWCONNECTION = -1;
-		return r;
+        }
 
-	}
+        public static int CONNECTIONINDEX;
 
-}
+        static int NEWCONNECTION;
 
-public static class UUID
-{
-	static int uid { get; set; }
 
-	public static string identity;
+        public static void SETNEWCONNECTION(int value)
+        {
+            NEWCONNECTION = value;
 
-	public static string getGlobalID ()
-	{
+        }
 
-		uid++;
+        public static int GETNEWCONNECTION()
+        {
 
-		return identity + uid.ToString ("x8");
+            int r = NEWCONNECTION;
+            NEWCONNECTION = -1;
+            return r;
 
-	}
+        }
 
-	public static string getID ()
-	{
+    }
 
-		uid++;
+    public static class UUID
+    {
+        static int uid { get; set; }
 
-		return uid.ToString ("x8");
+        public static string identity;
 
-	}
+        public static string getGlobalID()
+        {
 
-	public static void setIdentity ()
-	{
+            uid++;
 
-		string stamp = System.DateTime.UtcNow.ToString ("yyyyMMddhhmmss");
+            return identity + uid.ToString("x8");
 
-		Int64 num = Int64.Parse (stamp);
-		identity = num.ToString ("x8");
+        }
 
-	}
+        public static string getID()
+        {
+
+            uid++;
+
+            return uid.ToString("x8");
+
+        }
+
+        public static void setIdentity()
+        {
+
+            string stamp = System.DateTime.UtcNow.ToString("yyyyMMddhhmmss");
+
+            Int64 num = Int64.Parse(stamp);
+            identity = num.ToString("x8");
+
+        }
+    }
 }

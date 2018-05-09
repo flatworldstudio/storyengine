@@ -2,109 +2,127 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public delegate bool UserTaskHandler (StoryTask theTask);
-	
-public class UserController : MonoBehaviour
+namespace StoryEngine
 {
-	
-	GameObject StoryEngineObject;
-	UserTaskHandler userTaskHandler;
 
-	AssitantDirector ad;
-	bool handlerWarning = false;
+    public delegate bool UserTaskHandler(StoryTask theTask);
 
-	public List <StoryTask> taskList;
+    public class UserController : MonoBehaviour
+    {
 
-	string me = "User controller";
+        GameObject StoryEngineObject;
+        UserTaskHandler userTaskHandler;
 
-	void Start ()
-	{
-		Log.Message ("Starting...");
+        AssitantDirector ad;
+        bool handlerWarning = false;
 
-		taskList = new List <StoryTask> ();
+        public List<StoryTask> taskList;
 
-		StoryEngineObject = GameObject.Find ("StoryEngineObject");
+        string me = "User controller";
 
-		if (StoryEngineObject == null) {
+        void Start()
+        {
+            Log.Message("Starting...");
 
-			Log.Warning ("StoryEngineObject not found.");
+            taskList = new List<StoryTask>();
 
-		} else {
-			
-			ad = StoryEngineObject.GetComponent <AssitantDirector> ();
-			ad.newTasksEvent += new NewTasksEvent (newTasksHandler); // registrer for task events
+            StoryEngineObject = GameObject.Find("StoryEngineObject");
 
-		}
+            if (StoryEngineObject == null)
+            {
 
-	}
+                Log.Warning("StoryEngineObject not found.");
 
-	public void addTaskHandler (UserTaskHandler theHandler)
-	{
-		userTaskHandler = theHandler;
-		Log.Message ("Handler added");
-	}
+            }
+            else
+            {
+
+                ad = StoryEngineObject.GetComponent<AssitantDirector>();
+                ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+
+            }
+
+        }
+
+        public void addTaskHandler(UserTaskHandler theHandler)
+        {
+            userTaskHandler = theHandler;
+            Log.Message("Handler added");
+        }
 
 
-	void Update ()
-	{
-		
-		int t = 0;
+        void Update()
+        {
 
-		while (t < taskList.Count) {
+            int t = 0;
 
-			StoryTask task = taskList [t];
+            while (t < taskList.Count)
+            {
 
-//			if (task.pointer.getStatus () == POINTERSTATUS.KILLED && task.description != "end") {
+                StoryTask task = taskList[t];
 
-			if (!GENERAL.ALLTASKS.Exists(at => at==task )) {
+                //			if (task.pointer.getStatus () == POINTERSTATUS.KILLED && task.description != "end") {
 
-				Log.Message ("Removing task:" + task.description);
+                if (!GENERAL.ALLTASKS.Exists(at => at == task))
+                {
 
-				taskList.RemoveAt (t);
+                    Log.Message("Removing task:" + task.description);
 
-			} else {
+                    taskList.RemoveAt(t);
 
-				if (userTaskHandler != null) {
+                }
+                else
+                {
 
-					if (userTaskHandler (task)) {
+                    if (userTaskHandler != null)
+                    {
 
-						task.signOff (me);
-						taskList.RemoveAt (t);
+                        if (userTaskHandler(task))
+                        {
 
-					} else {
-						
-						t++;
+                            task.signOff(me);
+                            taskList.RemoveAt(t);
 
-					}
+                        }
+                        else
+                        {
 
-				} else {
-					
-					if (!handlerWarning) {
-						Debug.LogWarning (me + "No handler available, blocking task while waiting.");
-						handlerWarning = true;
-						t++;
-					} 
+                            t++;
 
-				}
+                        }
 
-			}
+                    }
+                    else
+                    {
 
-		}
+                        if (!handlerWarning)
+                        {
+                            Debug.LogWarning(me + "No handler available, blocking task while waiting.");
+                            handlerWarning = true;
+                            t++;
+                        }
 
-	}
+                    }
 
-	void newTasksHandler (object sender, TaskArgs e)
-	{
-		addTasks (e.theTasks);
-	}
+                }
 
-	public void addTasks (List<StoryTask> theTasks)
-	{
-		taskList.AddRange (theTasks);
-	}
+            }
+
+        }
+
+        void newTasksHandler(object sender, TaskArgs e)
+        {
+            addTasks(e.theTasks);
+        }
+
+        public void addTasks(List<StoryTask> theTasks)
+        {
+            taskList.AddRange(theTasks);
+        }
+
+    }
+
+
+
 
 }
-
-
-
-

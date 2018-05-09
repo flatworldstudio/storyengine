@@ -4,373 +4,411 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-
-public class UxController
+namespace StoryEngine
 {
 
+    public class UxController
+    {
 
-	GameObject emptyObject, TPObject;
 
+        GameObject emptyObject, TPObject;
 
-	Camera targetCamera;
-	// TO DO !!!!
-	GraphicRaycaster targetRaycaster;
-	// TO DO !!!!!
 
-	string me = "Uxcontroller";
+        Camera targetCamera;
+        // TO DO !!!!
+        GraphicRaycaster targetRaycaster;
+        // TO DO !!!!!
 
+        string me = "Uxcontroller";
 
-	UiEvent activeUiEvent, emptyUiEvent;
 
+        UiEvent activeUiEvent, emptyUiEvent;
 
-	UiConstraint emptyConstraint;
 
+        UiConstraint emptyConstraint;
 
-	int cycle = 0;
 
-	List <UiEvent> uiEventStack;
+        int cycle = 0;
 
+        List<UiEvent> uiEventStack;
 
 
-	public UxController ()
-	{
-		initialise ();
-	}
 
-	// 	high level
+        public UxController()
+        {
+            initialise();
+        }
 
+        // 	high level
 
-	void initialise ()
-	{
-		
-		activeUiEvent = new UiEvent ();
-		uiEventStack = new List <UiEvent> ();
-		uiEventStack.Add (activeUiEvent);
 
-		emptyUiEvent = new UiEvent ();
+        void initialise()
+        {
 
-		emptyConstraint = new UiConstraint ();
+            activeUiEvent = new UiEvent();
+            uiEventStack = new List<UiEvent>();
+            uiEventStack.Add(activeUiEvent);
 
-	}
-//	public void setSpringTarget (string target,UiConstraint constraint, int index){
-		
-	public void setSpringTarget (UiButton button, int index){
+            emptyUiEvent = new UiEvent();
 
-		// Moves an interface segment (dragtarget, so a parent object) to a given spring. 
-// it uses a button as a hook. checks if any event is targeting the same dragtarget to prevent interference.
-		// If there is we just take over. Could delete and replace it as well...
+            emptyConstraint = new UiConstraint();
 
-		// Warns if there's more than 1 event: that shouldn't happen...
+        }
+        //	public void setSpringTarget (string target,UiConstraint constraint, int index){
 
+        public void setSpringTarget(UiButton button, int index)
+        {
 
+            // Moves an interface segment (dragtarget, so a parent object) to a given spring. 
+            // it uses a button as a hook. checks if any event is targeting the same dragtarget to prevent interference.
+            // If there is we just take over. Could delete and replace it as well...
 
-		int e = 0;
-				
-		foreach (UiEvent uie in uiEventStack) {
+            // Warns if there's more than 1 event: that shouldn't happen...
 
-			if (uie.targetButton != null) {
-				
-				if (uie.targetButton.dragTarget == button.dragTarget) {
 
-					e++;
-					uie.targetButton = button;
-						uie.action = UIACTION.SINGLEDRAG;
-					uie.target2D = button.gameObject;
 
-					uie.isSpringing = true;
-					uie.springIndex = index;
+            int e = 0;
 
-				}
+            foreach (UiEvent uie in uiEventStack)
+            {
 
-			}
+                if (uie.targetButton != null)
+                {
 
-		}
+                    if (uie.targetButton.dragTarget == button.dragTarget)
+                    {
 
-		if (e == 0) {
-			
-			Log.Message ( "No ui event found, adding a temp one");
+                        e++;
+                        uie.targetButton = button;
+                        uie.action = UIACTION.SINGLEDRAG;
+                        uie.target2D = button.gameObject;
 
-			UiEvent springEvent = new UiEvent ();
+                        uie.isSpringing = true;
+                        uie.springIndex = index;
 
-			springEvent.targetButton = button;
-			springEvent.action = UIACTION.SINGLEDRAG;
-			springEvent.target2D = button.gameObject;
-			springEvent.isSpringing = true;
-			springEvent.springIndex = index;
+                    }
 
-			uiEventStack.Add (springEvent);
+                }
 
-		}
+            }
 
-		if (e > 1) {
-			
-			Log.Warning ("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ");
+            if (e == 0)
+            {
 
-		}
+                Log.Message("No ui event found, adding a temp one");
 
-	}
+                UiEvent springEvent = new UiEvent();
 
-	bool warnOnce =false;
+                springEvent.targetButton = button;
+                springEvent.action = UIACTION.SINGLEDRAG;
+                springEvent.target2D = button.gameObject;
+                springEvent.isSpringing = true;
+                springEvent.springIndex = index;
 
-	public string update (UxInterface activeInterface)
-	{
+                uiEventStack.Add(springEvent);
 
-		// legacy method returned only a string.
-		if (!warnOnce) {
-			warnOnce = true;
-			Log.Warning ("Update method updated, use updateUx instead.");
-		}
+            }
 
-		return updateUx (activeInterface).label;
+            if (e > 1)
+            {
 
+                Log.Warning("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ");
 
-	}
+            }
 
+        }
 
-	public UserCallBack updateUx (UxInterface activeInterface)
+        bool warnOnce = false;
 
-	{
-		// log current stack count to track changes.
+        public string update(UxInterface activeInterface)
+        {
 
-		int stackSize = uiEventStack.Count;
+            // legacy method returned only a string.
+            if (!warnOnce)
+            {
+                warnOnce = true;
+                Log.Warning("Update method updated, use updateUx instead.");
+            }
 
-		// apply this frame's user interaction to the 'active' ui event.
+            return updateUx(activeInterface).label;
 
-		applyUserInteraction (activeUiEvent, activeInterface);
 
-		// if a user action started, perform additional handling before processing. (If it ended we process first, then perform additional handling, see below).
+        }
 
-		if (activeUiEvent.touch == UITOUCH.BEGAN) {
-			
-			// a user action just began. find any objects and buttons the event is targeting. 
 
-			setUiTargetObjects (activeUiEvent, activeInterface);
+        public UserCallBack updateUx(UxInterface activeInterface)
 
-			// if this new action is targeting the same object or button as an event already on the stack, the old event should be removed.
+        {
+            // log current stack count to track changes.
 
-			int e = uiEventStack.Count - 1;
+            int stackSize = uiEventStack.Count;
 
-			while (e >= 0) {
+            // apply this frame's user interaction to the 'active' ui event.
 
-				UiEvent checkEvent = uiEventStack [e];
+            applyUserInteraction(activeUiEvent, activeInterface);
 
-				if (checkEvent != activeUiEvent) {
-					
-					bool removeThis = false;
+            // if a user action started, perform additional handling before processing. (If it ended we process first, then perform additional handling, see below).
 
-					if (activeUiEvent.targetButton != null) {
+            if (activeUiEvent.touch == UITOUCH.BEGAN)
+            {
 
-						// if same interface target, remove old.
+                // a user action just began. find any objects and buttons the event is targeting. 
 
-						if (activeUiEvent.targetButton.dragTarget == checkEvent.targetButton.dragTarget) {
-							
-							removeThis = true;
-						}
+                setUiTargetObjects(activeUiEvent, activeInterface);
 
-					} else if (activeUiEvent.target3D != null) {
+                // if this new action is targeting the same object or button as an event already on the stack, the old event should be removed.
 
-						// if same 3d target, remove old.
+                int e = uiEventStack.Count - 1;
 
-						if (checkEvent.target3D == checkEvent.target3D) {
-							
-							removeThis = true;
-						}
-													
+                while (e >= 0)
+                {
 
-					} else {
+                    UiEvent checkEvent = uiEventStack[e];
 
-						// if both have no targets at all, remove old. 
+                    if (checkEvent != activeUiEvent)
+                    {
 
-						if (checkEvent.targetButton == null && checkEvent.target2D == null && checkEvent.target3D == null) {
+                        bool removeThis = false;
 
-							removeThis = true;
+                        if (activeUiEvent.targetButton != null)
+                        {
 
-						}
+                            // if same interface target, remove old.
 
-					}
-					if (removeThis) {
+                            if (activeUiEvent.targetButton.dragTarget == checkEvent.targetButton.dragTarget)
+                            {
 
-						uiEventStack.RemoveAt (e);
+                                removeThis = true;
+                            }
 
-					}
+                        }
+                        else if (activeUiEvent.target3D != null)
+                        {
 
-				}
+                            // if same 3d target, remove old.
 
-				e--;
-			}
+                            if (checkEvent.target3D == checkEvent.target3D)
+                            {
 
-		}
+                                removeThis = true;
+                            }
 
-		// now handle the stack of ui events. this way, events can play out (inertia, springing) while the user starts new interaction.
 
-//		string callbackResult = ""; //
+                        }
+                        else
+                        {
 
-		// create empty callback object
+                            // if both have no targets at all, remove old. 
 
-		UserCallBack callBack = new UserCallBack (); 
+                            if (checkEvent.targetButton == null && checkEvent.target2D == null && checkEvent.target3D == null)
+                            {
 
+                                removeThis = true;
 
-		int i = 0;
+                            }
 
-		while (i < uiEventStack.Count) {
+                        }
+                        if (removeThis)
+                        {
 
-			UiEvent uiEvent = uiEventStack [i];
+                            uiEventStack.RemoveAt(e);
 
-//			Log.Message ( "handling event stack of size " + uiEventStack.Count);
+                        }
 
-			processUiEvent (uiEvent, activeInterface);
+                    }
 
-			// If an old event is no longer inert or springing, remove it.
+                    e--;
+                }
 
-			if (uiEvent != activeUiEvent && uiEvent.isInert == false && uiEvent.isSpringing == false) {
-					
-				uiEventStack.RemoveAt (i);
+            }
 
-				i--;
+            // now handle the stack of ui events. this way, events can play out (inertia, springing) while the user starts new interaction.
 
-			}
+            //		string callbackResult = ""; //
 
-			i++;
+            // create empty callback object
 
-		}
+            UserCallBack callBack = new UserCallBack();
 
-		if (activeUiEvent.callback != "") {
-		
-			callBack.label = activeUiEvent.callback;
-			callBack.sender = activeUiEvent.target2D;
-			callBack.trigger = true;
 
-//			callbackResult = activeUiEvent.callback;
+            int i = 0;
 
-//			Debug.Log ("callbackResult: " + callbackResult);
+            while (i < uiEventStack.Count)
+            {
 
-		}
+                UiEvent uiEvent = uiEventStack[i];
 
-		if (activeUiEvent.touch == UITOUCH.ENDED) {
+                //			Log.Message ( "handling event stack of size " + uiEventStack.Count);
 
-			// the active event just ended. set inert and springing to true.
+                processUiEvent(uiEvent, activeInterface);
 
-			activeUiEvent.touch = UITOUCH.NONE;
-			activeUiEvent.isInert = true;
+                // If an old event is no longer inert or springing, remove it.
 
+                if (uiEvent != activeUiEvent && uiEvent.isInert == false && uiEvent.isSpringing == false)
+                {
 
-			if (activeUiEvent.targetButton != null) {
-				
-				activeUiEvent.isSpringing = true;
+                    uiEventStack.RemoveAt(i);
 
-			}
+                    i--;
 
-			if (activeUiEvent.action == UIACTION.TAP) {
+                }
 
-				// tap must only be executed once, after that it becomes an inert singledrag event.
+                i++;
 
-				activeUiEvent.action = UIACTION.SINGLEDRAG;
+            }
 
-			}
+            if (activeUiEvent.callback != "")
+            {
 
-			UiEvent newEvent = new UiEvent ();
-			uiEventStack.Add (newEvent);
-			activeUiEvent = newEvent;
+                callBack.label = activeUiEvent.callback;
+                callBack.sender = activeUiEvent.target2D;
+                callBack.trigger = true;
 
-		}
+                //			callbackResult = activeUiEvent.callback;
 
-		int stackSizeNew = uiEventStack.Count;
+                //			Debug.Log ("callbackResult: " + callbackResult);
 
-		if (stackSize != stackSizeNew) {
-			
-//			Log.Message ( cycle + " Event stack size changed: " + stackSizeNew);
+            }
 
-		}
+            if (activeUiEvent.touch == UITOUCH.ENDED)
+            {
 
-		if (stackSizeNew > 10)
-			Log.Warning ( "Ui event stack exceeds 10, potential overflow.");	
+                // the active event just ended. set inert and springing to true.
 
-		return callBack;
+                activeUiEvent.touch = UITOUCH.NONE;
+                activeUiEvent.isInert = true;
 
-	}
 
-	// lower level
+                if (activeUiEvent.targetButton != null)
+                {
 
-	void applyUserInteraction (UiEvent ui, UxInterface theUiState)
-	{
+                    activeUiEvent.isSpringing = true;
 
+                }
 
-		cycle++;
-		cycle = cycle % 1000;
+                if (activeUiEvent.action == UIACTION.TAP)
+                {
 
-		// check user mouse/touch interaction and populate this passed-in UIEVENT accordingly
+                    // tap must only be executed once, after that it becomes an inert singledrag event.
 
-		UiEvent storeUi = ui.clone ();
+                    activeUiEvent.action = UIACTION.SINGLEDRAG;
 
-//		ui.action = UIACTION.VOID;
-		ui.touch = UITOUCH.NONE;
+                }
 
-		ui.dd = 0;
+                UiEvent newEvent = new UiEvent();
+                uiEventStack.Add(newEvent);
+                activeUiEvent = newEvent;
 
+            }
 
-		#if UNITY_EDITOR || UNITY_STANDALONE
+            int stackSizeNew = uiEventStack.Count;
 
-//		if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer) {
+            if (stackSize != stackSizeNew)
+            {
 
-			// if we're on macos .... or windows?
+                //			Log.Message ( cycle + " Event stack size changed: " + stackSizeNew);
 
-			if (Input.GetButton ("Fire1")) {
-				
-				ui.x = Input.mousePosition.x;
-				ui.y = Input.mousePosition.y;
-				ui.dx = ui.x - ui.px;
-				ui.dx = ui.dx / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
-				ui.dy = ui.y - ui.py;
-				ui.dy = ui.dy / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
-				ui.px = ui.x;
-				ui.py = ui.y;
+            }
 
-				if (!ui.firstFrame) { // skip first frame because delta value will jump.
-					
-					ui.action = UIACTION.SINGLEDRAG;
-					ui.touch = UITOUCH.TOUCHING;
+            if (stackSizeNew > 10)
+                Log.Warning("Ui event stack exceeds 10, potential overflow.");
 
-					if (Input.GetKey (KeyCode.Space)) {
-						// equivalent to doubletouch dragging only
-						ui.action = UIACTION.DOUBLEDRAG;
-					} 
-					if (Input.GetKey (KeyCode.LeftAlt) || Input.GetKey (KeyCode.RightAlt)) {
-						// equivalent to doubletouch pinching only
-						ui.action = UIACTION.DOUBLEDRAG;
-						ui.dd = ui.dx;
-						ui.dx = 0;
-						ui.dy = 0;
-					} 
-				} else {
-					ui.firstFrame = false;
-					ui.touch = UITOUCH.BEGAN;
-					ui.dx = 0;
-					ui.dy = 0;
-				}
-				trackTap (ui);
-			} 
+            return callBack;
 
-			if (Input.GetButtonUp ("Fire1")) {
-				
-				ui.touch = UITOUCH.ENDED;
+        }
 
-				if (wasTap (ui)) {
+        // lower level
 
-					ui.action = UIACTION.TAP;
+        void applyUserInteraction(UiEvent ui, UxInterface theUiState)
+        {
 
-				} else {
 
-				}
+            cycle++;
+            cycle = cycle % 1000;
 
-				ui.firstFrame = true;
+            // check user mouse/touch interaction and populate this passed-in UIEVENT accordingly
 
-			}
-//		}
+            UiEvent storeUi = ui.clone();
 
-		#endif
+            //		ui.action = UIACTION.VOID;
+            ui.touch = UITOUCH.NONE;
 
+            ui.dd = 0;
 
-		#if UNITY_IOS
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+
+            //		if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer) {
+
+            // if we're on macos .... or windows?
+
+            if (Input.GetButton("Fire1"))
+            {
+
+                ui.x = Input.mousePosition.x;
+                ui.y = Input.mousePosition.y;
+                ui.dx = ui.x - ui.px;
+                ui.dx = ui.dx / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+                ui.dy = ui.y - ui.py;
+                ui.dy = ui.dy / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+                ui.px = ui.x;
+                ui.py = ui.y;
+
+                if (!ui.firstFrame)
+                { // skip first frame because delta value will jump.
+
+                    ui.action = UIACTION.SINGLEDRAG;
+                    ui.touch = UITOUCH.TOUCHING;
+
+                    if (Input.GetKey(KeyCode.Space))
+                    {
+                        // equivalent to doubletouch dragging only
+                        ui.action = UIACTION.DOUBLEDRAG;
+                    }
+                    if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+                    {
+                        // equivalent to doubletouch pinching only
+                        ui.action = UIACTION.DOUBLEDRAG;
+                        ui.dd = ui.dx;
+                        ui.dx = 0;
+                        ui.dy = 0;
+                    }
+                }
+                else
+                {
+                    ui.firstFrame = false;
+                    ui.touch = UITOUCH.BEGAN;
+                    ui.dx = 0;
+                    ui.dy = 0;
+                }
+                trackTap(ui);
+            }
+
+            if (Input.GetButtonUp("Fire1"))
+            {
+
+                ui.touch = UITOUCH.ENDED;
+
+                if (wasTap(ui))
+                {
+
+                    ui.action = UIACTION.TAP;
+
+                }
+                else
+                {
+
+                }
+
+                ui.firstFrame = true;
+
+            }
+            //		}
+
+#endif
+
+
+#if UNITY_IOS
 
 //		if (Application.platform == RuntimePlatform.IPhonePlayer) {
 
@@ -463,301 +501,339 @@ public class UxController
 			}
 
 //		}
-		#endif
-	}
+#endif
+        }
 
-	void trackTap (UiEvent ui)
-	{
-		ui.tapCount += Time.deltaTime;
-	}
+        void trackTap(UiEvent ui)
+        {
+            ui.tapCount += Time.deltaTime;
+        }
 
-	bool wasTap (UiEvent ui)
-	{
-		bool result = false;
+        bool wasTap(UiEvent ui)
+        {
+            bool result = false;
 
-		if (ui.dx > -10f && ui.dx < 10f && ui.dy > -10f && ui.dy < 10f && ui.tapCount > 0 && ui.tapCount < 0.25f) {
-			result = true;
-			//				Log.Message ( cycle + " tap detected");
-		}
-		ui.tapCount = 0;
-		return result;
-	}
+            if (ui.dx > -10f && ui.dx < 10f && ui.dy > -10f && ui.dy < 10f && ui.tapCount > 0 && ui.tapCount < 0.25f)
+            {
+                result = true;
+                //				Log.Message ( cycle + " tap detected");
+            }
+            ui.tapCount = 0;
+            return result;
+        }
 
 
-	void setUiTargetObjects (UiEvent ui, UxInterface theInterface)
-	{
+        void setUiTargetObjects(UiEvent ui, UxInterface theInterface)
+        {
 
-		// finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
+            // finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
 
-		RaycastHit hit;
-		Vector3 uiPosition = new Vector3 (ui.x, ui.y, 0f);
-					
-		// cast a 3d ray from the camera we are controlling to find any 3D objects.
+            RaycastHit hit;
+            Vector3 uiPosition = new Vector3(ui.x, ui.y, 0f);
 
-		Camera activeCamera = theInterface.camera.camera;
+            // cast a 3d ray from the camera we are controlling to find any 3D objects.
 
-		Ray ray = activeCamera.ScreenPointToRay (uiPosition);
+            Camera activeCamera = theInterface.camera.camera;
 
-		int layerMask = 1 << 8; // only check colliders in layer '8'. 
+            Ray ray = activeCamera.ScreenPointToRay(uiPosition);
 
-		if (Physics.Raycast (ray, out hit, Mathf.Infinity, layerMask)) {
-			
-			ui.target3D = hit.transform.gameObject;
+            int layerMask = 1 << 8; // only check colliders in layer '8'. 
 
-		} else {
-			
-			ui.target3D = null;
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+            {
 
-		}
+                ui.target3D = hit.transform.gameObject;
 
-		// cast a 2d ray in the canvas we're controlling.
+            }
+            else
+            {
 
-		GraphicRaycaster gfxRayCaster = theInterface.canvasObject.GetComponent<GraphicRaycaster> ();
+                ui.target3D = null;
 
-		//Create the PointerEventData with null for the EventSystem
+            }
 
-		PointerEventData pointerEventData = new PointerEventData (null);
+            // cast a 2d ray in the canvas we're controlling.
 
-		//Set required parameters, in this case, mouse position
+            GraphicRaycaster gfxRayCaster = theInterface.canvasObject.GetComponent<GraphicRaycaster>();
 
-		pointerEventData.position = uiPosition;
+            //Create the PointerEventData with null for the EventSystem
 
-		//Create list to receive all results
+            PointerEventData pointerEventData = new PointerEventData(null);
 
-		List<RaycastResult> results = new List<RaycastResult> ();
+            //Set required parameters, in this case, mouse position
 
-		//Raycast it
+            pointerEventData.position = uiPosition;
 
-		gfxRayCaster.Raycast (pointerEventData, results);
+            //Create list to receive all results
 
-		if (results.Count > 0) {
-			
-			ui.target2D = results [0].gameObject;
+            List<RaycastResult> results = new List<RaycastResult>();
 
-			// find out if this 2d object is a button.
+            //Raycast it
 
-			UiButton checkButton = null;
-			theInterface.uiButtons.TryGetValue (ui.target2D.transform.name, out checkButton);
-			ui.targetButton = checkButton;
+            gfxRayCaster.Raycast(pointerEventData, results);
 
+            if (results.Count > 0)
+            {
 
-		} else {
-			
-			ui.target2D = null;
+                ui.target2D = results[0].gameObject;
 
-		}
-	}
+                // find out if this 2d object is a button.
 
+                UiButton checkButton = null;
+                theInterface.uiButtons.TryGetValue(ui.target2D.transform.name, out checkButton);
+                ui.targetButton = checkButton;
 
 
-	// ------------------------------------------------------------------------------------------------------------------------------------------
+            }
+            else
+            {
 
+                ui.target2D = null;
 
-	void processUiEvent (UiEvent ui, UxInterface activeInterface)
-	{
+            }
+        }
 
-		// this handles the result of user interaction, taking the info in the active UIEVENT and taking action by checking it against the UISTATE
 
-		// could potentially be moved into interface class
 
-		ui.callback = "";
+        // ------------------------------------------------------------------------------------------------------------------------------------------
 
-		Vector2 delta;
 
-		UxArgs args = new UxArgs ();
+        void processUiEvent(UiEvent ui, UxInterface activeInterface)
+        {
 
-		args.activeInterface = activeInterface;
-		args.delta = Vector3.zero;
-		args.uiEvent = ui;
+            // this handles the result of user interaction, taking the info in the active UIEVENT and taking action by checking it against the UISTATE
 
-		switch (ui.action) {
+            // could potentially be moved into interface class
 
+            ui.callback = "";
 
+            Vector2 delta;
 
-		case UIACTION.TAP:
+            UxArgs args = new UxArgs();
 
-			if (ui.target2D != null) {
+            args.activeInterface = activeInterface;
+            args.delta = Vector3.zero;
+            args.uiEvent = ui;
 
-				activeInterface.tap_2d (this, args);
+            switch (ui.action)
+            {
 
-			} else if (ui.target3D != null) {
 
-				activeInterface.tap_3d (this, args);
 
-			} else {
+                case UIACTION.TAP:
 
-				activeInterface.tap_none (this, args);
+                    if (ui.target2D != null)
+                    {
 
-			}
+                        activeInterface.tap_2d(this, args);
 
-			break;
+                    }
+                    else if (ui.target3D != null)
+                    {
 
-		case UIACTION.SINGLEDRAG:
-			
-			delta = new Vector2 (ui.dx, ui.dy);
+                        activeInterface.tap_3d(this, args);
 
-//			Debug.Log ("single drag");
+                    }
+                    else
+                    {
 
-			args.delta = new Vector3 (ui.dx, ui.dy, 0);
+                        activeInterface.tap_none(this, args);
 
+                    }
 
-			if (ui.target2D != null) {
-				
-				activeInterface.single_2d (this, args);
+                    break;
 
+                case UIACTION.SINGLEDRAG:
 
-			} else if (ui.target3D != null) {
+                    delta = new Vector2(ui.dx, ui.dy);
 
-				activeInterface.single_3d (this, args);
+                    //			Debug.Log ("single drag");
 
-			} else {
+                    args.delta = new Vector3(ui.dx, ui.dy, 0);
 
-				activeInterface.single_none (this, args);
 
-			}
+                    if (ui.target2D != null)
+                    {
 
-			break;
+                        activeInterface.single_2d(this, args);
 
-		case UIACTION.DOUBLEDRAG:
 
-			delta = new Vector2 (ui.dx, ui.dy);
+                    }
+                    else if (ui.target3D != null)
+                    {
 
-			args.delta = new Vector3 (ui.dx, ui.dy, ui.dd);
+                        activeInterface.single_3d(this, args);
 
+                    }
+                    else
+                    {
 
-			if (ui.target2D != null) {
+                        activeInterface.single_none(this, args);
 
-				activeInterface.double_2d (this, args);
+                    }
 
+                    break;
 
-			} else if (ui.target3D != null) {
+                case UIACTION.DOUBLEDRAG:
 
-				activeInterface.double_3d (this, args);
+                    delta = new Vector2(ui.dx, ui.dy);
 
-			} else {
+                    args.delta = new Vector3(ui.dx, ui.dy, ui.dd);
 
-				activeInterface.double_none (this, args);
 
-			}
+                    if (ui.target2D != null)
+                    {
 
+                        activeInterface.double_2d(this, args);
 
 
-//
-//			if (ui.target2D != null) {
-//
-//				activeInterface.double_2d (this, args);
-//
-////				singleDrag2D (activeInterface, ui, delta);
-//
-//			} else {
-//
-//
-//
-//				delta = -1f * delta;
-//
-//				panCamera (activeInterface, delta, activeInterface.cameraConstraint, false); // simplify??
-//
-//				zoomCamera (activeInterface, ui.dd);
-//
-//			}
-			break;
+                    }
+                    else if (ui.target3D != null)
+                    {
 
-		default:
+                        activeInterface.double_3d(this, args);
 
-			activeInterface.none (this, args);
+                    }
+                    else
+                    {
 
-			break;
-		}
+                        activeInterface.double_none(this, args);
 
-		if (ui.isInert) {
+                    }
 
-//			Debug.Log (ui.toString ());
 
-			// Event is inert.
 
-//			Log.Message ( cycle + "inertia " + ui.dx + " " + ui.dy);
+                    //
+                    //			if (ui.target2D != null) {
+                    //
+                    //				activeInterface.double_2d (this, args);
+                    //
+                    ////				singleDrag2D (activeInterface, ui, delta);
+                    //
+                    //			} else {
+                    //
+                    //
+                    //
+                    //				delta = -1f * delta;
+                    //
+                    //				panCamera (activeInterface, delta, activeInterface.cameraConstraint, false); // simplify??
+                    //
+                    //				zoomCamera (activeInterface, ui.dd);
+                    //
+                    //			}
+                    break;
 
-//			Debug.Log ("inertia creeps..." + ui.dx+" "+ui.dy);
+                default:
 
-			float iVel = 0f;
-			ui.dx = Mathf.SmoothDamp (ui.dx, 0, ref iVel, 0.075f);
+                    activeInterface.none(this, args);
 
-			if (Mathf.Abs (ui.dx) < 1f) {
-				ui.dx = 0;
-			}
+                    break;
+            }
 
-			ui.dy = Mathf.SmoothDamp (ui.dy, 0, ref iVel, 0.075f);
+            if (ui.isInert)
+            {
 
-			if (Mathf.Abs (ui.dy) < 1f) {
-				ui.dy = 0;
-			}
+                //			Debug.Log (ui.toString ());
 
-			if (ui.dx == 0 && ui.dy == 0) {
-				// inertia ended
-				if (ui.isInert) {
-//					Debug.Log ("Inertia stops");
-				}
-				ui.isInert = false;
+                // Event is inert.
 
-			}
+                //			Log.Message ( cycle + "inertia " + ui.dx + " " + ui.dy);
 
-		}
+                //			Debug.Log ("inertia creeps..." + ui.dx+" "+ui.dy);
 
-		// apply brightness for all button objects
+                float iVel = 0f;
+                ui.dx = Mathf.SmoothDamp(ui.dx, 0, ref iVel, 0.075f);
 
-		Dictionary<string, UiButton>.ValueCollection allButtons =
-			activeInterface.uiButtons.Values;
+                if (Mathf.Abs(ui.dx) < 1f)
+                {
+                    ui.dx = 0;
+                }
 
-		foreach (UiButton button in allButtons) {
-			button.applyColour ();
-		}
+                ui.dy = Mathf.SmoothDamp(ui.dy, 0, ref iVel, 0.075f);
 
-		//			if (ui.touch == UITOUCH.NONE && ui.target2D != null) {
-		//				// no touch, lettings springs run out while we have a target: apply a singledrag with delta 0
-		//				singleDrag2D (state, ui, Vector2.zero);
-		//			}
+                if (Mathf.Abs(ui.dy) < 1f)
+                {
+                    ui.dy = 0;
+                }
 
-		//			if (ui.action == UIACTION.INERTIA && ui.target2D != null) {
-		//				// no touch, lettings springs run out while we have a target: apply a singledrag with delta 0
-		//				singleDrag2D (state, ui, Vector2.zero);
-		//			}
+                if (ui.dx == 0 && ui.dy == 0)
+                {
+                    // inertia ended
+                    if (ui.isInert)
+                    {
+                        //					Debug.Log ("Inertia stops");
+                    }
+                    ui.isInert = false;
 
+                }
 
-	}
+            }
 
+            // apply brightness for all button objects
 
-	// ------------------------------------------------------------------------------------------------------------------------------------------
-	// execution of ui events
+            Dictionary<string, UiButton>.ValueCollection allButtons =
+                activeInterface.uiButtons.Values;
 
+            foreach (UiButton button in allButtons)
+            {
+                button.applyColour();
+            }
 
-	void setRaycastActive (string name, bool value, UxInterface activeInterface)
-	{
-		UiButton theButton;
-		activeInterface.uiButtons.TryGetValue (name, out theButton);
+            //			if (ui.touch == UITOUCH.NONE && ui.target2D != null) {
+            //				// no touch, lettings springs run out while we have a target: apply a singledrag with delta 0
+            //				singleDrag2D (state, ui, Vector2.zero);
+            //			}
 
-		if (theButton != null)
-			theButton.image.raycastTarget = value;
+            //			if (ui.action == UIACTION.INERTIA && ui.target2D != null) {
+            //				// no touch, lettings springs run out while we have a target: apply a singledrag with delta 0
+            //				singleDrag2D (state, ui, Vector2.zero);
+            //			}
 
-	}
 
-	bool brightnessIsChanging (string name, UxInterface activeInterface)
-	{
-		bool result = false;
-		UiButton theButton;
-		activeInterface.uiButtons.TryGetValue (name, out theButton);
+        }
 
-		if (theButton != null) {
-			if (theButton.brightness != theButton.targetBrightness) {
-				result = true;
 
-			}
-		}
+        // ------------------------------------------------------------------------------------------------------------------------------------------
+        // execution of ui events
 
-		return result;
-	}
 
+        void setRaycastActive(string name, bool value, UxInterface activeInterface)
+        {
+            UiButton theButton;
+            activeInterface.uiButtons.TryGetValue(name, out theButton);
 
+            if (theButton != null)
+                theButton.image.raycastTarget = value;
 
+        }
+
+        bool brightnessIsChanging(string name, UxInterface activeInterface)
+        {
+            bool result = false;
+            UiButton theButton;
+            activeInterface.uiButtons.TryGetValue(name, out theButton);
+
+            if (theButton != null)
+            {
+                if (theButton.brightness != theButton.targetBrightness)
+                {
+                    result = true;
+
+                }
+            }
+
+            return result;
+        }
+
+
+
+
+
+
+
+
+
+    }
 
 
 
@@ -765,10 +841,3 @@ public class UxController
 
 
 }
-
-
-
-
-
-
-

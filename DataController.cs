@@ -7,68 +7,78 @@ using UnityEngine.Networking;
 
 #endif
 
-public delegate bool DataTaskHandler (StoryTask theTask);
-	
-public class DataController : MonoBehaviour
+
+namespace StoryEngine
 {
-	
-	GameObject StoryEngineObject;
-	DataTaskHandler dataTaskHandler;
 
-	#if NETWORKED
-	GameObject NetworkObject;
-	NetworkBroadcast networkBroadcast;
-	ExtendedNetworkManager networkManager;
-	#endif
+    public delegate bool DataTaskHandler(StoryTask theTask);
 
-	AssitantDirector ad;
+    public class DataController : MonoBehaviour
+    {
 
-	bool handlerWarning = false;
+        GameObject StoryEngineObject;
+        DataTaskHandler dataTaskHandler;
 
-	public List <StoryTask> taskList;
+#if NETWORKED
+        GameObject NetworkObject;
+        NetworkBroadcast networkBroadcast;
+        ExtendedNetworkManager networkManager;
+#endif
 
-	string me = "Data controller";
+        AssitantDirector ad;
 
-	void Start ()
-	{
-		Log.Message ("Starting.");
+        bool handlerWarning = false;
 
-		taskList = new List <StoryTask> ();
+        public List<StoryTask> taskList;
 
-		#if NETWORKED
+        string me = "Data controller";
 
-		NetworkObject = GameObject.Find ("NetworkObject");
+        void Start()
+        {
+            Log.Message("Starting.");
 
-		if (NetworkObject == null) {
+            taskList = new List<StoryTask>();
 
-			Log.Warning ("NetworkObject not found.");
+#if NETWORKED
 
-		} else {
+            NetworkObject = GameObject.Find("NetworkObject");
 
-			networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast> ();
-			networkManager = NetworkObject.GetComponent<ExtendedNetworkManager> ();
+            if (NetworkObject == null)
+            {
 
-		}
+                Log.Warning("NetworkObject not found.");
 
-		#endif
+            }
+            else
+            {
 
-		StoryEngineObject = GameObject.Find ("StoryEngineObject");
+                networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
+                networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
 
-		if (StoryEngineObject == null) {
+            }
 
-			Log.Warning ("StoryEngineObject not found.");
+#endif
 
-		} else {
-			
-			ad = StoryEngineObject.GetComponent <AssitantDirector> ();
-			ad.newTasksEvent += new NewTasksEvent (newTasksHandler); // registrer for task events
+            StoryEngineObject = GameObject.Find("StoryEngineObject");
 
-		}
+            if (StoryEngineObject == null)
+            {
 
-	}
-		
+                Log.Warning("StoryEngineObject not found.");
 
-	#if UNITY_IOS && NETWORKED
+            }
+            else
+            {
+
+                ad = StoryEngineObject.GetComponent<AssitantDirector>();
+                ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+
+            }
+
+        }
+
+
+#if UNITY_IOS && NETWORKED
 	
 
 	void OnApplicationPause(bool paused){
@@ -109,237 +119,256 @@ public class DataController : MonoBehaviour
 		}
 	}
 
-	#endif
+#endif
 
-	#if NETWORKED
+#if NETWORKED
 
-	// These are networking methods to be called from datahandler to establish connections.
-	// Once connected, handling is done internally by the assistant directors.
+        // These are networking methods to be called from datahandler to establish connections.
+        // Once connected, handling is done internally by the assistant directors.
 
-	public int serverConnections ()
-	{
+        public int serverConnections()
+        {
 
-		// Get a count for the number of (active) connections.
+            // Get a count for the number of (active) connections.
 
-		NetworkConnection[] connections = new NetworkConnection[NetworkServer.connections.Count];
+            NetworkConnection[] connections = new NetworkConnection[NetworkServer.connections.Count];
 
-		NetworkServer.connections.CopyTo (connections, 0);
+            NetworkServer.connections.CopyTo(connections, 0);
 
-		int c = 0;
+            int c = 0;
 
-		foreach (NetworkConnection nc in connections) {
+            foreach (NetworkConnection nc in connections)
+            {
 
-//			if (nc.isConnected) {
+                //			if (nc.isConnected) {
 
-			if (nc != null) {
-				
-				c++;
+                if (nc != null)
+                {
 
-			}
+                    c++;
 
-		}
-		return c;
+                }
 
-	}
+            }
+            return c;
 
-	public void startBroadcastClient ()
-	{
+        }
 
-		Log.Message ("Starting broadcast client.");
+        public void startBroadcastClient()
+        {
 
-		networkBroadcast.StartClient ();
+            Log.Message("Starting broadcast client.");
 
-	}
+            networkBroadcast.StartClient();
 
-	public void startBroadcastServer ()
-	{
+        }
 
-		Log.Message ("Starting broadcast server.");
+        public void startBroadcastServer()
+        {
 
-		networkBroadcast.StartServer ();
+            Log.Message("Starting broadcast server.");
 
-	}
+            networkBroadcast.StartServer();
 
-	public void stopBroadcast ()
-	{
+        }
 
-		Log.Message ("Stopping broadcast server.");
+        public void stopBroadcast()
+        {
 
-		networkBroadcast.Stop ();
+            Log.Message("Stopping broadcast server.");
 
-	}
+            networkBroadcast.Stop();
 
-	public void startNetworkClient (string server)
-	{
-		
-		if (server == "") {
-			Log.Error ("trying to start client without server address");
-			return;
-		}
+        }
 
-		Log.Message ("Starting client for remote server " + server);
+        public void startNetworkClient(string server)
+        {
 
-		networkManager.StartNetworkClient (server);
+            if (server == "")
+            {
+                Log.Error("trying to start client without server address");
+                return;
+            }
 
-	}
+            Log.Message("Starting client for remote server " + server);
 
-	public void StopNetworkClient(){
+            networkManager.StartNetworkClient(server);
 
-		Log.Message ("Stopping network client.");
+        }
 
-		networkManager.StopClient ();
+        public void StopNetworkClient()
+        {
 
-	}
+            Log.Message("Stopping network client.");
 
-	public void startNetworkServer ()
-	{
+            networkManager.StopClient();
 
-		networkManager.StartNetworkServer ();
+        }
 
-	}
+        public void startNetworkServer()
+        {
 
-	public void stopNetworkServer ()
-	{
+            networkManager.StartNetworkServer();
 
-		networkManager.StopNetworkServer ();
+        }
 
-	}
+        public void stopNetworkServer()
+        {
 
-	public bool foundServer ()
-	{
-		
-		if (networkBroadcast.serverMessage != "") {
-			
-			return true;
+            networkManager.StopNetworkServer();
 
-		} else {
-			
-			return false;
-		}
+        }
 
-	}
+        public bool foundServer()
+        {
 
-	public bool clientIsConnected ()
-	{
+            if (networkBroadcast.serverMessage != "")
+            {
 
-		if (networkManager.client == null)
-			return false;
+                return true;
 
-		if (!networkManager.client.isConnected)
-			return false;
+            }
+            else
+            {
 
-		return true;
+                return false;
+            }
 
-	}
+        }
 
-	#endif
+        public bool clientIsConnected()
+        {
 
-	public void addTaskHandler (DataTaskHandler theHandler)
-	{
-		dataTaskHandler = theHandler;
-		Log.Message ("Handler added.");
-	}
+            if (networkManager.client == null)
+                return false;
 
-	void Update ()
-	{
-		
-		int t = 0;
+            if (!networkManager.client.isConnected)
+                return false;
 
-		while (t < taskList.Count) {
+            return true;
 
-			StoryTask task = taskList [t];
+        }
 
-//			if (task.pointer.getStatus () == POINTERSTATUS.KILLED && task.description != "end") {
-				
-			if (!GENERAL.ALLTASKS.Exists(at => at==task )) {
-					
-				Log.Message ("Removing task:" + task.description);
+#endif
 
-				// Task was removed, so stop executing it.
+        public void addTaskHandler(DataTaskHandler theHandler)
+        {
+            dataTaskHandler = theHandler;
+            Log.Message("Handler added.");
+        }
 
-				taskList.RemoveAt (t);
+        void Update()
+        {
 
-			} else {
+            int t = 0;
 
-				if (dataTaskHandler != null) {
+            while (t < taskList.Count)
+            {
 
-					if (dataTaskHandler (task)) {
+                StoryTask task = taskList[t];
 
-						task.signOff (me);
-						taskList.RemoveAt (t);
+                //			if (task.pointer.getStatus () == POINTERSTATUS.KILLED && task.description != "end") {
 
-					} else {
-						
-						t++;
+                if (!GENERAL.ALLTASKS.Exists(at => at == task))
+                {
 
-					}
+                    Log.Message("Removing task:" + task.description);
 
-				} else {
-					
-					if (!handlerWarning) {
-						
-						Log.Warning ("No handler available, blocking task while waiting.");
+                    // Task was removed, so stop executing it.
 
-						handlerWarning = true;
-						t++;
+                    taskList.RemoveAt(t);
 
-					} 
+                }
+                else
+                {
 
-				}
+                    if (dataTaskHandler != null)
+                    {
 
-			}
+                        if (dataTaskHandler(task))
+                        {
 
-		}
+                            task.signOff(me);
+                            taskList.RemoveAt(t);
 
-	}
+                        }
+                        else
+                        {
 
-	//	public void taskDone (StoryTask theTask){
-	//		theTask.signOff (me);
-	//		taskList.Remove (theTask);
-	//
-	//	}
+                            t++;
 
-	void newTasksHandler (object sender, TaskArgs e)
-	{
-	
-		addTasks (e.theTasks);
+                        }
 
-	}
+                    }
+                    else
+                    {
 
-	public void addTasks (List<StoryTask> theTasks)
-	{
-		
-		taskList.AddRange (theTasks);
+                        if (!handlerWarning)
+                        {
 
-	}
+                            Log.Warning("No handler available, blocking task while waiting.");
 
-	//
+                            handlerWarning = true;
+                            t++;
 
-	#if NETWORKED
+                        }
 
-	public bool displayNetworkGUIState ()
-	{
+                    }
 
+                }
 
-		return		networkBroadcast.showGUI;
+            }
 
+        }
 
-	}
+        //	public void taskDone (StoryTask theTask){
+        //		theTask.signOff (me);
+        //		taskList.Remove (theTask);
+        //
+        //	}
 
+        void newTasksHandler(object sender, TaskArgs e)
+        {
 
-	public void displayNetworkGUI (bool status)
-	{
+            addTasks(e.theTasks);
 
+        }
 
-		NetworkObject.GetComponent<NetworkManagerHUD> ().showGUI = status;
-		networkBroadcast.showGUI = status;
+        public void addTasks(List<StoryTask> theTasks)
+        {
 
+            taskList.AddRange(theTasks);
 
-	}
+        }
 
-	#endif
+        //
+
+#if NETWORKED
+
+        public bool displayNetworkGUIState()
+        {
+
+
+            return networkBroadcast.showGUI;
+
+
+        }
+
+
+        public void displayNetworkGUI(bool status)
+        {
+
+
+            NetworkObject.GetComponent<NetworkManagerHUD>().showGUI = status;
+            networkBroadcast.showGUI = status;
+
+
+        }
+
+#endif
+    }
+
+
+
+
 }
-
-
-
-

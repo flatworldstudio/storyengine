@@ -4,232 +4,235 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 
-
-public delegate void OnClientMessageHandler (NetworkMessage netMessage);
-public delegate void messageHandler (NetworkMessage netMessage);
-
-
-
-
-// Client delegates.
-
-public delegate void OnStartClientDelegate (NetworkClient theClient);
-public delegate void OnStopClientDelegate ();
-public delegate void OnClientConnectDelegate (NetworkConnection connection);
-public delegate void OnClientDisconnectDelegate (NetworkConnection connection);
-
-// Server delegates
-
-public delegate void OnStartServerDelegate ();
-public delegate void OnStopServerDelegate ();
-public delegate void OnServerConnectDelegate (NetworkConnection connection);
-public delegate void OnServerDisconnectDelegate (NetworkConnection connection);
-
-
-
-public class ExtendedNetworkManager : NetworkManager
+namespace StoryEngine
 {
-	string me = "Network manager";
 
-	const short connectionMessageCode = 1001;
+    public delegate void OnClientMessageHandler(NetworkMessage netMessage);
+    public delegate void messageHandler(NetworkMessage netMessage);
 
-	//
 
-	void OnApplicationQuit ()
-	{
-		if (client != null)
-			StopNetworkClient ();
 
-		if (NetworkServer.active)
-			StopNetworkServer ();
-		
-	}
 
-	// Client methods.
+    // Client delegates.
 
-	public OnStartClientDelegate onStartClientDelegate;
-	public OnStopClientDelegate onStopClientDelegate;
+    public delegate void OnStartClientDelegate(NetworkClient theClient);
+    public delegate void OnStopClientDelegate();
+    public delegate void OnClientConnectDelegate(NetworkConnection connection);
+    public delegate void OnClientDisconnectDelegate(NetworkConnection connection);
 
-	public OnClientConnectDelegate onClientConnectDelegate;
-	public OnClientDisconnectDelegate onClientDisconnectDelegate;
+    // Server delegates
 
-	public void StartNetworkClient (string server)
-	{
-		
-		networkAddress = server;
+    public delegate void OnStartServerDelegate();
+    public delegate void OnStopServerDelegate();
+    public delegate void OnServerConnectDelegate(NetworkConnection connection);
+    public delegate void OnServerDisconnectDelegate(NetworkConnection connection);
 
-		StartClient ();
 
-	}
 
-	public override void OnStartClient (NetworkClient theClient)
-	{
-		Log.Message ("Client has started.");
+    public class ExtendedNetworkManager : NetworkManager
+    {
+        string me = "Network manager";
 
-		if (onStartClientDelegate != null)
-			onStartClientDelegate (theClient);
+        const short connectionMessageCode = 1001;
 
-	}
+        //
 
-	public override void OnClientConnect (NetworkConnection conn)
-	{
-		
-		Log.Message ("Client connected to server.");
+        void OnApplicationQuit()
+        {
+            if (client != null)
+                StopNetworkClient();
 
-		if (onClientConnectDelegate != null)
-			onClientConnectDelegate (conn);
+            if (NetworkServer.active)
+                StopNetworkServer();
 
-	}
+        }
 
-	public override void OnClientDisconnect (NetworkConnection connection)
-	{
+        // Client methods.
 
-		Log.Message ("Client disconnected from server.");
+        public OnStartClientDelegate onStartClientDelegate;
+        public OnStopClientDelegate onStopClientDelegate;
 
-		if (onClientDisconnectDelegate != null)
-			onClientDisconnectDelegate (connection);
+        public OnClientConnectDelegate onClientConnectDelegate;
+        public OnClientDisconnectDelegate onClientDisconnectDelegate;
 
-	}
+        public void StartNetworkClient(string server)
+        {
 
-	public void StopNetworkClient ()
-	{
+            networkAddress = server;
 
-		StopClient ();
+            StartClient();
 
-	}
+        }
 
-	public override void OnStopClient ()
-	{
+        public override void OnStartClient(NetworkClient theClient)
+        {
+            Log.Message("Client has started.");
 
-		Log.Message ("Client has stopped.");
+            if (onStartClientDelegate != null)
+                onStartClientDelegate(theClient);
 
-		if (onStopClientDelegate != null)
-			onStopClientDelegate ();
+        }
 
-	}
+        public override void OnClientConnect(NetworkConnection conn)
+        {
 
-	// Server methods.
+            Log.Message("Client connected to server.");
 
-	public OnStartServerDelegate onStartServerDelegate;
-	public OnStopServerDelegate onStopServerDelegate;
+            if (onClientConnectDelegate != null)
+                onClientConnectDelegate(conn);
 
-	public OnServerConnectDelegate onServerConnectDelegate;
-	public OnServerDisconnectDelegate onServerDisconnectDelegate;
+        }
 
+        public override void OnClientDisconnect(NetworkConnection connection)
+        {
 
-	public void StartNetworkServer ()
-	{
-		
-		StartServer ();
+            Log.Message("Client disconnected from server.");
 
-	}
+            if (onClientDisconnectDelegate != null)
+                onClientDisconnectDelegate(connection);
 
-	public void StopNetworkServer ()
-	{
+        }
 
-		StopServer ();
+        public void StopNetworkClient()
+        {
 
-	}
+            StopClient();
 
-	public override void OnStartServer ()
-	{
-		Log.Message ("Server started.");
+        }
 
-		if (onStartServerDelegate != null)
-			onStartServerDelegate ();
+        public override void OnStopClient()
+        {
 
-	}
+            Log.Message("Client has stopped.");
 
-	public override void OnStopServer ()
-	{
-		Log.Message ("Server stopped.");
+            if (onStopClientDelegate != null)
+                onStopClientDelegate();
 
-		if (onStopServerDelegate != null)
-			onStopServerDelegate ();
+        }
 
-	}
+        // Server methods.
 
-	public override void OnServerConnect (NetworkConnection connection)
-	{
-		Log.Message ("Remote client connected.");
+        public OnStartServerDelegate onStartServerDelegate;
+        public OnStopServerDelegate onStopServerDelegate;
 
-		if (onServerConnectDelegate != null)
-			onServerConnectDelegate (connection);
-		
-	}
+        public OnServerConnectDelegate onServerConnectDelegate;
+        public OnServerDisconnectDelegate onServerDisconnectDelegate;
 
-	public override void OnServerDisconnect (NetworkConnection connection)
-	{
-		Log.Message ("Remote client disconnected.");
 
-		if (onServerDisconnectDelegate != null)
-			onServerDisconnectDelegate (connection);
+        public void StartNetworkServer()
+        {
 
-	}
+            StartServer();
 
+        }
 
-	/*
-//	public void 
+        public void StopNetworkServer()
+        {
 
-	public void InformServerOnDisconnect (){
+            StopServer();
 
-		connectionMessageToServer ("disconnecting");
+        }
 
-	}
+        public override void OnStartServer()
+        {
+            Log.Message("Server started.");
 
+            if (onStartServerDelegate != null)
+                onStartServerDelegate();
 
-	public void connectionMessageToServer (string value)
-	{
-		var msg = new StringMessage (value);
-		client.Send (connectionMessageCode, msg);
-		Log.Message ("Sending connection message to server: " + value);
-	}
+        }
 
-	public void connectionMessageToClients (string value)
-	{
-		var msg = new StringMessage (value);
-		NetworkServer.SendToAll (connectionMessageCode, msg);
-		Log.Message ("Sending connection message to all clients: " + value);
-	}
+        public override void OnStopServer()
+        {
+            Log.Message("Server stopped.");
 
+            if (onStopServerDelegate != null)
+                onStopServerDelegate();
 
-	void onClientConnectionMessage (NetworkMessage netMsg)
-	{
-		var message = netMsg.ReadMessage<StringMessage> ();
-		Log.Message ("Connection message from server: " + message.value);
-	}
+        }
 
+        public override void OnServerConnect(NetworkConnection connection)
+        {
+            Log.Message("Remote client connected.");
 
-	void onServerConnectionMessage (NetworkMessage netMsg)
-	{
-		var message = netMsg.ReadMessage<StringMessage> ();
-		Log.Message ("Connection message from client: " + message.value);
+            if (onServerConnectDelegate != null)
+                onServerConnectDelegate(connection);
 
-		switch (message.value) {
+        }
 
-		case "hello":
+        public override void OnServerDisconnect(NetworkConnection connection)
+        {
+            Log.Message("Remote client disconnected.");
 
-			connectionMessageToClients ("A new client was added.");
+            if (onServerDisconnectDelegate != null)
+                onServerDisconnectDelegate(connection);
 
-			break;
+        }
 
-		case "disconnecting":
 
-			Log.Message ("Client is disconnecting, dropping their connection." + message.value);
+        /*
+    //	public void 
 
-//			Network.CloseConnection(netMsg.conn, true);
+        public void InformServerOnDisconnect (){
 
-			break;
+            connectionMessageToServer ("disconnecting");
 
-		default:
-			
-			break;
+        }
 
-		}
 
-	}
-	*/
+        public void connectionMessageToServer (string value)
+        {
+            var msg = new StringMessage (value);
+            client.Send (connectionMessageCode, msg);
+            Log.Message ("Sending connection message to server: " + value);
+        }
 
+        public void connectionMessageToClients (string value)
+        {
+            var msg = new StringMessage (value);
+            NetworkServer.SendToAll (connectionMessageCode, msg);
+            Log.Message ("Sending connection message to all clients: " + value);
+        }
 
 
+        void onClientConnectionMessage (NetworkMessage netMsg)
+        {
+            var message = netMsg.ReadMessage<StringMessage> ();
+            Log.Message ("Connection message from server: " + message.value);
+        }
+
+
+        void onServerConnectionMessage (NetworkMessage netMsg)
+        {
+            var message = netMsg.ReadMessage<StringMessage> ();
+            Log.Message ("Connection message from client: " + message.value);
+
+            switch (message.value) {
+
+            case "hello":
+
+                connectionMessageToClients ("A new client was added.");
+
+                break;
+
+            case "disconnecting":
+
+                Log.Message ("Client is disconnecting, dropping their connection." + message.value);
+
+    //			Network.CloseConnection(netMsg.conn, true);
+
+                break;
+
+            default:
+
+                break;
+
+            }
+
+        }
+        */
+
+
+
+    }
 }
