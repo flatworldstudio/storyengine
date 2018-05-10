@@ -18,6 +18,7 @@ namespace StoryEngine
 
     public class AssitantDirector : MonoBehaviour
     {
+        List <PointerUpdate> PointerUpdateStack;
 
         public event NewTasksEvent newTasksEvent;
 
@@ -60,6 +61,8 @@ namespace StoryEngine
             theDirector = new Director();
 
             GENERAL.ALLTASKS = new List<StoryTask>();
+            PointerUpdateStack=new List<PointerUpdate>();
+
 
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
 
@@ -140,7 +143,56 @@ namespace StoryEngine
         }
 
         void Update()
+        //void LateUpdate()
         {
+
+            // Handle pointer killing updates first.
+
+            for (int m=PointerUpdateStack.Count-1;m>=0;m--){
+
+                PointerUpdate message = PointerUpdateStack[m];
+
+
+                //}
+                //foreach (NetworkMessage netMsg in PointerUpdateStack){
+
+                // Right now the only update we send for pointers is when they are killed.
+
+                //PointerUpdate message = netMsg.ReadMessage<PointerUpdate>();
+
+                StoryPointer pointer = GENERAL.GetStorylinePointerForPointID(message.storyPointID);
+
+                Log.Message("Server update for pointer " + message.storyPointID);
+
+                if (message.killed)
+                {
+                    pointer.Kill();
+
+                    //if (pointer.currentTask.description=="moodon"){
+                    //    Debug.Log("moodon task pointer killed at "+Time.frameCount);
+                    //}
+
+                    if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
+                    {
+
+                        Log.Message("Removing task " + pointer.currentTask.description);
+
+                    }
+                    else
+                    {
+
+                        Log.Warning("Failed removing task " + pointer.currentTask.description);
+
+                    }
+
+
+                }
+
+                PointerUpdateStack.RemoveAt(m);
+
+
+            }
+            
 
             switch (theDirector.status)
             {
@@ -203,6 +255,9 @@ namespace StoryEngine
 
                                             Log.Message("Creating and distributing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
 
+                                            //if (task.description=="moodon"){
+                                            //    Debug.Log("moodon task created at "+Time.frameCount);
+                                            //}
                                         }
 
                                     }
@@ -289,9 +344,10 @@ namespace StoryEngine
 #if NETWORKED
 
         void LateUpdate()
+        //void Update()
         {
 
-            // Iterate over all pointers to see if any were killed. Clients cannot tell by themselves.
+            //// Iterate over all pointers to see if any were killed. Clients cannot tell by themselves.
 
             for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++)
             {
@@ -306,6 +362,13 @@ namespace StoryEngine
                     sendPointerUpdateToClients(pointer.GetUpdateMessage());
 
                     pointer.modified = false;
+
+                    //if (pointer.currentTask.description=="moodon"){
+                   
+                    //        Debug.Log("moodon pointer killed update sent at "+Time.frameCount);
+
+                    //}
+
 
                 }
 
@@ -327,6 +390,9 @@ namespace StoryEngine
 
                     Log.Message("Task " + task.description + " completed, removing from alltasks. ");
 
+                    //if (task.description=="moodon"){
+                    //    Debug.Log("moodon task removed at "+Time.frameCount);
+                    //}
                 }
 
                 if (task.modified)
@@ -359,6 +425,9 @@ namespace StoryEngine
 
                                 sendTaskUpdateToClients(task.GetUpdateMessage());
 
+                                //if (task.description=="moodon"){
+                                //    Debug.Log("moodon task update sent at "+Time.frameCount);
+                                //}
                             }
 
                             break;
@@ -373,6 +442,10 @@ namespace StoryEngine
                 }
 
             }
+
+
+           
+
 
         }
 
@@ -508,6 +581,13 @@ namespace StoryEngine
 
         void onPointerUpdateFromServer(NetworkMessage netMsg)
         {
+            PointerUpdate message = netMsg.ReadMessage<PointerUpdate>();
+            PointerUpdateStack.Add(message);
+
+        }
+
+        void onPointerUpdateFromServerBAK(NetworkMessage netMsg)
+        {
 
             // Right now the only update we send for pointers is when they are killed.
 
@@ -520,6 +600,10 @@ namespace StoryEngine
             if (message.killed)
             {
                 pointer.Kill();
+
+                //if (pointer.currentTask.description=="moodon"){
+                //    Debug.Log("moodon task pointer killed at "+Time.frameCount);
+                //}
 
                 if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
                 {
@@ -557,6 +641,8 @@ namespace StoryEngine
             Log.Message("Incoming task update for point: " + taskUpdate.pointID);
 
             applyTaskUpdate(taskUpdate);
+
+
 
         }
 
@@ -623,8 +709,12 @@ namespace StoryEngine
 
             StoryTask updateTask = GENERAL.GetTaskForPoint(taskUpdate.pointID);
 
+           
+
             if (updateTask == null)
             {
+
+
 
                 // If not, and we're a client, we create the task.
                 // If we're the server, we ignore updates for task we no longer know about.
@@ -634,6 +724,11 @@ namespace StoryEngine
 
                     updateTask = new StoryTask(taskUpdate.pointID, SCOPE.GLOBAL);
                     updateTask.ApplyUpdateMessage(taskUpdate);
+
+                    //if (updateTask.description=="moodon"){
+                    //    Debug.Log("moodon created at "+Time.frameCount);
+
+                    //}
 
                     Log.Message("Created an instance of global task " + updateTask.description);
 
@@ -673,6 +768,10 @@ namespace StoryEngine
 
                 Log.Message("Applied update to existing task.");
 
+                //if (updateTask.description=="moodon"){
+                //    Debug.Log("moodon updated at "+Time.frameCount);
+
+                //}
             }
 
         }

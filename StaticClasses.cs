@@ -45,6 +45,8 @@ namespace StoryEngine
 
     public static class GENERAL
     {
+        public static bool UserInConfinedArea=true;
+        public static bool UserCalibrated=false;
 
         public static AUTHORITY AUTHORITY = AUTHORITY.LOCAL;
 
