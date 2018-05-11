@@ -429,9 +429,22 @@ namespace StoryEngine
                 Log.Message("New callback storyline: " + callBackValue);
 
                 StoryPointer newStoryPointer = new StoryPointer(callBackValue, pointer.scope);
-                newStoryPointer.modified = true;
-                pointerStack.Add(newStoryPointer);
-                newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task.
+
+                if (newStoryPointer.currentPoint == null)
+                {
+                    // callback value was invalid, no point was found, we don't add the pointer.
+                    GENERAL.ALLPOINTERS.Remove(newStoryPointer);// was auto-added in constructor, so must be removed
+                    Log.Warning("Callback storyline doesn't exist: " + callBackValue);
+                }
+                else
+                {
+                    newStoryPointer.modified = true;
+                    pointerStack.Add(newStoryPointer);
+                    newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task.
+
+                }
+
+            
 
             }
             else

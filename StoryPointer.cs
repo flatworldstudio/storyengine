@@ -61,7 +61,8 @@ namespace StoryEngine
             // Empty pointer, set to pause just to be safe. To be populated from task.
 
             status = POINTERSTATUS.PAUSED;
-            GENERAL.ALLPOINTERS.Add(this);
+           GENERAL.ALLPOINTERS.Add(this);
+           
 
         }
 
@@ -71,9 +72,12 @@ namespace StoryEngine
             // Create a pointer from a given point. Task to be added later.
 
             currentPoint = GENERAL.GetStoryPointByID(pointID);
+         
             currentTask = null;
             status = POINTERSTATUS.EVALUATE;
             scope = setScope;
+
+         //   GENERAL.AddPointer(this);
 
             GENERAL.ALLPOINTERS.Add(this);
 

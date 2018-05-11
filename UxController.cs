@@ -174,8 +174,10 @@ namespace StoryEngine
                         {
 
                             // if same interface target, remove old.
-
-                            if (activeUiEvent.targetButton.dragTarget == checkEvent.targetButton.dragTarget)
+                            if (checkEvent.targetButton!=null && 
+                                activeUiEvent.targetButton.dragTarget == checkEvent.targetButton.dragTarget)
+                                                              
+                               // if (activeUiEvent.targetButton.dragTarget == checkEvent.targetButton.dragTarget)
                             {
 
                                 removeThis = true;

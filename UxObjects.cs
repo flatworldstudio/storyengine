@@ -207,31 +207,15 @@ namespace StoryEngine
 
         public static void highlightButton2d(object sender, UxArgs uxArgs)
         {
-
-
             string name = uxArgs.uiEvent.target2D.transform.name;
 
-
-
             setTargetBrightness(uxArgs.activeInterface.getButtonNames(), 0.75f, uxArgs.activeInterface);
-
-            //		setTargetBrightness
             setTargetBrightness(name, 1f, uxArgs.activeInterface);
 
-            //		UiButton theButton;
-            //		uxArgs.activeInterface.uiButtons.TryGetValue (name, out theButton);
-            //
+            if (uxArgs.uiEvent.targetButton != null)
+                uxArgs.uiEvent.callback = uxArgs.uiEvent.targetButton.callback;
 
-
-            uxArgs.uiEvent.callback = uxArgs.uiEvent.targetButton.callback;
-
-
-
-            //		uxArgs.uiEvent.callback = theButton.callback; // to be retrieved from button object..
-            //
-            //		Debug.Log ("tap callback: " + theButton.callback);
         }
-
 
         public static void stopControls(object sender, UxArgs uxArgs)
         {
@@ -734,7 +718,8 @@ namespace StoryEngine
 
             UiButton draggedButton;
 
-            uxArgs.activeInterface.uiButtons.TryGetValue(name, out draggedButton);
+            if (!uxArgs.activeInterface.uiButtons.TryGetValue(name, out draggedButton))
+                return;
 
             // catch exception: when constructing a uibutton the constructor searches for a gameobject by name, which may fail.
             if (draggedButton != null && (draggedButton.gameObject == null || draggedButton.dragTarget == null))

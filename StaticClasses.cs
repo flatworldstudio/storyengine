@@ -71,13 +71,22 @@ namespace StoryEngine
 
         public static string me = "General";
 
+
+        public static void AddPointer(StoryPointer pointer)
+        {
+
+            if (pointer != null)
+                ALLPOINTERS.Add(pointer);
+
+        }
+
         public static StoryPoint GetStoryPointByID(string pointID)
         {
             StoryPoint r;
 
             if (!storyPoints.TryGetValue(pointID, out r))
             {
-                Log.Error("Storypoint " + pointID + " not found.");
+                Log.Warning("Storypoint " + pointID + " not found.");
             }
 
             return r;
