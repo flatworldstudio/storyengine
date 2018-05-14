@@ -1410,7 +1410,7 @@ namespace StoryEngine
             else
             {
                 // catch exception
-                Log.Error("ERROR: uibutton gameobject not found");
+                Log.Error("Uibutton gameobject reference not found. Is it disabled?");
             }
         }
 

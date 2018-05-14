@@ -178,7 +178,7 @@ namespace StoryEngine
             if (messageLevel <= moduleLevel)
             {
 
-                UnityEngine.Debug.LogWarning(callerId + ": " + message + ", Line: " + line);
+                UnityEngine.Debug.LogError(callerId + ": " + message + ", Line: " + line);
 
             }
 

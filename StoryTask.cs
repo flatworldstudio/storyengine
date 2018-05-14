@@ -631,6 +631,24 @@ namespace StoryEngine
 
         }
 
+
+        public void ForceComplete()
+        {
+
+          
+
+            Debug.Log("Force complete, signoffs still required was " + (GENERAL.SIGNOFFS - signoffs));
+
+            signoffs = GENERAL.SIGNOFFS;
+            complete();
+
+
+
+        }
+
+
+
+
         void complete()
         {
 
