@@ -1144,6 +1144,31 @@ namespace StoryEngine
 
         //	public float lockValueY;
 
+            public void HideButton (string button)
+        {
+            UiButton target;
+            if (uiButtons.TryGetValue(button,out target))
+            {
+
+                if (target.gameObject != null)
+                    target.gameObject.transform.localScale = Vector3.zero;
+            }
+
+        }
+
+        public void ShowButton (string button)
+        {
+            UiButton target;
+            if (uiButtons.TryGetValue(button, out target))
+            {
+
+                if (target.gameObject != null)
+                    target.gameObject.transform.localScale = Vector3.one;
+            }
+
+
+        }
+
         public void none(object sender, UxArgs args)
         {
 
