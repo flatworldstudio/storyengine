@@ -56,7 +56,7 @@ namespace StoryEngine
 
 #if NETWORKED
 
-        TaskUpdateMessage updateSend,updateReceive;
+        TaskUpdateBundled updateSend,updateReceive;
 
         public Dictionary<string, bool> taskValuesChangeMask;
         List<string> changedTaskValue;
@@ -126,8 +126,8 @@ namespace StoryEngine
 
 #if NETWORKED
             taskValuesChangeMask = new Dictionary<string, bool>();
-            updateSend = new TaskUpdateMessage();
-            updateReceive = new TaskUpdateMessage();
+            updateSend = new TaskUpdateBundled();
+            updateReceive = new TaskUpdateBundled();
 
 #endif
 
@@ -145,14 +145,12 @@ namespace StoryEngine
 #if NETWORKED
 
 
-        public TaskUpdateMessage GetUpdate() {
+        public TaskUpdateBundled GetUpdateBundled() {
 
 
             // Bundled approach. NOTE FLAGS!
 
-            updateSend.Clear();
-
-            TaskUpdate msg = new TaskUpdate();
+            TaskUpdateBundled msg = new TaskUpdateBundled();
 
             msg.pointID = pointID;
 
@@ -166,7 +164,7 @@ namespace StoryEngine
 
                     msg.updatedIntNames.Add(intName);
 
-                    //taskValuesChangeMask[intName] = false;
+                    taskValuesChangeMask[intName] = false;
 
                     int intValue;
 
@@ -187,7 +185,7 @@ namespace StoryEngine
 
                     msg.updatedFloatNames.Add(floatName);
 
-                    //taskValuesChangeMask[floatName] = false;
+                    taskValuesChangeMask[floatName] = false;
 
                     float floatValue;
 
@@ -208,7 +206,7 @@ namespace StoryEngine
 
                     msg.updatedQuaternionNames.Add(quaternionName);
 
-                    //taskValuesChangeMask[quaternionName] = false;
+                    taskValuesChangeMask[quaternionName] = false;
 
                     Quaternion quaternionValue;
 
@@ -229,7 +227,7 @@ namespace StoryEngine
 
                     msg.updatedVector3Names.Add(vector3Name);
 
-                    //taskValuesChangeMask[vector3Name] = false;
+                    taskValuesChangeMask[vector3Name] = false;
 
                     Vector3 vector3Value;
 
@@ -250,7 +248,7 @@ namespace StoryEngine
 
                     msg.updatedStringNames.Add(stringName);
 
-                    //taskValuesChangeMask[stringName] = false;
+                    taskValuesChangeMask[stringName] = false;
 
                     string stringValue;
 
@@ -271,7 +269,7 @@ namespace StoryEngine
 
                     msg.updatedUshortNames.Add(ushortName);
 
-                    //taskValuesChangeMask[ushortName] = false;
+                    taskValuesChangeMask[ushortName] = false;
 
                     ushort[] ushortValue;
 
@@ -292,7 +290,7 @@ namespace StoryEngine
 
                     msg.updatedByteNames.Add(byteName);
 
-                    //taskValuesChangeMask[byteName] = false;
+                    taskValuesChangeMask[byteName] = false;
 
                     byte[] byteValue;
 
@@ -303,15 +301,15 @@ namespace StoryEngine
 
             }
 
-            //allModified = false;
+            allModified = false;
 
-            return updateSend;
+            return msg;
 
         }
 
 
 
-
+        /*
         public TaskUpdate GetUpdateMessage()
         {
 
@@ -487,10 +485,10 @@ namespace StoryEngine
             return msg;
 
         }
-
+*/
         string UpdateFrequency = "";
 
-        public void ApplyUpdateMessage(TaskUpdate update, bool changeMask = false)
+        public void ApplyUpdateMessage(TaskUpdateBundled update, bool changeMask = false)
         {
 
             //		Log.Message ("Applying network task update.");
@@ -501,52 +499,52 @@ namespace StoryEngine
             //			pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
             //		}
 
-            if (description == "userstream")
-            {
+            //if (description == "userstream")
+            //{
 
-                int CurrentFrame = Time.frameCount;
+            //    int CurrentFrame = Time.frameCount;
 
-                if (CurrentFrame - LastUpdateFrame==0)
-                {
+            //    if (CurrentFrame - LastUpdateFrame==0)
+            //    {
 
-                    UpdatesPerFrame++;
+            //        UpdatesPerFrame++;
 
 
-                }
-                if (CurrentFrame - LastUpdateFrame==1){
-                    // we're in the next frame
-                    UpdateFrequency += "" + UpdatesPerFrame;
+            //    }
+            //    if (CurrentFrame - LastUpdateFrame==1){
+            //        // we're in the next frame
+            //        UpdateFrequency += "" + UpdatesPerFrame;
                                        
-                    UpdatesPerFrame = 1;
+            //        UpdatesPerFrame = 1;
 
-                }
+            //    }
 
-                if (CurrentFrame - LastUpdateFrame>1){
-                    // we've skipped a frame
+            //    if (CurrentFrame - LastUpdateFrame>1){
+            //        // we've skipped a frame
 
-                    for (int f=LastUpdateFrame+1 ;f<CurrentFrame;f++){
-                        UpdateFrequency += "" + 0;
+            //        for (int f=LastUpdateFrame+1 ;f<CurrentFrame;f++){
+            //            UpdateFrequency += "" + 0;
 
-                    }
+            //        }
 
 
 
-                    UpdatesPerFrame = 1;
+            //        UpdatesPerFrame = 1;
 
-                }
+            //    }
 
                
 
 
 
-                if (UpdateFrequency.Length > 30)
-                {
-                    Debug.Log("update pattern:" + UpdateFrequency);
-                    setStringValue("debug",UpdateFrequency);
-                    UpdateFrequency = "";
-                }
-                LastUpdateFrame = CurrentFrame;
-            }
+            //    if (UpdateFrequency.Length > 30)
+            //    {
+            //        Debug.Log("update pattern:" + UpdateFrequency);
+            //        setStringValue("debug",UpdateFrequency);
+            //        UpdateFrequency = "";
+            //    }
+            //    LastUpdateFrame = CurrentFrame;
+            //}
             //MaxUpdatesPerFrame = Mathf.Max(MaxUpdatesPerFrame, UpdatesPerFrame);
 
 

@@ -18,11 +18,20 @@ namespace StoryEngine
 
     public class AssitantDirector : MonoBehaviour
     {
-        List <PointerUpdate> PointerUpdateStack;
+        List<PointerUpdate> PointerUpdateStack;
+        List<StoryUpdate> StoryUpdateStack;
 
         public event NewTasksEvent newTasksEvent;
 
-        StoryUpdate storyUpdateSend,storyUpdateReceive;
+        int lastStoryUpdateAtFrame = -1;
+
+        double[] frameDurationBuffer;
+        double frameDurrationBufferSum;
+        int frameDurationBufferIndex=0;
+        double  frameDurationAverage;
+
+    
+        //StoryUpdate storyUpdateSend,storyUpdateReceive;
 
 
         string me = "Assistant director";
@@ -38,11 +47,11 @@ namespace StoryEngine
         public ExtendedNetworkManager networkManager;
 
         const short stringCode = 1002;
-        const short pointerCode = 1003;
-        const short taskCode = 1004;
+        //const short pointerCode = 1003;
+        //const short taskCode = 1004;
         const short storyCode = 1005;
-
-
+        static   public double loadBalance=1;
+        static    public bool BufferStatusOk=true;
 
 #endif
 
@@ -67,10 +76,15 @@ namespace StoryEngine
             theDirector = new Director();
 
             GENERAL.ALLTASKS = new List<StoryTask>();
-            PointerUpdateStack=new List<PointerUpdate>();
+            PointerUpdateStack = new List<PointerUpdate>();
 
-             storyUpdateSend = new StoryUpdate();
-            storyUpdateReceive = new StoryUpdate();
+            StoryUpdateStack = new List<StoryUpdate>();
+
+            frameDurationBuffer=new double[5];
+
+
+            // storyUpdateSend = new StoryUpdate();
+            //storyUpdateReceive = new StoryUpdate();
 
 
 
@@ -152,10 +166,61 @@ namespace StoryEngine
 
         }
 
+
+
+
+
         void Update()
         //void LateUpdate()
         {
 
+            // Handle story updates, aiming for 1 per frame.
+
+            int UpdateCount = StoryUpdateStack.Count;
+
+            switch (UpdateCount)
+            {
+
+                case 0:
+                    break;
+
+                case 1:
+
+                    // exactly one, so apply.
+
+                    ApplyStoryUpdate(StoryUpdateStack[0]);
+                    StoryUpdateStack.RemoveAt(0);
+                    BufferStatusOk=true;
+                    break;
+
+                case 2:
+
+                    // Two, normally for different frames that happened to arrive in the same frame on this end. 
+                    // Apply one, keep the other because we exact 0 updates during our next frame.
+
+                    ApplyStoryUpdate(StoryUpdateStack[1]);
+                    StoryUpdateStack.RemoveAt(1);
+                    BufferStatusOk=true;
+                    break;
+
+                default:
+
+                    // Overflowing. Apply all exept one.
+
+                    for (int u = UpdateCount - 1; u > 0; u--)
+                    {
+
+                        ApplyStoryUpdate(StoryUpdateStack[u]);
+                        StoryUpdateStack.RemoveAt(u);
+
+                    }
+
+                    BufferStatusOk=false;
+                    break;
+
+            }
+
+            /*
             // Handle pointer killing updates first.
 
             for (int m=PointerUpdateStack.Count-1;m>=0;m--){
@@ -202,7 +267,7 @@ namespace StoryEngine
 
 
             }
-            
+            */
 
             switch (theDirector.status)
             {
@@ -353,13 +418,179 @@ namespace StoryEngine
 
 #if NETWORKED
 
+        void ApplyStoryUpdate(StoryUpdate storyUpdate)
+        {
+
+            //Debug.Log("Applying storyupdate \n"+storyUpdate.DebugLog);
+
+            // load balance
+
+            loadBalance = frameDurationAverage/storyUpdate.frameDuration;
+
+            //Debug.Log("load balance ours/theirs (>1 they run faster) "+ loadBalance);
+
+            PointerUpdateBundled pointerUpdateBundled;
+
+            while (storyUpdate.GetPointerUpdate(out pointerUpdateBundled))
+            {
+
+                ApplyPointerUpdate(pointerUpdateBundled);
+
+            }
+
+            TaskUpdateBundled taskUpdateBundled;
+
+            while (storyUpdate.GetTaskUpdate(out taskUpdateBundled))
+            {
+
+                ApplyTaskUpdate(taskUpdateBundled);
+
+            }
+
+        }
+
+        void ApplyPointerUpdate(PointerUpdateBundled pointerUpdate)
+        {
+
+            // Right now the only update we send for pointers is when they are killed.
+
+            StoryPointer pointer = GENERAL.GetStorylinePointerForPointID(pointerUpdate.storyPointID);
+
+            Log.Message("Server update for pointer " + pointerUpdate.storyPointID);
+
+            if (pointer != null && pointerUpdate.killed)
+            {
+                pointer.Kill();
+
+                //if (pointer.currentTask.description=="moodon"){
+                //    Debug.Log("moodon task pointer killed at "+Time.frameCount);
+                //}
+
+                if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
+                {
+
+                    Log.Message("Removing task " + pointer.currentTask.description);
+
+                }
+                else
+                {
+
+                    Log.Warning("Failed removing task " + pointer.currentTask.description);
+
+                }
+
+
+            }
+
+        }
+
+        void ApplyTaskUpdate(TaskUpdateBundled taskUpdate)
+        {
+
+
+
+            // See if we have a task on this storypoint.
+
+            StoryTask updateTask = GENERAL.GetTaskForPoint(taskUpdate.pointID);
+
+
+            if (updateTask == null)
+            {
+
+                // If not, and we're a client, we create the task.
+                // If we're the server, we ignore updates for task we no longer know about.
+
+                if (GENERAL.AUTHORITY == AUTHORITY.LOCAL)
+                {
+
+                    updateTask = new StoryTask(taskUpdate.pointID, SCOPE.GLOBAL);
+                    updateTask.ApplyUpdateMessage(taskUpdate);
+
+                    //if (updateTask.description=="moodon"){
+                    //    Debug.Log("moodon created at "+Time.frameCount);
+
+                    //}
+
+                    Log.Message("Created an instance of global task " + updateTask.description);
+
+                    if (taskUpdate.pointID != "GLOBALS")
+                    {
+
+                        // Now find a pointer.
+
+                        StoryPointer updatePointer = GENERAL.GetStorylinePointerForPointID(taskUpdate.pointID);
+
+                        if (updatePointer == null)
+                        {
+
+                            updatePointer = new StoryPointer();
+
+                            Log.Message("Created a new pointer for new task.");
+
+                        }
+
+                        updatePointer.PopulateWithTask(updateTask);
+
+                        Log.Message("Populated pointer from task. " + updatePointer.currentPoint.storyLineName);
+
+                        DistributeTasks(new TaskArgs(updateTask));
+
+                    }
+                }
+
+
+            }
+            else
+            {
+
+                updateTask.ApplyUpdateMessage(taskUpdate);
+
+                updateTask.scope = SCOPE.GLOBAL;
+
+                Log.Message("Applied update to existing task.");
+
+                //if (updateTask.description=="moodon"){
+                //    Debug.Log("moodon updated at "+Time.frameCount);
+
+                //}
+            }
+
+        }
+
+
+#endif
+
+
+#if NETWORKED
+
         void LateUpdate()
         {
 
             // New approach: bundled updates.
 
-            storyUpdateSend.Clear();
+            StoryUpdate storyUpdate = new StoryUpdate();
 
+            // Average framerate
+
+            float current = Time.deltaTime;
+
+            // replace the value at the current index.
+
+            frameDurrationBufferSum-=frameDurationBuffer[frameDurationBufferIndex];
+            frameDurationBuffer[frameDurationBufferIndex]=current;
+            frameDurrationBufferSum+=current;
+            frameDurationBufferIndex = (frameDurationBufferIndex+1)%frameDurationBuffer.Length;
+            frameDurationAverage = (frameDurrationBufferSum/frameDurationBuffer.Length);
+
+            storyUpdate.frameDuration=frameDurationAverage;
+
+
+            if (loadBalance<0.5f){
+
+                Debug.Log("balancing load: we are sending too many");
+
+            }
+            //Debug.Log ("duration av: "+frameDurationAverage);
             // Iterate over all pointers to see if any were killed. Clients do not kill pointers themselves.
 
             for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++)
@@ -372,9 +603,9 @@ namespace StoryEngine
 
                     Log.Message("Sending pointer (killed) update to clients: " + pointer.currentPoint.storyLineName);
 
-                    storyUpdateSend.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
+                    storyUpdate.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
 
-                    sendPointerUpdateToClients(pointer.GetUpdateMessage()); // individual
+                    //SendPointerUpdateToClients(pointer.GetUpdateMessage()); // individual
 
                     pointer.modified = false;
 
@@ -382,7 +613,7 @@ namespace StoryEngine
 
 
                     //if (pointer.currentTask.description=="moodon"){
-                   
+
                     //        Debug.Log("moodon pointer killed update sent at "+Time.frameCount);
 
                     //}
@@ -427,9 +658,10 @@ namespace StoryEngine
                             {
 
                                 Log.Message("Global task " + task.description + " changed, sending update to server.");
-                                storyUpdateSend.AddTaskUpdate(task.GetUpdate()); // bundled
 
-                                sendTaskUpdateToServer(task.GetUpdateMessage());
+                                storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+
+                                //sendTaskUpdateToServer(task.GetUpdateMessage());
 
                             }
 
@@ -441,9 +673,10 @@ namespace StoryEngine
                             {
 
                                 Log.Message("Global task " + task.description + " changed, sending update to clients.");
-                                storyUpdateSend.AddTaskUpdate(task.GetUpdate()); // bundled
 
-                                sendTaskUpdateToClients(task.GetUpdateMessage());
+                                storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+
+                                //sendTaskUpdateToClients(task.GetUpdateMessage());
 
                                 //if (task.description=="moodon"){
                                 //    Debug.Log("moodon task update sent at "+Time.frameCount);
@@ -463,24 +696,30 @@ namespace StoryEngine
 
             }
 
-            if (storyUpdateSend.AnythingToSend()){
+            if (storyUpdate.AnythingToSend())
+            {
 
                 switch (GENERAL.AUTHORITY)
                 {
                     case AUTHORITY.LOCAL:
-                        Debug.Log("Sending story update to server. \n"+ storyUpdateSend.DebugLog);
-                        SendStoryUpdateToServer (storyUpdateSend);
+                        SendStoryUpdateToServer(storyUpdate);
+                        //Debug.Log("Sending story update to server. \n" + storyUpdate.DebugLog);
+
                         break;
                     case AUTHORITY.GLOBAL:
-                        Debug.Log("Sending story update to clients. \n"+ storyUpdateSend.DebugLog);
-                        SendStoryUpdateToClients (storyUpdateSend);
+
+                        SendStoryUpdateToClients(storyUpdate);
+
+                        //Debug.Log("Sending story update to clients. \n" + storyUpdate.DebugLog);
+                        //Debug.Log(storyUpdate.ToString());
+
                         break;
                     default:
                         break;
 
 
                 }
-          
+
             }
 
         }
@@ -500,8 +739,9 @@ namespace StoryEngine
 
             Log.Message("Registering server message handlers.");
 
-            NetworkServer.RegisterHandler(stringCode, onMessageFromClient);
-            NetworkServer.RegisterHandler(taskCode, onTaskUpdateFromClient);
+            NetworkServer.RegisterHandler(stringCode, OnMessageFromClient);
+            //NetworkServer.RegisterHandler(taskCode, onTaskUpdateFromClient);
+            NetworkServer.RegisterHandler(storyCode, OnStoryUpdateFromClient);
 
         }
 
@@ -516,9 +756,11 @@ namespace StoryEngine
         {
 
             Log.Message("Registering client message handlers.");
-            theClient.RegisterHandler(stringCode, onMessageFromServer);
-            theClient.RegisterHandler(pointerCode, onPointerUpdateFromServer);
-            theClient.RegisterHandler(taskCode, onTaskUpdateFromServer);
+
+            theClient.RegisterHandler(stringCode, OnMessageFromServer);
+            //theClient.RegisterHandler(pointerCode, OnPointerUpdateFromServer);
+            //theClient.RegisterHandler(taskCode, onTaskUpdateFromServer);
+            theClient.RegisterHandler(storyCode, OnStoryUpdateFromServer);
 
         }
 
@@ -588,7 +830,7 @@ namespace StoryEngine
 
         // Handle basic string messages.
 
-        void onMessageFromClient(NetworkMessage netMsg)
+        void OnMessageFromClient(NetworkMessage netMsg)
         {
             var message = netMsg.ReadMessage<StringMessage>();
 
@@ -596,7 +838,7 @@ namespace StoryEngine
 
         }
 
-        void onMessageFromServer(NetworkMessage netMsg)
+        void OnMessageFromServer(NetworkMessage netMsg)
         {
             var message = netMsg.ReadMessage<StringMessage>();
 
@@ -615,12 +857,13 @@ namespace StoryEngine
 
         // Handle pointer messages.
 
-        void onPointerUpdateFromServer(NetworkMessage netMsg)
-        {
-            PointerUpdate message = netMsg.ReadMessage<PointerUpdate>();
-            PointerUpdateStack.Add(message);
+        //void OnPointerUpdateFromServer(NetworkMessage netMsg)
+        //{
+        //    PointerUpdate message = netMsg.ReadMessage<PointerUpdate>();
 
-        }
+        //    PointerUpdateStack.Add(message);
+
+        //}
 
         //void onPointerUpdateFromServerBAK(NetworkMessage netMsg)
         //{
@@ -660,28 +903,29 @@ namespace StoryEngine
 
         //}
 
-        public void sendPointerUpdateToClients(PointerUpdate pointerMessage)
-        {
+        //public void SendPointerUpdateToClients(PointerUpdate pointerMessage)
+        //{
 
-            NetworkServer.SendToAll(pointerCode, pointerMessage);
+        //    NetworkServer.SendToAll(pointerCode, pointerMessage);
 
-        }
+        //}
 
         // Handle task messages.
 
-        void onTaskUpdateFromServer(NetworkMessage networkMessage)
-        {
+        //void onTaskUpdateFromServer(NetworkMessage networkMessage)
+        //{
 
-            var taskUpdate = networkMessage.ReadMessage<TaskUpdate>();
+        //    var taskUpdate = networkMessage.ReadMessage<TaskUpdate>();
 
-            Log.Message("Incoming task update for point: " + taskUpdate.pointID);
+        //    Log.Message("Incoming task update for point: " + taskUpdate.pointID);
 
-            applyTaskUpdate(taskUpdate);
+        //    applyTaskUpdate(taskUpdate);
 
 
 
-        }
+        //}
 
+        /*
         void onTaskUpdateFromClient(NetworkMessage netMsg)
         {
 
@@ -737,80 +981,8 @@ namespace StoryEngine
             Log.Message(debug);
 
         }
-
-        void applyTaskUpdate(TaskUpdate taskUpdate)
-        {
-
-            // See if we have a task on this storypoint.
-
-            StoryTask updateTask = GENERAL.GetTaskForPoint(taskUpdate.pointID);
-
-           
-
-            if (updateTask == null)
-            {
-
-
-
-                // If not, and we're a client, we create the task.
-                // If we're the server, we ignore updates for task we no longer know about.
-
-                if (GENERAL.AUTHORITY == AUTHORITY.LOCAL)
-                {
-
-                    updateTask = new StoryTask(taskUpdate.pointID, SCOPE.GLOBAL);
-                    updateTask.ApplyUpdateMessage(taskUpdate);
-
-                    //if (updateTask.description=="moodon"){
-                    //    Debug.Log("moodon created at "+Time.frameCount);
-
-                    //}
-
-                    Log.Message("Created an instance of global task " + updateTask.description);
-
-                    if (taskUpdate.pointID != "GLOBALS")
-                    {
-
-                        // Now find a pointer.
-
-                        StoryPointer updatePointer = GENERAL.GetStorylinePointerForPointID(taskUpdate.pointID);
-
-                        if (updatePointer == null)
-                        {
-
-                            updatePointer = new StoryPointer();
-
-                            Log.Message("Created a new pointer for new task.");
-
-                        }
-
-                        updatePointer.PopulateWithTask(updateTask);
-
-                        Log.Message("Populated pointer from task. " + updatePointer.currentPoint.storyLineName);
-
-                        DistributeTasks(new TaskArgs(updateTask));
-
-                    }
-                }
-
-
-            }
-            else
-            {
-
-                updateTask.ApplyUpdateMessage(taskUpdate);
-
-                updateTask.scope = SCOPE.GLOBAL;
-
-                Log.Message("Applied update to existing task.");
-
-                //if (updateTask.description=="moodon"){
-                //    Debug.Log("moodon updated at "+Time.frameCount);
-
-                //}
-            }
-
-        }
+*/
+       
 
         // Send bundled story updates
 
@@ -819,6 +991,8 @@ namespace StoryEngine
 
             NetworkServer.SendToAll(storyCode, message);
 
+
+            //Log.Message (message.Serialize());
         }
 
         void SendStoryUpdateToServer(StoryUpdate message)
@@ -828,28 +1002,46 @@ namespace StoryEngine
 
         }
 
+        // 
+
+        void OnStoryUpdateFromClient(NetworkMessage netMsg)
+        {
+
+            StoryUpdateStack.Add(netMsg.ReadMessage<StoryUpdate>());
+
+        }
+
+        void OnStoryUpdateFromServer(NetworkMessage netMsg)
+        {
+
+            StoryUpdateStack.Add(netMsg.ReadMessage<StoryUpdate>());
+
+
+        }
+
+
         // Task updates.
 
 
-        void sendTaskUpdateToServer(TaskUpdate message)
-        {
+        //void sendTaskUpdateToServer(TaskUpdate message)
+        //{
 
-            networkManager.client.Send(taskCode, message);
+        //    networkManager.client.Send(taskCode, message);
 
-            //		Log.Message ( "Sending task update to server. ");
-            //		Log.Message (message.toString());
+        //    //		Log.Message ( "Sending task update to server. ");
+        //    //		Log.Message (message.toString());
 
-        }
+        //}
 
-        void sendTaskUpdateToClients(TaskUpdate message)
-        {
+        //void sendTaskUpdateToClients(TaskUpdate message)
+        //{
 
-            NetworkServer.SendToAll(taskCode, message);
+        //    NetworkServer.SendToAll(taskCode, message);
 
-            //		Log.Message ( "Sending task update to all clients. ");
-            //		Log.Message (message.toString());
+        //    //		Log.Message ( "Sending task update to all clients. ");
+        //    //	Log.Message (message.toString());
 
-        }
+        //}
 
         public void sendMessageToServer(string value)
         {

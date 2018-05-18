@@ -42,7 +42,7 @@ namespace StoryEngine
 
 #if NETWORKED
         public bool modified;
-        PointerUpdateMessage updateMessage;
+        PointerUpdateBundled updateMessageSend;
 #endif
 
         string me = "Storypointer";
@@ -55,7 +55,7 @@ namespace StoryEngine
             status = POINTERSTATUS.PAUSED;
            GENERAL.ALLPOINTERS.Add(this);
 
-           updateMessage = new PointerUpdateMessage(); // we'll reuse.
+            updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
 
 
         }
@@ -75,7 +75,7 @@ namespace StoryEngine
 
             GENERAL.ALLPOINTERS.Add(this);
 
-            updateMessage = new PointerUpdateMessage(); // we'll reuse.
+            updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
 
 
         }
@@ -120,24 +120,24 @@ namespace StoryEngine
 
         }
 
-        public PointerUpdateMessage GetUpdate()
+        public PointerUpdateBundled GetUpdate()
         {
             // bundled approach.
             // Generate a network update message for this pointer. (In effect: if it was killed.)
 
-            updateMessage.storyPointID = currentPoint.ID;
+            updateMessageSend.storyPointID = currentPoint.ID;
 
             if (status == POINTERSTATUS.KILLED)
             {
-                updateMessage.killed = true;
+                updateMessageSend.killed = true;
 
             } else{
                 
-                updateMessage.killed = false;
+                updateMessageSend.killed = false;
 
             }
 
-            return updateMessage;
+            return updateMessageSend;
 
         }
 

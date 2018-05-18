@@ -16,78 +16,182 @@ namespace StoryEngine
     {
 
         public string DebugLog;
-        List<PointerUpdateMessage> pointerUpdateMessages;
-        List<TaskUpdateMessage> taskUpdateMessages;
-
+        public List<PointerUpdateBundled> pointerUpdates;
+        public List<TaskUpdateBundled> taskUpdates;
+        public double frameDuration;
 
         public StoryUpdate() : base()
         {
             // Extended constructor.
-            pointerUpdateMessages = new List<PointerUpdateMessage>();
-            taskUpdateMessages = new List<TaskUpdateMessage>();
+
+            DebugLog = "Created storyupdate. \n";
+
+            pointerUpdates = new List<PointerUpdateBundled>();
+            taskUpdates = new List<TaskUpdateBundled>();
 
         }
 
         public bool AnythingToSend()
         {
 
-            return (pointerUpdateMessages.Count > 0 || taskUpdateMessages.Count > 0);
+            return (pointerUpdates.Count > 0 || taskUpdates.Count > 0);
 
         }
 
-        public void Clear()
+        public bool GetPointerUpdate(out PointerUpdateBundled pointerUpdate)
         {
-            // Clear for reuse.
 
-            DebugLog = "Created storyupdate. \n";
-            pointerUpdateMessages.Clear();
-            taskUpdateMessages.Clear();
+            int count = pointerUpdates.Count;
 
+            if (count > 0)
+            {
+                pointerUpdate = pointerUpdates[count - 1];
+                pointerUpdates.RemoveAt(count - 1);
+                return true;
+            }
+            pointerUpdate=null;
+                return false;
+           
         }
 
-        public void AddStoryPointerUpdate(PointerUpdateMessage pointerUpdateMessage)
+        public bool GetTaskUpdate(out TaskUpdateBundled taskUpdate)
         {
 
-            pointerUpdateMessages.Add(pointerUpdateMessage);
+            int count = taskUpdates.Count;
+
+            if (count > 0)
+            {
+                taskUpdate = taskUpdates[count - 1];
+                taskUpdates.RemoveAt(count - 1);
+                return true;
+            }
+            taskUpdate=null;
+            return false;
+
+        }
+        //public void Clear()
+        //{
+        //    // Clear for reuse.
+
+        //    DebugLog = "Created storyupdate. \n";
+        //    pointerUpdateMessages.Clear();
+        //    taskUpdateMessages.Clear();
+
+        //}
+
+        //public void Apply(){
+
+        //    // evaluate.
+
+
+
+        //}
+
+        public void AddStoryPointerUpdate(PointerUpdateBundled pointerUpdateMessage)
+        {
+
+            pointerUpdates.Add(pointerUpdateMessage);
             DebugLog += "Added pointer update. \n";
 
         }
 
-        public void AddTaskUpdate(TaskUpdateMessage taskUpdateMessage)
+        public void AddTaskUpdate(TaskUpdateBundled taskUpdateMessage)
         {
 
-            taskUpdateMessages.Add(taskUpdateMessage);
+            taskUpdates.Add(taskUpdateMessage);
             DebugLog += "Added task update. \n";
 
         }
 
-
-
         public override void Deserialize(NetworkReader reader)
         {
+
+            // Write their current framerate.
+
+            frameDuration= reader.ReadDouble();
+
+            DebugLog+="Their average duration: "+ frameDuration;
+
+            // Pointer updates first. First get the number of messages, then deserialise them.
+          
+            Int16 count = reader.ReadInt16();
+
+            //Debug.Log("pointer updates "+count);
+
+            for (int n = 0; n < count; n++)
+            {
+
+                pointerUpdates.Add(new PointerUpdateBundled());
+                DebugLog += pointerUpdates[n].Deserialize(ref reader);
+
+            }
+
+            // Task updates next. First get the number of messages, then deserialise them.
+
+            count = reader.ReadInt16();
+
+            //Debug.Log("task updates "+count);
+
+            for (int n = 0; n < count; n++)
+            {
+
+                taskUpdates.Add(new TaskUpdateBundled());
+                DebugLog += taskUpdates[n].Deserialize(ref reader);
+
+            }
 
         }
 
         public override void Serialize(NetworkWriter writer)
         {
+
+            // Write our current framerate.
+
+            writer.Write(frameDuration);
+
+            DebugLog+="Our average duration: "+ frameDuration;
+
             // Pointer updates first. First write the number of messages, then serialise them.
 
-            writer.Write(pointerUpdateMessages.Count);
+            Int16 count = (Int16) pointerUpdates.Count;
 
-            for (int m = 0; m < pointerUpdateMessages.Count; m++)
-            {
-                DebugLog += pointerUpdateMessages[m].Serialize(ref writer);
+            writer.Write (count);
+
+            for (int i = 0; i < count; i++){
+                
+                DebugLog += pointerUpdates[i].Serialize(ref writer);
+
             }
+
+            //Int16 m = 0;
+
+            //while (m < pointerUpdates.Count)
+            //{
+            //    DebugLog += pointerUpdates[m].Serialize(ref writer);
+            //    m++;
+            //}
+
 
             // Task updates next. First write the number of messages, then serialise them.
+            count = (Int16) taskUpdates.Count;
 
-            writer.Write(taskUpdateMessages.Count);
+            writer.Write(count);
 
-            for (int m = 0; m < taskUpdateMessages.Count; m++)
-            {
+            for (int i = 0; i < count; i++){
 
-                DebugLog += pointerUpdateMessages[m].Serialize(ref writer);
+                DebugLog += taskUpdates[i].Serialize(ref writer);
+
             }
+
+            //m = 0;
+
+            //while (m < taskUpdates.Count)
+            //{
+            //    DebugLog += taskUpdates[m].Serialize(ref writer);
+            //    m++;
+            //}
+
+            //Debug.Log("serialised " +DebugLog);
 
         }
 
@@ -108,7 +212,7 @@ namespace StoryEngine
     }
 
 
-    public class PointerUpdateMessage
+    public class PointerUpdateBundled
     {
 
         public string storyPointID;
@@ -150,7 +254,7 @@ namespace StoryEngine
 
 
 
-    public class TaskUpdateMessage
+    public class TaskUpdateBundled
     {
 
         public string pointID;
@@ -178,7 +282,7 @@ namespace StoryEngine
 
         public string debug;
 
-        public TaskUpdateMessage() : base()
+        public TaskUpdateBundled() : base()
         {
 
             updatedIntNames = new List<string>();
@@ -203,37 +307,37 @@ namespace StoryEngine
             updatedByteValues = new List<byte[]>();
         }
 
-        public void Clear()
-        {
+        //public void Clear()
+        //{
 
-            updatedIntNames.Clear();
-            updatedIntValues.Clear();
+        //    updatedIntNames.Clear();
+        //    updatedIntValues.Clear();
 
-            updatedFloatNames.Clear();
-            updatedFloatValues.Clear();
+        //    updatedFloatNames.Clear();
+        //    updatedFloatValues.Clear();
 
-            updatedQuaternionNames.Clear();
-            updatedQuaternionValues.Clear();
+        //    updatedQuaternionNames.Clear();
+        //    updatedQuaternionValues.Clear();
 
-            updatedVector3Names.Clear();
-            updatedVector3Values.Clear();
+        //    updatedVector3Names.Clear();
+        //    updatedVector3Values.Clear();
 
-            updatedStringNames.Clear();
-            updatedStringValues.Clear();
+        //    updatedStringNames.Clear();
+        //    updatedStringValues.Clear();
 
-            updatedUshortNames.Clear();
-            updatedUshortValues.Clear();
+        //    updatedUshortNames.Clear();
+        //    updatedUshortValues.Clear();
 
-            updatedByteNames.Clear();
-            updatedByteValues.Clear();
+        //    updatedByteNames.Clear();
+        //    updatedByteValues.Clear();
 
-        }
+        //}
 
         public string Deserialize(ref NetworkReader reader)
         {
             // When deserialising we handle clearing here.
 
-            Clear();
+            //Clear();
 
             debug = "Task update deserialing.";
 
