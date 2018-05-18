@@ -198,18 +198,18 @@ namespace StoryEngine
                 case 2:
 
                     // Two, normally for different frames that happened to arrive in the same frame on this end. 
-                    // Apply one, keep the other because we exact 0 updates during our next frame.
+                    // Apply the oldest one, keep the other because we exact 0 updates during our next frame.
 
-                    ApplyStoryUpdate(StoryUpdateStack[1]);
-                    StoryUpdateStack.RemoveAt(1);
+                    ApplyStoryUpdate(StoryUpdateStack[0]);
+                    StoryUpdateStack.RemoveAt(0);
                     BufferStatusOk=true;
                     break;
 
                 default:
 
-                    // Overflowing. Apply all exept one.
+                    // Overflowing. Apply the oldest ones, keep the latest.
 
-                    for (int u = UpdateCount - 1; u > 0; u--)
+                    for (int u = UpdateCount - 2; u >= 0; u--)
                     {
 
                         ApplyStoryUpdate(StoryUpdateStack[u]);
@@ -688,8 +688,9 @@ namespace StoryEngine
                 }
 
                 // If anything to send, send. 
+                // If not, and buffer is overflowing, send updates randomly once a second.
 
-                if (storyUpdate.AnythingToSend())
+                if (storyUpdate.AnythingToSend() || (!AssitantDirector.BufferStatusOk && Random.value<frameDurationAverage))
                 {
 
                     switch (GENERAL.AUTHORITY)
