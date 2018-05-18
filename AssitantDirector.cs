@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
+using Random = UnityEngine.Random;
+
 
 #if NETWORKED
 using UnityEngine.Networking;
@@ -570,12 +572,10 @@ namespace StoryEngine
 
             StoryUpdate storyUpdate = new StoryUpdate();
 
-            // Average framerate
+            // Calculate average framerate.
 
             float current = Time.deltaTime;
-
-            // replace the value at the current index.
-
+            
             frameDurrationBufferSum-=frameDurationBuffer[frameDurationBufferIndex];
             frameDurationBuffer[frameDurationBufferIndex]=current;
             frameDurrationBufferSum+=current;
@@ -584,141 +584,142 @@ namespace StoryEngine
 
             storyUpdate.frameDuration=frameDurationAverage;
 
+            // Check our loadbalance. If we're sending too many updates we'll randomly drop frames.
+            // All changes will be sent but if values are updated in the meantime the previous value will never be sent.
+            // This is ok for running values but not ok for status values etc.
 
-            if (loadBalance<0.5f){
-
-                Debug.Log("balancing load: we are sending too many");
-
-            }
-            //Debug.Log ("duration av: "+frameDurationAverage);
-            // Iterate over all pointers to see if any were killed. Clients do not kill pointers themselves.
-
-            for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++)
+            if (loadBalance > 0.90f || Random.value < loadBalance )
             {
 
-                StoryPointer pointer = GENERAL.ALLPOINTERS[p];
+                // Iterate over all pointers to see if any were killed. Clients do not kill pointers themselves.
 
-                if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified && pointer.GetStatus() == POINTERSTATUS.KILLED)
+                for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++)
                 {
 
-                    Log.Message("Sending pointer (killed) update to clients: " + pointer.currentPoint.storyLineName);
+                    StoryPointer pointer = GENERAL.ALLPOINTERS[p];
 
-                    storyUpdate.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
-
-                    //SendPointerUpdateToClients(pointer.GetUpdateMessage()); // individual
-
-                    pointer.modified = false;
-
-
-
-
-                    //if (pointer.currentTask.description=="moodon"){
-
-                    //        Debug.Log("moodon pointer killed update sent at "+Time.frameCount);
-
-                    //}
-
-
-                }
-
-            }
-
-            // Iterate over all tasks.
-
-            for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i--)
-            {
-
-                StoryTask task = GENERAL.ALLTASKS[i];
-
-                // Cleanup completed tasks.
-
-                if (task.getStatus() == TASKSTATUS.COMPLETE)
-                {
-
-                    GENERAL.ALLTASKS.RemoveAt(i);
-
-                    Log.Message("Task " + task.description + " completed, removing from alltasks. ");
-
-                    //if (task.description=="moodon"){
-                    //    Debug.Log("moodon task removed at "+Time.frameCount);
-                    //}
-                }
-
-                if (task.modified)
-                {
-
-                    // Check if we need to send network updates.
-
-                    switch (GENERAL.AUTHORITY)
+                    if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified && pointer.GetStatus() == POINTERSTATUS.KILLED)
                     {
 
-                        case AUTHORITY.LOCAL:
+                        Log.Message("Sending pointer (killed) update to clients: " + pointer.currentPoint.storyLineName);
 
-                            if (task.scope == SCOPE.GLOBAL)
-                            {
+                        storyUpdate.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
 
-                                Log.Message("Global task " + task.description + " changed, sending update to server.");
+                        //SendPointerUpdateToClients(pointer.GetUpdateMessage()); // individual
 
-                                storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+                        pointer.modified = false;
 
-                                //sendTaskUpdateToServer(task.GetUpdateMessage());
-
-                            }
-
-                            break;
-
-                        case AUTHORITY.GLOBAL:
-
-                            if (task.scope == SCOPE.GLOBAL)
-                            {
-
-                                Log.Message("Global task " + task.description + " changed, sending update to clients.");
-
-                                storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
-
-                                //sendTaskUpdateToClients(task.GetUpdateMessage());
-
-                                //if (task.description=="moodon"){
-                                //    Debug.Log("moodon task update sent at "+Time.frameCount);
-                                //}
-                            }
-
-                            break;
-
-                        default:
-
-                            break;
 
                     }
 
-                    task.modified = false;
+                }
+
+                // Iterate over all tasks.
+
+                for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i--)
+                {
+
+                    StoryTask task = GENERAL.ALLTASKS[i];
+
+                    // Cleanup completed tasks.
+
+                    if (task.getStatus() == TASKSTATUS.COMPLETE)
+                    {
+
+                        GENERAL.ALLTASKS.RemoveAt(i);
+
+                        Log.Message("Task " + task.description + " completed, removing from alltasks. ");
+
+                        //if (task.description=="moodon"){
+                        //    Debug.Log("moodon task removed at "+Time.frameCount);
+                        //}
+                    }
+
+                    if (task.modified)
+                    {
+
+                        // Check if we need to send network updates.
+
+                        switch (GENERAL.AUTHORITY)
+                        {
+
+                            case AUTHORITY.LOCAL:
+
+                                if (task.scope == SCOPE.GLOBAL)
+                                {
+
+                                    Log.Message("Global task " + task.description + " changed, sending update to server.");
+
+                                    storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+
+                                    //sendTaskUpdateToServer(task.GetUpdateMessage());
+
+                                }
+
+                                break;
+
+                            case AUTHORITY.GLOBAL:
+
+                                if (task.scope == SCOPE.GLOBAL)
+                                {
+
+                                    Log.Message("Global task " + task.description + " changed, sending update to clients.");
+
+                                    storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+
+                                    //sendTaskUpdateToClients(task.GetUpdateMessage());
+
+                                    //if (task.description=="moodon"){
+                                    //    Debug.Log("moodon task update sent at "+Time.frameCount);
+                                    //}
+                                }
+
+                                break;
+
+                            default:
+
+                                break;
+
+                        }
+
+                        task.modified = false;
+                    }
+
+                }
+
+                // If anything to send, send. 
+
+                if (storyUpdate.AnythingToSend())
+                {
+
+                    switch (GENERAL.AUTHORITY)
+                    {
+                        case AUTHORITY.LOCAL:
+                            SendStoryUpdateToServer(storyUpdate);
+                            //Debug.Log("Sending story update to server. \n" + storyUpdate.DebugLog);
+
+                            break;
+                        case AUTHORITY.GLOBAL:
+
+                            SendStoryUpdateToClients(storyUpdate);
+
+                            //Debug.Log("Sending story update to clients. \n" + storyUpdate.DebugLog);
+                            //Debug.Log(storyUpdate.ToString());
+
+                            break;
+                        default:
+                            break;
+
+
+                    }
+
                 }
 
             }
-
-            if (storyUpdate.AnythingToSend())
+            else
             {
 
-                switch (GENERAL.AUTHORITY)
-                {
-                    case AUTHORITY.LOCAL:
-                        SendStoryUpdateToServer(storyUpdate);
-                        //Debug.Log("Sending story update to server. \n" + storyUpdate.DebugLog);
-
-                        break;
-                    case AUTHORITY.GLOBAL:
-
-                        SendStoryUpdateToClients(storyUpdate);
-
-                        //Debug.Log("Sending story update to clients. \n" + storyUpdate.DebugLog);
-                        //Debug.Log(storyUpdate.ToString());
-
-                        break;
-                    default:
-                        break;
-
-
-                }
+                Debug.Log("Dropping update.");
 
             }
 
