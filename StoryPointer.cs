@@ -13,16 +13,7 @@ using UnityEngine.Networking.NetworkSystem;
 namespace StoryEngine
 {
 
-#if NETWORKED
 
-    public class PointerUpdate : MessageBase
-    {
-
-        public string storyPointID;
-        public bool killed = false;
-
-    }
-#endif
 
 
     public enum POINTERSTATUS
@@ -51,6 +42,7 @@ namespace StoryEngine
 
 #if NETWORKED
         public bool modified;
+        PointerUpdateMessage updateMessage;
 #endif
 
         string me = "Storypointer";
@@ -62,7 +54,9 @@ namespace StoryEngine
 
             status = POINTERSTATUS.PAUSED;
            GENERAL.ALLPOINTERS.Add(this);
-           
+
+           updateMessage = new PointerUpdateMessage(); // we'll reuse.
+
 
         }
 
@@ -80,6 +74,9 @@ namespace StoryEngine
          //   GENERAL.AddPointer(this);
 
             GENERAL.ALLPOINTERS.Add(this);
+
+            updateMessage = new PointerUpdateMessage(); // we'll reuse.
+
 
         }
 
@@ -122,6 +119,31 @@ namespace StoryEngine
             return message;
 
         }
+
+        public PointerUpdateMessage GetUpdate()
+        {
+            // bundled approach.
+            // Generate a network update message for this pointer. (In effect: if it was killed.)
+
+            updateMessage.storyPointID = currentPoint.ID;
+
+            if (status == POINTERSTATUS.KILLED)
+            {
+                updateMessage.killed = true;
+
+            } else{
+                
+                updateMessage.killed = false;
+
+            }
+
+            return updateMessage;
+
+        }
+
+
+
+
 
         public void Kill()
         {

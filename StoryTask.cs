@@ -56,6 +56,8 @@ namespace StoryEngine
 
 #if NETWORKED
 
+        TaskUpdateMessage updateSend,updateReceive;
+
         public Dictionary<string, bool> taskValuesChangeMask;
         List<string> changedTaskValue;
         public bool modified = false;
@@ -124,6 +126,9 @@ namespace StoryEngine
 
 #if NETWORKED
             taskValuesChangeMask = new Dictionary<string, bool>();
+            updateSend = new TaskUpdateMessage();
+            updateReceive = new TaskUpdateMessage();
+
 #endif
 
             setStatus(TASKSTATUS.ACTIVE);
@@ -138,6 +143,174 @@ namespace StoryEngine
         }
 
 #if NETWORKED
+
+
+        public TaskUpdateMessage GetUpdate() {
+
+
+            // Bundled approach. NOTE FLAGS!
+
+            updateSend.Clear();
+
+            TaskUpdate msg = new TaskUpdate();
+
+            msg.pointID = pointID;
+
+            string[] intNames = taskIntValues.Keys.ToArray();
+
+            foreach (string intName in intNames)
+            {
+
+                if (taskValuesChangeMask[intName] || allModified)
+                {
+
+                    msg.updatedIntNames.Add(intName);
+
+                    //taskValuesChangeMask[intName] = false;
+
+                    int intValue;
+
+                    if (taskIntValues.TryGetValue(intName, out intValue))
+                        msg.updatedIntValues.Add(intValue);
+
+                }
+
+            }
+
+            string[] floatNames = taskFloatValues.Keys.ToArray();
+
+            foreach (string floatName in floatNames)
+            {
+
+                if (taskValuesChangeMask[floatName] || allModified)
+                {
+
+                    msg.updatedFloatNames.Add(floatName);
+
+                    //taskValuesChangeMask[floatName] = false;
+
+                    float floatValue;
+
+                    if (taskFloatValues.TryGetValue(floatName, out floatValue))
+                        msg.updatedFloatValues.Add(floatValue);
+
+                }
+
+            }
+
+            string[] quaternionNames = taskQuaternionValues.Keys.ToArray();
+
+            foreach (string quaternionName in quaternionNames)
+            {
+
+                if (taskValuesChangeMask[quaternionName] || allModified)
+                {
+
+                    msg.updatedQuaternionNames.Add(quaternionName);
+
+                    //taskValuesChangeMask[quaternionName] = false;
+
+                    Quaternion quaternionValue;
+
+                    if (taskQuaternionValues.TryGetValue(quaternionName, out quaternionValue))
+                        msg.updatedQuaternionValues.Add(quaternionValue);
+
+                }
+
+            }
+
+            string[] vector3Names = taskVector3Values.Keys.ToArray();
+
+            foreach (string vector3Name in vector3Names)
+            {
+
+                if (taskValuesChangeMask[vector3Name] || allModified)
+                {
+
+                    msg.updatedVector3Names.Add(vector3Name);
+
+                    //taskValuesChangeMask[vector3Name] = false;
+
+                    Vector3 vector3Value;
+
+                    if (taskVector3Values.TryGetValue(vector3Name, out vector3Value))
+                        msg.updatedVector3Values.Add(vector3Value);
+
+                }
+
+            }
+
+            string[] stringNames = taskStringValues.Keys.ToArray();
+
+            foreach (string stringName in stringNames)
+            {
+
+                if (taskValuesChangeMask[stringName] || allModified)
+                {
+
+                    msg.updatedStringNames.Add(stringName);
+
+                    //taskValuesChangeMask[stringName] = false;
+
+                    string stringValue;
+
+                    if (taskStringValues.TryGetValue(stringName, out stringValue))
+                        msg.updatedStringValues.Add(stringValue);
+
+                }
+
+            }
+
+            string[] ushortNames = taskUshortValues.Keys.ToArray();
+
+            foreach (string ushortName in ushortNames)
+            {
+
+                if (taskValuesChangeMask[ushortName] || allModified)
+                {
+
+                    msg.updatedUshortNames.Add(ushortName);
+
+                    //taskValuesChangeMask[ushortName] = false;
+
+                    ushort[] ushortValue;
+
+                    if (taskUshortValues.TryGetValue(ushortName, out ushortValue))
+                        msg.updatedUshortValues.Add(ushortValue);
+
+                }
+
+            }
+
+            string[] byteNames = taskByteValues.Keys.ToArray();
+
+            foreach (string byteName in byteNames)
+            {
+
+                if (taskValuesChangeMask[byteName] || allModified)
+                {
+
+                    msg.updatedByteNames.Add(byteName);
+
+                    //taskValuesChangeMask[byteName] = false;
+
+                    byte[] byteValue;
+
+                    if (taskByteValues.TryGetValue(byteName, out byteValue))
+                        msg.updatedByteValues.Add(byteValue);
+
+                }
+
+            }
+
+            //allModified = false;
+
+            return updateSend;
+
+        }
+
+
+
 
         public TaskUpdate GetUpdateMessage()
         {
@@ -315,6 +488,8 @@ namespace StoryEngine
 
         }
 
+        string UpdateFrequency = "";
+
         public void ApplyUpdateMessage(TaskUpdate update, bool changeMask = false)
         {
 
@@ -326,27 +501,53 @@ namespace StoryEngine
             //			pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
             //		}
 
-
-
-            int CurrentFrame = Time.frameCount;
-
-            if (CurrentFrame == LastUpdateFrame)
+            if (description == "userstream")
             {
 
-                UpdatesPerFrame++;
+                int CurrentFrame = Time.frameCount;
+
+                if (CurrentFrame - LastUpdateFrame==0)
+                {
+
+                    UpdatesPerFrame++;
 
 
+                }
+                if (CurrentFrame - LastUpdateFrame==1){
+                    // we're in the next frame
+                    UpdateFrequency += "" + UpdatesPerFrame;
+                                       
+                    UpdatesPerFrame = 1;
+
+                }
+
+                if (CurrentFrame - LastUpdateFrame>1){
+                    // we've skipped a frame
+
+                    for (int f=LastUpdateFrame+1 ;f<CurrentFrame;f++){
+                        UpdateFrequency += "" + 0;
+
+                    }
+
+
+
+                    UpdatesPerFrame = 1;
+
+                }
+
+               
+
+
+
+                if (UpdateFrequency.Length > 30)
+                {
+                    Debug.Log("update pattern:" + UpdateFrequency);
+                    setStringValue("debug",UpdateFrequency);
+                    UpdateFrequency = "";
+                }
+                LastUpdateFrame = CurrentFrame;
             }
-            else
-            {
-
-                LastUpdatesPerFrame = UpdatesPerFrame;
-                UpdatesPerFrame = 1;
-            }
-
-            LastUpdateFrame = CurrentFrame;
-
-            MaxUpdatesPerFrame = Mathf.Max(MaxUpdatesPerFrame, UpdatesPerFrame);
+            //MaxUpdatesPerFrame = Mathf.Max(MaxUpdatesPerFrame, UpdatesPerFrame);
 
 
 
@@ -635,7 +836,7 @@ namespace StoryEngine
         public void ForceComplete()
         {
 
-          
+
 
             Debug.Log("Force complete, signoffs still required was " + (GENERAL.SIGNOFFS - signoffs));
 
@@ -725,354 +926,6 @@ namespace StoryEngine
 
     }
 
-#if NETWORKED
-
-    public class TaskUpdate : MessageBase
-    {
-
-        public string pointID;
-
-        Dictionary<string, Int32> intValues;
-        Dictionary<string, float> floatValues;
-
-        public List<string> updatedIntNames;
-        public List<Int32> updatedIntValues;
-
-        public List<string> updatedFloatNames;
-        public List<float> updatedFloatValues;
-
-        public List<string> updatedQuaternionNames;
-        public List<Quaternion> updatedQuaternionValues;
-
-        public List<string> updatedVector3Names;
-        public List<Vector3> updatedVector3Values;
-
-        public List<string> updatedStringNames;
-        public List<string> updatedStringValues;
-
-        public List<string> updatedUshortNames;
-        public List<ushort[]> updatedUshortValues;
-
-        public List<string> updatedByteNames;
-        public List<byte[]> updatedByteValues;
-
-
-        public string debug;
-
-        string me = "Taskupdate";
-
-        public override void Deserialize(NetworkReader reader)
-        {
-
-            debug = "Deserialised: ";
-
-            // Custom deserialisation.
-
-            pointID = reader.ReadString();
-
-            debug += "/ pointid: " + pointID;
-
-            // Deserialise updated int values.
-
-            updatedIntNames = new List<string>();
-            updatedIntValues = new List<Int32>();
-
-            int intCount = reader.ReadInt32();
-
-            debug += "/ updated ints: " + intCount;
-
-            for (int i = 0; i < intCount; i++)
-            {
-
-                string intName = reader.ReadString();
-                Int32 intValue = reader.ReadInt32();
-
-                updatedIntNames.Add(intName);
-                updatedIntValues.Add(intValue);
-
-            }
-
-            // Deserialise updated float values.
-
-            updatedFloatNames = new List<string>();
-            updatedFloatValues = new List<float>();
-
-            int floatCount = reader.ReadInt32();
-
-            debug += "/ updated floats: " + floatCount;
-
-            for (int i = 0; i < floatCount; i++)
-            {
-
-                string floatName = reader.ReadString();
-                float floatValue = reader.ReadSingle();
-
-                updatedFloatNames.Add(floatName);
-                updatedFloatValues.Add(floatValue);
-
-            }
-
-            // Deserialise updated quaternion values.
-
-            updatedQuaternionNames = new List<string>();
-            updatedQuaternionValues = new List<Quaternion>();
-
-            int quaternionCount = reader.ReadInt32();
-
-            debug += "/ updated quaternions: " + quaternionCount;
-
-            for (int i = 0; i < quaternionCount; i++)
-            {
-
-                string quaternionName = reader.ReadString();
-                Quaternion quaternionValue = reader.ReadQuaternion();
-
-                updatedQuaternionNames.Add(quaternionName);
-                updatedQuaternionValues.Add(quaternionValue);
-
-            }
-
-            // Deserialise updated vector3 values.
-
-            updatedVector3Names = new List<string>();
-            updatedVector3Values = new List<Vector3>();
-
-            int vector3Count = reader.ReadInt32();
-
-            debug += "/ updated vector3s: " + vector3Count;
-
-            for (int i = 0; i < vector3Count; i++)
-            {
-
-                string vector3Name = reader.ReadString();
-                Vector3 vector3Value = reader.ReadVector3();
-
-                updatedVector3Names.Add(vector3Name);
-                updatedVector3Values.Add(vector3Value);
-
-            }
-
-            // Deserialise updated string values.
-
-            updatedStringNames = new List<string>();
-            updatedStringValues = new List<string>();
-
-            int stringCount = reader.ReadInt32();
-
-            debug += "/ updated strings: " + stringCount;
-
-            for (int i = 0; i < stringCount; i++)
-            {
-
-                string stringName = reader.ReadString();
-                string stringValue = reader.ReadString();
-
-                updatedStringNames.Add(stringName);
-                updatedStringValues.Add(stringValue);
-
-            }
-
-
-            // Deserialise updated ushort values.
-
-            updatedUshortNames = new List<string>();
-            updatedUshortValues = new List<ushort[]>();
-
-            int ushortCount = reader.ReadInt32();
-
-            debug += "/ updated ushort arrays: " + ushortCount;
-
-            for (int i = 0; i < ushortCount; i++)
-            {
-
-                string ushortName = reader.ReadString();
-                updatedUshortNames.Add(ushortName);
-
-                int ushortArrayLength = reader.ReadInt32();
-
-                ushort[] ushortArray = new ushort[ushortArrayLength];
-
-                for (int j = 0; j < ushortArrayLength; j++)
-                {
-
-                    ushortArray[j] = reader.ReadUInt16();
-
-                }
-
-                updatedUshortValues.Add(ushortArray);
-
-            }
-
-            // Deserialise updated byte values.
-
-            updatedByteNames = new List<string>();
-            updatedByteValues = new List<byte[]>();
-
-            int byteCount = reader.ReadInt32();
-
-            debug += "/ updated ushort arrays: " + byteCount;
-
-            for (int i = 0; i < byteCount; i++)
-            {
-
-                string byteName = reader.ReadString();
-                updatedByteNames.Add(byteName);
-
-                int byteArrayLength = reader.ReadInt32();
-
-                byte[] byteArray = new byte[byteArrayLength];
-
-                for (int j = 0; j < byteArrayLength; j++)
-                {
-
-                    byteArray[j] = reader.ReadByte();
-
-                }
-
-                updatedByteValues.Add(byteArray);
-
-            }
-
-            Log.Message(debug, LOGLEVEL.VERBOSE);
-
-            //		Debug.Log (debug);
-
-        }
-
-        public override void Serialize(NetworkWriter writer)
-        {
-
-            debug = "Serialised: ";
-
-            // Custom serialisation.
-
-            writer.Write(pointID);
-            debug += "/ pointid: " + pointID;
-
-            // Serialise updated int values.
-
-            writer.Write(updatedIntNames.Count);
-
-            debug += "/ updated ints: " + updatedIntNames.Count;
-
-            for (int i = 0; i < updatedIntNames.Count; i++)
-            {
-
-                writer.Write(updatedIntNames[i]);
-                writer.Write(updatedIntValues[i]);
-
-            }
-
-            // Serialise updated float values.
-
-            writer.Write(updatedFloatNames.Count);
-
-            debug += "/ updated floats: " + updatedFloatNames.Count;
-
-            for (int i = 0; i < updatedFloatNames.Count; i++)
-            {
-
-                writer.Write(updatedFloatNames[i]);
-                writer.Write(updatedFloatValues[i]);
-
-            }
-
-            // Serialise updated quaternion values.
-
-            writer.Write(updatedQuaternionNames.Count);
-
-            debug += "/ updated quaternions: " + updatedQuaternionNames.Count;
-
-            for (int i = 0; i < updatedQuaternionNames.Count; i++)
-            {
-
-                writer.Write(updatedQuaternionNames[i]);
-                writer.Write(updatedQuaternionValues[i]);
-
-            }
-
-            // Serialise updated vector3 values.
-
-            writer.Write(updatedVector3Names.Count);
-
-            debug += "/ updated vector3's: " + updatedVector3Names.Count;
-
-            for (int i = 0; i < updatedVector3Names.Count; i++)
-            {
-
-                writer.Write(updatedVector3Names[i]);
-                writer.Write(updatedVector3Values[i]);
-
-            }
-
-            // Serialise updated string values.
-
-            writer.Write(updatedStringNames.Count);
-
-            debug += "/ updated strings: " + updatedStringNames.Count;
-
-            for (int i = 0; i < updatedStringNames.Count; i++)
-            {
-
-                writer.Write(updatedStringNames[i]);
-                writer.Write(updatedStringValues[i]);
-
-            }
-
-            // Serialise updated ushort values.
-
-            writer.Write(updatedUshortNames.Count);
-
-            debug += "/ updated ushorts: " + updatedUshortNames.Count;
-
-            for (int i = 0; i < updatedUshortNames.Count; i++)
-            {
-
-                writer.Write(updatedUshortNames[i]); // name
-
-                writer.Write(updatedUshortValues[i].Length); // length
-
-                for (int j = 0; j < updatedUshortValues[i].Length; j++)
-                {
-
-                    writer.Write(updatedUshortValues[i][j]); // data
-
-                }
-
-
-            }
-
-            // Serialise updated byte values.
-
-            writer.Write(updatedByteNames.Count);
-
-            debug += "/ updated bytes: " + updatedByteNames.Count;
-
-            for (int i = 0; i < updatedByteNames.Count; i++)
-            {
-
-                writer.Write(updatedByteNames[i]); // name
-
-                writer.Write(updatedByteValues[i].Length); // length
-
-                for (int j = 0; j < updatedByteValues[i].Length; j++)
-                {
-
-                    writer.Write(updatedByteValues[i][j]); // data
-
-                }
-
-
-            }
-
-            Log.Message(debug, LOGLEVEL.VERBOSE);
-            //		Debug.Log (debug);
-
-        }
-
-    }
-
-#endif
 
 
 

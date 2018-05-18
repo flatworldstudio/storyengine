@@ -22,6 +22,9 @@ namespace StoryEngine
 
         public event NewTasksEvent newTasksEvent;
 
+        StoryUpdate storyUpdateSend,storyUpdateReceive;
+
+
         string me = "Assistant director";
 
         Director theDirector;
@@ -37,6 +40,9 @@ namespace StoryEngine
         const short stringCode = 1002;
         const short pointerCode = 1003;
         const short taskCode = 1004;
+        const short storyCode = 1005;
+
+
 
 #endif
 
@@ -62,6 +68,10 @@ namespace StoryEngine
 
             GENERAL.ALLTASKS = new List<StoryTask>();
             PointerUpdateStack=new List<PointerUpdate>();
+
+             storyUpdateSend = new StoryUpdate();
+            storyUpdateReceive = new StoryUpdate();
+
 
 
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
@@ -344,10 +354,13 @@ namespace StoryEngine
 #if NETWORKED
 
         void LateUpdate()
-        //void Update()
         {
 
-            //// Iterate over all pointers to see if any were killed. Clients cannot tell by themselves.
+            // New approach: bundled updates.
+
+            storyUpdateSend.Clear();
+
+            // Iterate over all pointers to see if any were killed. Clients do not kill pointers themselves.
 
             for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++)
             {
@@ -359,9 +372,14 @@ namespace StoryEngine
 
                     Log.Message("Sending pointer (killed) update to clients: " + pointer.currentPoint.storyLineName);
 
-                    sendPointerUpdateToClients(pointer.GetUpdateMessage());
+                    storyUpdateSend.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
+
+                    sendPointerUpdateToClients(pointer.GetUpdateMessage()); // individual
 
                     pointer.modified = false;
+
+
+
 
                     //if (pointer.currentTask.description=="moodon"){
                    
@@ -409,6 +427,7 @@ namespace StoryEngine
                             {
 
                                 Log.Message("Global task " + task.description + " changed, sending update to server.");
+                                storyUpdateSend.AddTaskUpdate(task.GetUpdate()); // bundled
 
                                 sendTaskUpdateToServer(task.GetUpdateMessage());
 
@@ -422,6 +441,7 @@ namespace StoryEngine
                             {
 
                                 Log.Message("Global task " + task.description + " changed, sending update to clients.");
+                                storyUpdateSend.AddTaskUpdate(task.GetUpdate()); // bundled
 
                                 sendTaskUpdateToClients(task.GetUpdateMessage());
 
@@ -443,9 +463,25 @@ namespace StoryEngine
 
             }
 
+            if (storyUpdateSend.AnythingToSend()){
 
-           
+                switch (GENERAL.AUTHORITY)
+                {
+                    case AUTHORITY.LOCAL:
+                        Debug.Log("Sending story update to server. \n"+ storyUpdateSend.DebugLog);
+                        SendStoryUpdateToServer (storyUpdateSend);
+                        break;
+                    case AUTHORITY.GLOBAL:
+                        Debug.Log("Sending story update to clients. \n"+ storyUpdateSend.DebugLog);
+                        SendStoryUpdateToClients (storyUpdateSend);
+                        break;
+                    default:
+                        break;
 
+
+                }
+          
+            }
 
         }
 
@@ -586,43 +622,43 @@ namespace StoryEngine
 
         }
 
-        void onPointerUpdateFromServerBAK(NetworkMessage netMsg)
-        {
+        //void onPointerUpdateFromServerBAK(NetworkMessage netMsg)
+        //{
 
-            // Right now the only update we send for pointers is when they are killed.
+        //    // Right now the only update we send for pointers is when they are killed.
 
-            var message = netMsg.ReadMessage<PointerUpdate>();
+        //    var message = netMsg.ReadMessage<PointerUpdate>();
 
-            StoryPointer pointer = GENERAL.GetStorylinePointerForPointID(message.storyPointID);
+        //    StoryPointer pointer = GENERAL.GetStorylinePointerForPointID(message.storyPointID);
 
-            Log.Message("Server update for pointer " + message.storyPointID);
+        //    Log.Message("Server update for pointer " + message.storyPointID);
 
-            if (message.killed)
-            {
-                pointer.Kill();
+        //    if (message.killed)
+        //    {
+        //        pointer.Kill();
 
-                //if (pointer.currentTask.description=="moodon"){
-                //    Debug.Log("moodon task pointer killed at "+Time.frameCount);
-                //}
+        //        //if (pointer.currentTask.description=="moodon"){
+        //        //    Debug.Log("moodon task pointer killed at "+Time.frameCount);
+        //        //}
 
-                if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
-                {
+        //        if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
+        //        {
 
-                    Log.Message("Removing task " + pointer.currentTask.description);
+        //            Log.Message("Removing task " + pointer.currentTask.description);
 
-                }
-                else
-                {
+        //        }
+        //        else
+        //        {
 
-                    Log.Warning("Failed removing task " + pointer.currentTask.description);
+        //            Log.Warning("Failed removing task " + pointer.currentTask.description);
 
-                }
-
-
-            }
+        //        }
 
 
-        }
+        //    }
+
+
+        //}
 
         public void sendPointerUpdateToClients(PointerUpdate pointerMessage)
         {
@@ -775,6 +811,25 @@ namespace StoryEngine
             }
 
         }
+
+        // Send bundled story updates
+
+        void SendStoryUpdateToClients(StoryUpdate message)
+        {
+
+            NetworkServer.SendToAll(storyCode, message);
+
+        }
+
+        void SendStoryUpdateToServer(StoryUpdate message)
+        {
+
+            networkManager.client.Send(storyCode, message);
+
+        }
+
+        // Task updates.
+
 
         void sendTaskUpdateToServer(TaskUpdate message)
         {
