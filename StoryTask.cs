@@ -51,12 +51,13 @@ namespace StoryEngine
         public Dictionary<string, Vector3> taskVector3Values;
         public Dictionary<string, string> taskStringValues;
         public Dictionary<string, ushort[]> taskUshortValues;
-
         public Dictionary<string, byte[]> taskByteValues;
+        public Dictionary<string, Vector3[]> taskVector3ArrayValues;
+        public Dictionary<string, bool[]> taskBoolArrayValues;
 
 #if NETWORKED
 
-        TaskUpdateBundled updateSend,updateReceive;
+        TaskUpdateBundled updateSend, updateReceive;
 
         public Dictionary<string, bool> taskValuesChangeMask;
         List<string> changedTaskValue;
@@ -122,6 +123,8 @@ namespace StoryEngine
             taskStringValues = new Dictionary<string, string>();
             taskUshortValues = new Dictionary<string, ushort[]>();
             taskByteValues = new Dictionary<string, byte[]>();
+            taskVector3ArrayValues = new Dictionary<string, Vector3[]>();
+            taskBoolArrayValues = new Dictionary<string, bool[]>();
 
 
 #if NETWORKED
@@ -138,17 +141,16 @@ namespace StoryEngine
         public void LoadPersistantData(StoryPointer referencePointer)
         {
 
-            setStringValue("persistantData", referencePointer.persistantData);
+            SetStringValue("persistantData", referencePointer.persistantData);
 
         }
 
 #if NETWORKED
 
 
-        public TaskUpdateBundled GetUpdateBundled() {
-
-
-            // Bundled approach. NOTE FLAGS!
+        public TaskUpdateBundled GetUpdateBundled()
+        {
+            // Bundled approach.
 
             TaskUpdateBundled msg = new TaskUpdateBundled();
 
@@ -296,6 +298,48 @@ namespace StoryEngine
 
                     if (taskByteValues.TryGetValue(byteName, out byteValue))
                         msg.updatedByteValues.Add(byteValue);
+
+                }
+
+            }
+
+            string[] vector3ArrayNames = taskVector3ArrayValues.Keys.ToArray();
+
+            foreach (string vector3ArrayName in vector3ArrayNames)
+            {
+
+                if (taskValuesChangeMask[vector3ArrayName] || allModified)
+                {
+
+                    msg.updatedVector3ArrayNames.Add(vector3ArrayName);
+
+                    taskValuesChangeMask[vector3ArrayName] = false;
+
+                    Vector3[] vector3ArrayValue;
+
+                    if (taskVector3ArrayValues.TryGetValue(vector3ArrayName, out vector3ArrayValue))
+                        msg.updatedVector3ArrayValues.Add(vector3ArrayValue);
+
+                }
+
+            }
+
+            string[] boolArrayNames = taskBoolArrayValues.Keys.ToArray();
+
+            foreach (string boolArrayName in boolArrayNames)
+            {
+
+                if (taskValuesChangeMask[boolArrayName] || allModified)
+                {
+
+                    msg.updatedBoolArrayNames.Add(boolArrayName);
+
+                    taskValuesChangeMask[boolArrayName] = false;
+
+                    bool[] boolArrayValue;
+
+                    if (taskBoolArrayValues.TryGetValue(boolArrayName, out boolArrayValue))
+                        msg.updatedBoolArrayValues.Add(boolArrayValue);
 
                 }
 
@@ -514,7 +558,7 @@ namespace StoryEngine
             //    if (CurrentFrame - LastUpdateFrame==1){
             //        // we're in the next frame
             //        UpdateFrequency += "" + UpdatesPerFrame;
-                                       
+
             //        UpdatesPerFrame = 1;
 
             //    }
@@ -533,7 +577,7 @@ namespace StoryEngine
 
             //    }
 
-               
+
 
 
 
@@ -601,11 +645,27 @@ namespace StoryEngine
 
             }
 
+            for (int i = 0; i < update.updatedVector3ArrayNames.Count; i++)
+            {
+
+                taskVector3ArrayValues[update.updatedVector3ArrayNames[i]] = update.updatedVector3ArrayValues[i];
+                taskValuesChangeMask[update.updatedVector3ArrayNames[i]] = changeMask;
+
+            }
+
+            for (int i = 0; i < update.updatedBoolArrayNames.Count; i++)
+            {
+
+                taskBoolArrayValues[update.updatedBoolArrayNames[i]] = update.updatedBoolArrayValues[i];
+                taskValuesChangeMask[update.updatedBoolArrayNames[i]] = changeMask;
+
+            }
+
         }
 
 #endif
 
-        public void setIntValue(string valueName, Int32 value)
+        public void SetIntValue(string valueName, Int32 value)
         {
 
             taskIntValues[valueName] = value;
@@ -617,7 +677,7 @@ namespace StoryEngine
 
         }
 
-        public bool getIntValue(string valueName, out Int32 value)
+        public bool GetIntValue(string valueName, out Int32 value)
         {
 
             if (!taskIntValues.TryGetValue(valueName, out value))
@@ -629,7 +689,7 @@ namespace StoryEngine
 
         }
 
-        public void setStringValue(string valueName, string value)
+        public void SetStringValue(string valueName, string value)
         {
 
             taskStringValues[valueName] = value;
@@ -641,7 +701,7 @@ namespace StoryEngine
 
         }
 
-        public bool getStringValue(string valueName, out string value)
+        public bool GetStringValue(string valueName, out string value)
         {
 
             if (!taskStringValues.TryGetValue(valueName, out value))
@@ -653,7 +713,7 @@ namespace StoryEngine
 
         }
 
-        public void setFloatValue(string valueName, float value)
+        public void SetFloatValue(string valueName, float value)
         {
 
             taskFloatValues[valueName] = value;
@@ -665,7 +725,7 @@ namespace StoryEngine
 
         }
 
-        public bool getFloatValue(string valueName, out float value)
+        public bool GetFloatValue(string valueName, out float value)
         {
 
             if (!taskFloatValues.TryGetValue(valueName, out value))
@@ -677,7 +737,7 @@ namespace StoryEngine
 
         }
 
-        public void setUshortValue(string valueName, ushort[] value)
+        public void SetUshortValue(string valueName, ushort[] value)
         {
 
             taskUshortValues[valueName] = value;
@@ -689,7 +749,7 @@ namespace StoryEngine
 
         }
 
-        public bool getUshortValue(string valueName, out ushort[] value)
+        public bool GetUshortValue(string valueName, out ushort[] value)
         {
 
             if (!taskUshortValues.TryGetValue(valueName, out value))
@@ -701,7 +761,7 @@ namespace StoryEngine
 
         }
 
-        public void setByteValue(string valueName, byte[] value)
+        public void SetByteValue(string valueName, byte[] value)
         {
 
             taskByteValues[valueName] = value;
@@ -713,7 +773,7 @@ namespace StoryEngine
 
         }
 
-        public bool getByteValue(string valueName, out byte[] value)
+        public bool GetByteValue(string valueName, out byte[] value)
         {
 
             if (!taskByteValues.TryGetValue(valueName, out value))
@@ -726,7 +786,7 @@ namespace StoryEngine
         }
 
 
-        public void setVector3Value(string valueName, Vector3 value)
+        public void SetVector3Value(string valueName, Vector3 value)
         {
 
             taskVector3Values[valueName] = value;
@@ -738,7 +798,7 @@ namespace StoryEngine
 
         }
 
-        public bool getVector3Value(string valueName, out Vector3 value)
+        public bool GetVector3Value(string valueName, out Vector3 value)
         {
 
             if (!taskVector3Values.TryGetValue(valueName, out value))
@@ -750,7 +810,32 @@ namespace StoryEngine
 
         }
 
-        public void setQuaternionValue(string valueName, Quaternion value)
+        public void SetVector3ArrayValue(string valueName, Vector3[] value)
+        {
+
+            taskVector3ArrayValues[valueName] = value;
+
+#if NETWORKED
+            taskValuesChangeMask[valueName] = true;
+            modified = true;
+#endif
+
+        }
+
+        public bool GetVector3ArrayValue(string valueName, out Vector3[] value)
+        {
+
+            if (!taskVector3ArrayValues.TryGetValue(valueName, out value))
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
+
+        public void SetQuaternionValue(string valueName, Quaternion value)
         {
 
             taskQuaternionValues[valueName] = value;
@@ -762,7 +847,7 @@ namespace StoryEngine
 
         }
 
-        public bool getQuaternionValue(string valueName, out Quaternion value)
+        public bool GetQuaternionValue(string valueName, out Quaternion value)
         {
 
             if (!taskQuaternionValues.TryGetValue(valueName, out value))
@@ -774,7 +859,7 @@ namespace StoryEngine
 
         }
 
-        void setPointerToUpdated()
+        void SetPointerToUpdated()
         {
 
             switch (GENERAL.AUTHORITY)
@@ -819,7 +904,7 @@ namespace StoryEngine
         {
 
             status = theStatus;
-            setPointerToUpdated();
+            SetPointerToUpdated();
 
         }
 
@@ -871,14 +956,14 @@ namespace StoryEngine
         public void setCallBack(string theCallBackPoint)
         {
 
-            setStringValue("callBackPoint", theCallBackPoint);
+            SetStringValue("callBackPoint", theCallBackPoint);
 
         }
 
         public void clearCallBack()
         {
 
-            setStringValue("callBackPoint", "");
+            SetStringValue("callBackPoint", "");
 
         }
 
@@ -887,7 +972,7 @@ namespace StoryEngine
 
             string value;
 
-            if (getStringValue("callBackPoint", out value))
+            if (GetStringValue("callBackPoint", out value))
             {
 
                 return value;

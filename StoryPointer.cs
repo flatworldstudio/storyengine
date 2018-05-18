@@ -98,27 +98,27 @@ namespace StoryEngine
             // load carry over value from task into pointer.
 
             if (currentTask != null)
-                currentTask.getStringValue("persistantData", out persistantData);
+                currentTask.GetStringValue("persistantData", out persistantData);
 
         }
 
-        public PointerUpdate GetUpdateMessage()
-        {
+        //public PointerUpdate GetUpdateMessage()
+        //{
 
-            // Generate a network update message for this pointer. (In effect: if it was killed.)
+        //    // Generate a network update message for this pointer. (In effect: if it was killed.)
 
-            PointerUpdate message = new PointerUpdate();
+        //    PointerUpdate message = new PointerUpdate();
 
-            message.storyPointID = currentPoint.ID;
+        //    message.storyPointID = currentPoint.ID;
 
-            if (status == POINTERSTATUS.KILLED)
-            {
-                message.killed = true;
-            }
+        //    if (status == POINTERSTATUS.KILLED)
+        //    {
+        //        message.killed = true;
+        //    }
 
-            return message;
+        //    return message;
 
-        }
+        //}
 
         public PointerUpdateBundled GetUpdate()
         {

@@ -300,7 +300,7 @@ namespace StoryEngine
 
                 string debugText;
 
-                if (theTask.getStringValue("debug", out debugText))
+                if (theTask.GetStringValue("debug", out debugText))
                 {
 
                     displayText = displayText + debugText;

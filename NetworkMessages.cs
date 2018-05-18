@@ -69,24 +69,7 @@ namespace StoryEngine
             return false;
 
         }
-        //public void Clear()
-        //{
-        //    // Clear for reuse.
-
-        //    DebugLog = "Created storyupdate. \n";
-        //    pointerUpdateMessages.Clear();
-        //    taskUpdateMessages.Clear();
-
-        //}
-
-        //public void Apply(){
-
-        //    // evaluate.
-
-
-
-        //}
-
+   
         public void AddStoryPointerUpdate(PointerUpdateBundled pointerUpdateMessage)
         {
 
@@ -162,16 +145,7 @@ namespace StoryEngine
                 DebugLog += pointerUpdates[i].Serialize(ref writer);
 
             }
-
-            //Int16 m = 0;
-
-            //while (m < pointerUpdates.Count)
-            //{
-            //    DebugLog += pointerUpdates[m].Serialize(ref writer);
-            //    m++;
-            //}
-
-
+            
             // Task updates next. First write the number of messages, then serialise them.
             count = (Int16) taskUpdates.Count;
 
@@ -182,15 +156,7 @@ namespace StoryEngine
                 DebugLog += taskUpdates[i].Serialize(ref writer);
 
             }
-
-            //m = 0;
-
-            //while (m < taskUpdates.Count)
-            //{
-            //    DebugLog += taskUpdates[m].Serialize(ref writer);
-            //    m++;
-            //}
-
+            
             //Debug.Log("serialised " +DebugLog);
 
         }
@@ -203,13 +169,13 @@ namespace StoryEngine
     // bundled
 
 
-    public class PointerUpdate : MessageBase
-    {
+    //public class PointerUpdate : MessageBase
+    //{
 
-        public string storyPointID;
-        public bool killed = false;
+    //    public string storyPointID;
+    //    public bool killed = false;
 
-    }
+    //}
 
 
     public class PointerUpdateBundled
@@ -280,6 +246,12 @@ namespace StoryEngine
         public List<string> updatedByteNames;
         public List<byte[]> updatedByteValues;
 
+        public List<string> updatedVector3ArrayNames;
+        public List<Vector3[]> updatedVector3ArrayValues;
+
+        public List<string> updatedBoolArrayNames;
+        public List<bool[]> updatedBoolArrayValues;
+
         public string debug;
 
         public TaskUpdateBundled() : base()
@@ -305,33 +277,14 @@ namespace StoryEngine
 
             updatedByteNames = new List<string>();
             updatedByteValues = new List<byte[]>();
+
+            updatedVector3ArrayNames = new List<string>();
+            updatedVector3ArrayValues = new List<Vector3[]>();
+
+            updatedBoolArrayNames = new List<string>();
+            updatedBoolArrayValues = new List<bool[]>();
+
         }
-
-        //public void Clear()
-        //{
-
-        //    updatedIntNames.Clear();
-        //    updatedIntValues.Clear();
-
-        //    updatedFloatNames.Clear();
-        //    updatedFloatValues.Clear();
-
-        //    updatedQuaternionNames.Clear();
-        //    updatedQuaternionValues.Clear();
-
-        //    updatedVector3Names.Clear();
-        //    updatedVector3Values.Clear();
-
-        //    updatedStringNames.Clear();
-        //    updatedStringValues.Clear();
-
-        //    updatedUshortNames.Clear();
-        //    updatedUshortValues.Clear();
-
-        //    updatedByteNames.Clear();
-        //    updatedByteValues.Clear();
-
-        //}
 
         public string Deserialize(ref NetworkReader reader)
         {
@@ -487,6 +440,61 @@ namespace StoryEngine
 
             }
 
+            // Deserialise updated vector 3 array values.
+
+            int vector3ArrayCount = reader.ReadInt32();
+
+            debug += "/ updated vector3 arrays: " + vector3ArrayCount;
+
+            for (int i = 0; i < vector3ArrayCount; i++)
+            {
+
+                string vector3ArrayName = reader.ReadString();
+                updatedVector3ArrayNames.Add(vector3ArrayName);
+
+                int vector3ArrayLength = reader.ReadInt32();
+
+                Vector3[] vector3Array = new Vector3[vector3ArrayLength];
+
+                for (int j = 0; j < vector3ArrayLength; j++)
+                {
+
+                    vector3Array[j] = reader.ReadVector3();
+
+                }
+
+                updatedVector3ArrayValues.Add(vector3Array);
+
+            }
+
+            // Deserialise updated bool array values.
+
+            int boolArrayCount = reader.ReadInt32();
+
+            debug += "/ updated bool arrays: " + boolArrayCount;
+
+            for (int i = 0; i < boolArrayCount; i++)
+            {
+
+                string boolArrayName = reader.ReadString();
+                updatedBoolArrayNames.Add(boolArrayName);
+
+                int boolArrayLength = reader.ReadInt32();
+
+                bool[] boolArray = new bool[boolArrayLength];
+
+                for (int j = 0; j < boolArrayLength; j++)
+                {
+
+                    boolArray[j] = reader.ReadBoolean();
+
+                }
+
+                updatedBoolArrayValues.Add(boolArray);
+
+            }
+
+
             return debug;
 
         }
@@ -617,6 +625,53 @@ namespace StoryEngine
 
             }
 
+
+            // Serialise updated vector3 array values.
+
+            writer.Write(updatedVector3ArrayNames.Count);
+
+            debug += "/ updated vector3 arrays: " + updatedVector3ArrayNames.Count;
+
+            for (int i = 0; i < updatedVector3ArrayNames.Count; i++)
+            {
+
+                writer.Write(updatedVector3ArrayNames[i]); // name
+
+                writer.Write(updatedVector3ArrayValues[i].Length); // length
+
+                for (int j = 0; j < updatedVector3ArrayValues[i].Length; j++)
+                {
+
+                    writer.Write(updatedVector3ArrayValues[i][j]); // data
+
+                }
+
+
+            }
+
+            // Serialise updated bool array values.
+
+            writer.Write(updatedBoolArrayNames.Count);
+
+            debug += "/ updated bool arrays: " + updatedBoolArrayNames.Count;
+
+            for (int i = 0; i < updatedBoolArrayNames.Count; i++)
+            {
+
+                writer.Write(updatedBoolArrayNames[i]); // name
+
+                writer.Write(updatedBoolArrayValues[i].Length); // length
+
+                for (int j = 0; j < updatedBoolArrayValues[i].Length; j++)
+                {
+
+                    writer.Write(updatedBoolArrayValues[i][j]); // data
+
+                }
+
+
+            }
+
             return debug;
 
         }
@@ -626,56 +681,9 @@ namespace StoryEngine
 
 
 
-    // individual
-
-    //public class PointerUpdate : MessageBase
-    //{
-
-    //    public string storyPointID;
-    //    public bool killed = false;
-
-    //}
 
 
-    //public class PointerUpdateMessage
-    //{
-
-    //    public string storyPointID;
-    //    public bool killed = false;
-
-
-    //    public string Deserialize(ref NetworkReader reader){
-
-    //        string DebugLog ="Deserialising pointer update.";
-
-    //        storyPointID=reader.ReadString();
-    //        killed=reader.ReadBoolean();
-
-    //        DebugLog+="Storypoint ID: "+storyPointID;
-    //        DebugLog+="Killed: "+killed.ToString();
-
-    //        return DebugLog;
-
-    //    }
-
-    //    public string Serialize(ref NetworkWriter writer){
-
-    //        string DebugLog ="Serialising pointer update.";
-
-    //        DebugLog+="Storypoint ID: "+storyPointID;
-    //        DebugLog+="Killed: "+killed.ToString();
-
-    //        writer.Write(storyPointID);
-    //        writer.Write(killed);
-
-    //        return DebugLog;
-
-    //    }
-
-    //}
-
-
-
+    /*
     public class TaskUpdate : MessageBase
     {
 
@@ -1020,7 +1028,7 @@ namespace StoryEngine
         }
 
     }
-
+    */
 #endif
 
 
