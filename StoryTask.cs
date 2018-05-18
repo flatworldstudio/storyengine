@@ -834,6 +834,29 @@ namespace StoryEngine
 
         }
 
+        public void SetBoolArrayValue(string valueName, bool[] value)
+        {
+
+            taskBoolArrayValues[valueName] = value;
+
+#if NETWORKED
+            taskValuesChangeMask[valueName] = true;
+            modified = true;
+#endif
+
+        }
+
+        public bool GetBoolArrayValue(string valueName, out bool[] value)
+        {
+
+            if (!taskBoolArrayValues.TryGetValue(valueName, out value))
+            {
+                return false;
+            }
+
+            return true;
+
+        }
 
         public void SetQuaternionValue(string valueName, Quaternion value)
         {
