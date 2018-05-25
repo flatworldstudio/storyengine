@@ -54,6 +54,7 @@ namespace StoryEngine
         public Dictionary<string, byte[]> taskByteValues;
         public Dictionary<string, Vector3[]> taskVector3ArrayValues;
         public Dictionary<string, bool[]> taskBoolArrayValues;
+        public Dictionary<string, string[]> taskStringArrayValues;
 
 #if NETWORKED
 
@@ -125,6 +126,7 @@ namespace StoryEngine
             taskByteValues = new Dictionary<string, byte[]>();
             taskVector3ArrayValues = new Dictionary<string, Vector3[]>();
             taskBoolArrayValues = new Dictionary<string, bool[]>();
+            taskStringArrayValues = new Dictionary<string, string[]>();
 
 
 #if NETWORKED
@@ -340,6 +342,27 @@ namespace StoryEngine
 
                     if (taskBoolArrayValues.TryGetValue(boolArrayName, out boolArrayValue))
                         msg.updatedBoolArrayValues.Add(boolArrayValue);
+
+                }
+
+            }
+
+            string[] stringArrayNames = taskStringArrayValues.Keys.ToArray();
+
+            foreach (string stringArrayName in stringArrayNames)
+            {
+
+                if (taskValuesChangeMask[stringArrayName] || allModified)
+                {
+
+                    msg.updatedStringArrayNames.Add(stringArrayName);
+
+                    taskValuesChangeMask[stringArrayName] = false;
+
+                    string[] stringArrayValue;
+
+                    if (taskStringArrayValues.TryGetValue(stringArrayName, out stringArrayValue))
+                        msg.updatedStringArrayValues.Add(stringArrayValue);
 
                 }
 
@@ -661,6 +684,14 @@ namespace StoryEngine
 
             }
 
+            for (int i = 0; i < update.updatedStringArrayNames.Count; i++)
+            {
+
+                taskStringArrayValues[update.updatedStringArrayNames[i]] = update.updatedStringArrayValues[i];
+                taskValuesChangeMask[update.updatedStringArrayNames[i]] = changeMask;
+
+            }
+
         }
 
 #endif
@@ -850,6 +881,30 @@ namespace StoryEngine
         {
 
             if (!taskBoolArrayValues.TryGetValue(valueName, out value))
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
+        public void SetStringArrayValue(string valueName, string[] value)
+        {
+
+            taskStringArrayValues[valueName] = value;
+
+            #if NETWORKED
+            taskValuesChangeMask[valueName] = true;
+            modified = true;
+            #endif
+
+        }
+
+        public bool GetStringArrayValue(string valueName, out string[] value)
+        {
+
+            if (!taskStringArrayValues.TryGetValue(valueName, out value))
             {
                 return false;
             }

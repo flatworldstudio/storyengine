@@ -114,7 +114,17 @@ namespace StoryEngine
 //						storyPoint = getUniqueName ();
 					
 //					storyLabels.Add (storyLabel, point);
-						GENERAL.storyPoints.Add (storyLabel, point);
+
+                        StoryPoint exists;
+
+                        if (GENERAL.storyPoints.TryGetValue(storyLabel,out  exists)){
+
+                            Debug.LogError("Storylabel exists: "+storyLabel+". Adding as a non functional duplicate.");
+                            storyLabel=storyLabel+"_DUPLICATE";
+                        }
+						
+                        GENERAL.storyPoints.Add (storyLabel, point);
+
 
 						previousPoint.setNextStoryPoint (point);
 						previousPoint = point;

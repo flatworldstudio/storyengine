@@ -252,6 +252,9 @@ namespace StoryEngine
         public List<string> updatedBoolArrayNames;
         public List<bool[]> updatedBoolArrayValues;
 
+        public List<string> updatedStringArrayNames;
+        public List<string[]> updatedStringArrayValues;
+
         public string debug;
 
         public TaskUpdateBundled() : base()
@@ -283,6 +286,9 @@ namespace StoryEngine
 
             updatedBoolArrayNames = new List<string>();
             updatedBoolArrayValues = new List<bool[]>();
+
+            updatedStringArrayNames = new List<string>();
+            updatedStringArrayValues = new List<string[]>();
 
         }
 
@@ -494,6 +500,33 @@ namespace StoryEngine
 
             }
 
+            // Deserialise updated string array values.
+
+            int stringArrayCount = reader.ReadInt32();
+
+            debug += "/ updated string arrays: " + stringArrayCount;
+
+            for (int i = 0; i < stringArrayCount; i++)
+            {
+
+                string stringArrayName = reader.ReadString();
+                updatedStringArrayNames.Add(stringArrayName);
+
+                int stringArrayLength = reader.ReadInt32();
+
+                string[] stringArray = new string[stringArrayLength];
+
+                for (int j = 0; j < stringArrayLength; j++)
+                {
+
+                    stringArray[j] = reader.ReadString();
+
+                }
+
+                updatedStringArrayValues.Add(stringArray);
+
+            }
+
 
             return debug;
 
@@ -666,6 +699,29 @@ namespace StoryEngine
                 {
 
                     writer.Write(updatedBoolArrayValues[i][j]); // data
+
+                }
+
+
+            }
+
+            // Serialise updated string array values.
+
+            writer.Write(updatedStringArrayNames.Count);
+
+            debug += "/ updated string arrays: " + updatedStringArrayNames.Count;
+
+            for (int i = 0; i < updatedStringArrayNames.Count; i++)
+            {
+
+                writer.Write(updatedStringArrayNames[i]); // name
+
+                writer.Write(updatedStringArrayValues[i].Length); // length
+
+                for (int j = 0; j < updatedStringArrayValues[i].Length; j++)
+                {
+
+                    writer.Write(updatedStringArrayValues[i][j]); // data
 
                 }
 

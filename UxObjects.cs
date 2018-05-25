@@ -1169,6 +1169,17 @@ namespace StoryEngine
 
         }
 
+
+        public UiButton GetButton (string name){
+
+            UiButton button;
+
+            if (uiButtons.TryGetValue(name, out button))
+                return button;
+
+            return UiButton.Void;
+        }
+
         public void none(object sender, UxArgs args)
         {
 
@@ -1352,6 +1363,26 @@ namespace StoryEngine
         public Image image;
         public Color color;
         public float brightness, targetBrightness, stepBrightness;
+
+        // Provide a void button. 
+
+        static UiButton _void;
+
+        public static UiButton Void {
+
+            get{
+                if (_void==null)
+                    _void= new UiButton();
+                return _void;
+
+            }
+            set{
+
+
+            }
+
+
+        }
 
         Vector2 lastPosition, deltaPosition;
         float lastAngle, deltaAngle;
