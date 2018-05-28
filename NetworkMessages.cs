@@ -18,7 +18,7 @@ namespace StoryEngine
         public string DebugLog;
         public List<PointerUpdateBundled> pointerUpdates;
         public List<TaskUpdateBundled> taskUpdates;
-        public double frameDuration;
+     //   public double frameDuration;
 
         public StoryUpdate() : base()
         {
@@ -91,9 +91,9 @@ namespace StoryEngine
 
             // Write their current framerate.
 
-            frameDuration= reader.ReadDouble();
+     //       frameDuration= reader.ReadDouble();
 
-            DebugLog+="Their average duration: "+ frameDuration;
+     //       DebugLog+="Their average duration: "+ frameDuration;
 
             // Pointer updates first. First get the number of messages, then deserialise them.
           
@@ -130,9 +130,9 @@ namespace StoryEngine
 
             // Write our current framerate.
 
-            writer.Write(frameDuration);
+         //   writer.Write(frameDuration);
 
-            DebugLog+="Our average duration: "+ frameDuration;
+        //    DebugLog+="Our average duration: "+ frameDuration;
 
             // Pointer updates first. First write the number of messages, then serialise them.
 

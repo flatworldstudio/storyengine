@@ -22,6 +22,7 @@ namespace StoryEngine
     {
         //List<PointerUpdate> PointerUpdateStack;
         List<StoryUpdate> StoryUpdateStack;
+        public UnityEngine.UI.Text debugValue;
 
         public event NewTasksEvent newTasksEvent;
 
@@ -74,7 +75,7 @@ namespace StoryEngine
             theDirector = new Director();
 
             GENERAL.ALLTASKS = new List<StoryTask>();
-         //   PointerUpdateStack = new List<PointerUpdate>();
+            //   PointerUpdateStack = new List<PointerUpdate>();
 
             StoryUpdateStack = new List<StoryUpdate>();
 
@@ -367,7 +368,7 @@ namespace StoryEngine
 
             // load balance
 
-            loadBalance = frameDurationAverage / storyUpdate.frameDuration;
+        //    loadBalance = frameDurationAverage / storyUpdate.frameDuration;
 
             //Debug.Log("load balance ours/theirs (>1 they run faster) "+ loadBalance);
 
@@ -403,7 +404,7 @@ namespace StoryEngine
             if (pointer != null && pointerUpdate.killed)
             {
                 pointer.Kill();
-                
+
                 if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
                 {
 
@@ -416,14 +417,14 @@ namespace StoryEngine
                     Log.Warning("Failed removing task " + pointer.currentTask.description);
 
                 }
-                
+
             }
 
         }
 
         void ApplyTaskUpdate(TaskUpdateBundled taskUpdate)
         {
-                        
+
             // See if we have a task on this storypoint.
 
             StoryTask updateTask = GENERAL.GetTaskForPoint(taskUpdate.pointID);
@@ -498,22 +499,54 @@ namespace StoryEngine
 
             // Calculate average framerate.
 
-            float current = Time.deltaTime;
+            //float current = Time.deltaTime;
 
-            frameDurrationBufferSum -= frameDurationBuffer[frameDurationBufferIndex];
-            frameDurationBuffer[frameDurationBufferIndex] = current;
-            frameDurrationBufferSum += current;
-            frameDurationBufferIndex = (frameDurationBufferIndex + 1) % frameDurationBuffer.Length;
-            frameDurationAverage = (frameDurrationBufferSum / frameDurationBuffer.Length);
+            //frameDurrationBufferSum -= frameDurationBuffer[frameDurationBufferIndex];
+            //frameDurationBuffer[frameDurationBufferIndex] = current;
+            //frameDurrationBufferSum += current;
+            //frameDurationBufferIndex = (frameDurationBufferIndex + 1) % frameDurationBuffer.Length;
+            //frameDurationAverage = (frameDurrationBufferSum / frameDurationBuffer.Length);
 
-            storyUpdate.frameDuration = frameDurationAverage;
+            //storyUpdate.frameDuration = frameDurationAverage;
 
             // Check our loadbalance. If we're sending too many updates we'll randomly drop frames.
             // All changes will be sent but if values are updated in the meantime the previous value will never be sent.
             // This is ok for running values but not ok for status values etc.
 
-            if (loadBalance > 0.90f || Random.value < loadBalance)
+            //  networkManager.getmess
+
+            int QueueSize=0;
+
+            if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && NetworkServer.active)
             {
+
+                // We're an active server.
+
+                byte error;
+                QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(NetworkServer.serverHostId, out error);
+                debugValue.text = "queued out server: " + QueueSize;
+
+            }
+            if (GENERAL.AUTHORITY == AUTHORITY.LOCAL && NetworkClient.active)
+            {
+
+                // We're an active client.
+
+                byte error;
+                QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(networkManager.client.connection.hostId, out error);
+                debugValue.text = "queued out client: " + QueueSize;
+
+            }
+
+            //    int a= networkManager.client.connection.hostId;
+
+
+
+
+            if (QueueSize<3)
+
+          //      if (loadBalance > 0.90f || Random.value < loadBalance)
+                {
 
                 // Iterate over all pointers to see if any were killed. Clients do not kill pointers themselves.
 
@@ -614,10 +647,12 @@ namespace StoryEngine
                 // If anything to send, send. 
                 // If not, and buffer is overflowing, send updates randomly once a second.
 
-                if (storyUpdate.AnythingToSend() || (!AssitantDirector.BufferStatusOk && Random.value < frameDurationAverage))
-                {
+             //   if (storyUpdate.AnythingToSend() || (!AssitantDirector.BufferStatusOk && Random.value < frameDurationAverage))
+                    if (storyUpdate.AnythingToSend() )
 
-                    switch (GENERAL.AUTHORITY)
+                    {
+
+                        switch (GENERAL.AUTHORITY)
                     {
                         case AUTHORITY.LOCAL:
                             SendStoryUpdateToServer(storyUpdate);
@@ -644,7 +679,7 @@ namespace StoryEngine
             else
             {
 
-              //  Debug.Log("Dropping update.");
+                //  Debug.Log("Dropping update.");
 
             }
 
@@ -778,16 +813,16 @@ namespace StoryEngine
 
         }
 
-       // Keeping this for a bit. If there's multiple clients we need to solve what gets sent where. An update from a client to the server should be forwarded.
-       // Other clients would receive the update first and any server updates on top of that.
-       // But that would mean different messages which we haven't used so far.
-       // Could also be that update messages get forwarded but all updates have sender labels, so the the sender can identify an update as their own and ignore it.
-       // All clients and server would need unique id's.
-       // Could already be implemented in unity. If not, server should pass around unique names.
+        // Keeping this for a bit. If there's multiple clients we need to solve what gets sent where. An update from a client to the server should be forwarded.
+        // Other clients would receive the update first and any server updates on top of that.
+        // But that would mean different messages which we haven't used so far.
+        // Could also be that update messages get forwarded but all updates have sender labels, so the the sender can identify an update as their own and ignore it.
+        // All clients and server would need unique id's.
+        // Could already be implemented in unity. If not, server should pass around unique names.
 
 
-       // 
-       
+        // 
+
         /*
         void onTaskUpdateFromClient(NetworkMessage netMsg)
         {
@@ -852,8 +887,10 @@ namespace StoryEngine
         void SendStoryUpdateToClients(StoryUpdate message)
         {
 
+
+            // NetworkServer.SendUnreliableToAll(storyCode, message);
             NetworkServer.SendToAll(storyCode, message);
-            
+
         }
 
         void SendStoryUpdateToServer(StoryUpdate message)
@@ -862,10 +899,10 @@ namespace StoryEngine
             networkManager.client.Send(storyCode, message);
 
         }
-        
+
         void OnStoryUpdateFromClient(NetworkMessage netMsg)
         {
-
+            //  netMsg.MaxMess
             StoryUpdateStack.Add(netMsg.ReadMessage<StoryUpdate>());
 
         }
