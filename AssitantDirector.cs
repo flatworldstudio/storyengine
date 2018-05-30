@@ -22,7 +22,7 @@ namespace StoryEngine
     {
         //List<PointerUpdate> PointerUpdateStack;
         List<StoryUpdate> StoryUpdateStack;
-        public UnityEngine.UI.Text debugValue;
+ //       public UnityEngine.UI.Text debugValue;
 
         public event NewTasksEvent newTasksEvent;
 
@@ -49,8 +49,12 @@ namespace StoryEngine
         //const short pointerCode = 1003;
         //const short taskCode = 1004;
         const short storyCode = 1005;
-        static public double loadBalance = 1;
-        static public bool BufferStatusOk = true;
+        //static public double loadBalance = 1;
+        //static public bool BufferStatusOk = true;
+        static public int BufferStatusOut = 0;
+        static public int BufferStatusIn = 0;
+
+
 
 #endif
 
@@ -168,10 +172,13 @@ namespace StoryEngine
 
             int UpdateCount = StoryUpdateStack.Count;
 
+           
+
             switch (UpdateCount)
             {
 
                 case 0:
+                    BufferStatusIn = 0;
                     break;
 
                 case 1:
@@ -180,7 +187,8 @@ namespace StoryEngine
 
                     ApplyStoryUpdate(StoryUpdateStack[0]);
                     StoryUpdateStack.RemoveAt(0);
-                    BufferStatusOk = true;
+                    //BufferStatusOk = true;
+                    BufferStatusIn = 1;
 
                     break;
 
@@ -191,14 +199,15 @@ namespace StoryEngine
 
                     ApplyStoryUpdate(StoryUpdateStack[0]);
                     StoryUpdateStack.RemoveAt(0);
-                    BufferStatusOk = true;
+                    //    BufferStatusOk = true;
+                    BufferStatusIn = 1;
 
                     break;
 
                 default:
 
                     // Overflowing. Apply the oldest ones, keep the latest.
-
+                    BufferStatusIn = 2;
                     for (int u = UpdateCount - 2; u >= 0; u--)
                     {
 
@@ -207,7 +216,7 @@ namespace StoryEngine
 
                     }
 
-                    BufferStatusOk = false;
+                 //   BufferStatusOk = false;
                     break;
 
             }
@@ -524,7 +533,7 @@ namespace StoryEngine
 
                 byte error;
                 QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(NetworkServer.serverHostId, out error);
-                debugValue.text = "queued out server: " + QueueSize;
+              //  debugValue.text = "queued out server: " + QueueSize;
 
             }
             if (GENERAL.AUTHORITY == AUTHORITY.LOCAL && NetworkClient.active)
@@ -534,9 +543,25 @@ namespace StoryEngine
 
                 byte error;
                 QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(networkManager.client.connection.hostId, out error);
-                debugValue.text = "queued out client: " + QueueSize;
+            //    debugValue.text = "queued out client: " + QueueSize;
 
             }
+
+            switch (QueueSize)
+            {
+                case 0:
+                    BufferStatusOut = 0;
+                    break;
+                case 1:
+                case 2:
+                    BufferStatusOut = 1;
+                    break;
+                default:
+                    BufferStatusOut = 2;
+                    break;
+
+            }
+
 
             //    int a= networkManager.client.connection.hostId;
 
