@@ -240,8 +240,8 @@ namespace StoryEngine
 		{
 			l = manuscript [i];
 
-			if (isComment(l))
-				return null;
+			//if (isComment(l))
+				//return null;
 			
 			string r = null;
 
@@ -262,8 +262,8 @@ namespace StoryEngine
 			l = manuscript [i];
 		
 
-			if (isComment(l))
-				return null;
+			//if (isComment(l))
+				//return null;
 			
 			string r = null;
 
@@ -282,8 +282,8 @@ namespace StoryEngine
 		{
 			 l = manuscript [i];
 
-			if (isComment(l))
-				return null;
+			//if (isComment(l))
+				//return null;
 
 			Char space = ' ';
 //			string comment = "//";
@@ -372,7 +372,23 @@ namespace StoryEngine
 			if (mytxtData != null) {
 				string txt = mytxtData.text;
 				string[] lines = txt.Split (new string[] { "\r\n", "\n" }, StringSplitOptions.None);
-				manuscript.AddRange (lines);
+				
+                for (int l=0;l<lines.Length;l++){
+                    if (!isComment(lines[l])){
+
+                        manuscript.Add (lines[l]);
+
+                    }
+
+
+                }
+
+
+
+                //manuscript.AddRange (lines);
+
+
+
 				return true;
 			} else {
 
