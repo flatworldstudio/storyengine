@@ -212,7 +212,11 @@ namespace StoryEngine
 		public bool foundServer ()
 		{
 		
-			if (networkBroadcast.serverMessage != "") {
+            // Checks if the message from the server is the one we're looking for. If so, returns true.
+            // This allows for different environments - a dev intance cannot connect to a production instance.
+            // Could include versions, but would have to generate user feedback.
+
+			if (networkBroadcast.serverMessage == GENERAL.connectionKey) {
 			
 				return true;
 

@@ -57,9 +57,12 @@ namespace StoryEngine
 
 		public static bool wasConnected = false;
 
-		public static string broadcastServer, networkServer;
+		public static string broadcastServer, networkServer,receivedMessage;
 
-		public static string me = "General";
+        public static string connectionKey = "HELLO";
+
+
+        public static string me = "General";
 
 		public static StoryPoint getStoryPointByID (string pointID)
 		{

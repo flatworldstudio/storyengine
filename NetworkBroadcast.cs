@@ -83,6 +83,8 @@ namespace StoryEngine
 		public void StartServer ()
 		{
 
+            broadcastData = GENERAL.connectionKey; // get message string. default is HELLO.
+            
 			Initialize ();
 			ResetMessage (); // just to be sure.
 			StartAsServer ();
@@ -109,6 +111,7 @@ namespace StoryEngine
 			serverAddress = fromAddress;
 
 			GENERAL.broadcastServer = fromAddress;
+            GENERAL.receivedMessage = data; // store message string. allow for comparing messages, eg for different versions or environments.
 
 		}
 
