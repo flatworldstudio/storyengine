@@ -216,7 +216,10 @@ namespace StoryEngine
             // This allows for different environments - a dev intance cannot connect to a production instance.
             // Could include versions, but would have to generate user feedback.
 
-			if (networkBroadcast.serverMessage == GENERAL.connectionKey) {
+            // We use a search because the message is 512 chars
+
+                if (networkBroadcast.serverMessage.IndexOf(GENERAL.connectionKey)!=-1) 
+            {
 			
 				return true;
 
