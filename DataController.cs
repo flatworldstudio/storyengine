@@ -163,7 +163,7 @@ namespace StoryEngine
 
 		}
 
-		public void stopBroadcast ()
+		public void stopBroadcastServer ()
 		{
 
 			Log.Message ("Stopping broadcast server.", me);

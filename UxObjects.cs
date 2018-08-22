@@ -701,8 +701,18 @@ namespace StoryEngine
 //			draggedButton.dragTarget = emptyObject;
 			}
 
+            if (draggedButton == null)
+            {
 
-			panGUI (draggedButton.dragTarget, uxArgs.delta, draggedButton.constraint, uxArgs.uiEvent);
+               Debug.Log("dragged button not found " + name);
+
+            }
+
+          
+
+            panGUI (draggedButton.dragTarget, uxArgs.delta, draggedButton.constraint, uxArgs.uiEvent);
+
+
 //
 //
 //		switch (name) {
