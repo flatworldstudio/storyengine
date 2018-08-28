@@ -31,13 +31,18 @@ namespace StoryEngine
 
         string me = "Director";
 
+        static public Director Instance;
+
+
         public Director()
         {
-
+            Instance = this;
             GENERAL.ALLPOINTERS = new List<StoryPointer>();
             status = DIRECTORSTATUS.NOTREADY;
 
         }
+
+        
 
         public void evaluatePointers()
         {
