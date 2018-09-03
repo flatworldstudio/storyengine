@@ -554,6 +554,11 @@ namespace StoryEngine
 
             }
 
+            // Check if there is a 2d canvas.
+
+            if (theInterface.canvasObject == null)
+                return;
+
             // cast a 2d ray in the canvas we're controlling.
 
             GraphicRaycaster gfxRayCaster = theInterface.canvasObject.GetComponent<GraphicRaycaster>();

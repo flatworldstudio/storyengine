@@ -8,10 +8,10 @@ namespace StoryEngine
     public class DeusController : MonoBehaviour
     {
 
-        GameObject DeusCanvas, StoryEngineObject, PointerBlock;
-
-
-        AssitantDirector ad;
+        public GameObject DeusCanvas, PointerBlock;
+        public int Width;
+         GameObject StoryEngineObject;
+       AssitantDirector ad;
 
         string me = "Deus Controller";
 
@@ -32,7 +32,8 @@ namespace StoryEngine
             //		smoothMouseX = 0;
             //		smoothMouseY = 0;
 
-            StoryEngineObject = GameObject.Find("StoryEngineObject");
+            //       StoryEngineObject = GameObject.Find("StoryEngineObject");
+            StoryEngineObject = this.transform.gameObject;
 
             if (StoryEngineObject == null)
             {
@@ -46,14 +47,14 @@ namespace StoryEngine
                 ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
             }
 
-            DeusCanvas = GameObject.Find("DeusCanvas");
+      //      DeusCanvas = GameObject.Find("DeusCanvas");
 
             if (DeusCanvas == null)
             {
                 Log.Warning("DeusCanvas not found.");
             }
 
-            DeusCanvas = GameObject.Find("DeusCanvas");
+     //       DeusCanvas = GameObject.Find("DeusCanvas");
 
             if (DeusCanvas == null)
             {
@@ -61,10 +62,10 @@ namespace StoryEngine
             }
             else
             {
-                DeusCanvas.SetActive(false);
+               DeusCanvas.SetActive(false);
             }
 
-            PointerBlock = GameObject.Find("PointerBlock");
+        //    PointerBlock = GameObject.Find("PointerBlock");
 
 
             if (PointerBlock == null)
@@ -325,7 +326,7 @@ namespace StoryEngine
             GameObject newPointerUi;
 
             newPointerUi = Instantiate(PointerBlock);
-            newPointerUi.transform.SetParent(DeusCanvas.transform);
+            newPointerUi.transform.SetParent(DeusCanvas.transform,false);
 
             targetPointer.pointerObject = newPointerUi;
             targetPointer.pointerTextObject = newPointerUi.transform.Find("textObject").gameObject;
@@ -358,27 +359,35 @@ namespace StoryEngine
             maxPosition++;
             maxPosition = Mathf.Max(maxPosition, 4);
 
-            float scalar = 4f / maxPosition;
+            //     float scalar = 4f / maxPosition;
 
             //		Debug.Log (scalar + " " + maxPosition);
+            float xSize = (float) Width / maxPosition;
+            float xAnchor = xSize / 2f;
+            float scalar = xSize / 320f;
+            
+            // 
 
-            float xSize = 320f * scalar;
-            float xAnchor = 160f * scalar;
-            float ySize = 160f * scalar;
+
+            //float xSize = 320f * scalar;
+            //float xAnchor = 160f * scalar;
+            //float ySize = 160f * scalar;
             //float yAnchor = -0.5f * Screen.height + 80f * scalar;
 
-            float screenCorrection = Screen.width / 1280f;
+            //    float screenCorrection = Screen.width / 1280f;
 
             //	Debug.Log( "CORR: "+screenCorrection);
 
-            float yAnchor = GENERAL.pointerScreenScalar * Screen.height + ySize * GENERAL.pointerRectScalar * screenCorrection;
+            //   float yAnchor = GENERAL.pointerScreenScalar * Screen.height + ySize * GENERAL.pointerRectScalar * screenCorrection;
 
             for (int i = 0; i < 10; i++)
             {
                 if (pointerPositions[i] != null)
                 {
-                    pointerPositions[i].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3((-640f + xAnchor + i * xSize) * screenCorrection, yAnchor, 0);
-                    pointerPositions[i].pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scalar * screenCorrection, scalar * screenCorrection, 1);
+                    //pointerPositions[i].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3((-640f + xAnchor + i * xSize) * screenCorrection, yAnchor, 0);
+                    //pointerPositions[i].pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scalar * screenCorrection, scalar * screenCorrection, 1);
+                    pointerPositions[i].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3((-Width/2 + xAnchor + i * xSize) , 0, 0);
+                    pointerPositions[i].pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scalar , scalar, scalar);
                 }
             }
 

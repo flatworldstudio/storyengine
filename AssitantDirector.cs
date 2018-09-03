@@ -39,7 +39,7 @@ namespace StoryEngine
         public string scriptName;
 
         string launchOnStoryline;
-        public string launchOSX, launchWIN, launchIOS;
+        public string launchOSX, launchWIN, launchIOS,launchAndroid;
 
 #if NETWORKED
 
@@ -108,6 +108,15 @@ namespace StoryEngine
 		Log.Message ("Running on IOS platform. ");
 
 		launchOnStoryline = launchIOS;
+
+#endif
+
+
+#if UNITY_ANDROID
+
+		Log.Message ("Running on Android platform. ");
+
+            launchOnStoryline = launchAndroid;
 
 #endif
 
