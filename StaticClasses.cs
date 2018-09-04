@@ -96,7 +96,7 @@ namespace StoryEngine
         static void flagPointerOverflow()
         {
 
-            if (ALLPOINTERS.Count > 10)
+            if (ALLPOINTERS.Count > 25)
             {
                 Log.Warning("Potential pointer overflow.");
             }
@@ -106,7 +106,7 @@ namespace StoryEngine
         static void flagTaskOverflow()
         {
 
-            if (ALLTASKS.Count > 10)
+            if (ALLTASKS.Count > 25)
             {
                 Log.Warning("Potential task overflow.");
 

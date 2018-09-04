@@ -20,6 +20,8 @@ namespace StoryEngine
         StoryPointer[] pointerPositions;
         public bool storyBoard;
 
+        int PointerdisplayBuffer = 24;
+
         void Start()
         {
 
@@ -27,7 +29,7 @@ namespace StoryEngine
 
             taskList = new List<StoryTask>();
             pointerList = new List<StoryPointer>();
-            pointerPositions = new StoryPointer[10];
+            pointerPositions = new StoryPointer[PointerdisplayBuffer];
 
             //		smoothMouseX = 0;
             //		smoothMouseY = 0;
@@ -340,6 +342,11 @@ namespace StoryEngine
             while (pointerPositions[p] != null)
             {
                 p++;
+                if (p==PointerdisplayBuffer)
+                {
+                    Log.Error("To many pointers for display, crashing now.");
+
+                }
             }
 
             //		Debug.Log ("found point position: " + p);
@@ -349,7 +356,7 @@ namespace StoryEngine
 
             int maxPosition = 0;
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < PointerdisplayBuffer; i++)
             {
                 if (pointerPositions[i] != null)
                 {
@@ -357,36 +364,28 @@ namespace StoryEngine
                 }
             }
             maxPosition++;
-            maxPosition = Mathf.Max(maxPosition, 4);
 
-            //     float scalar = 4f / maxPosition;
+          //  maxPosition = Mathf.Max(maxPosition, 4);
 
-            //		Debug.Log (scalar + " " + maxPosition);
+            maxPosition = Mathf.Clamp(maxPosition, 4, 6);
+
+
             float xSize = (float) Width / maxPosition;
             float xAnchor = xSize / 2f;
             float scalar = xSize / 320f;
-            
-            // 
+            float ySize = xSize / 320f * 160f;
 
 
-            //float xSize = 320f * scalar;
-            //float xAnchor = 160f * scalar;
-            //float ySize = 160f * scalar;
-            //float yAnchor = -0.5f * Screen.height + 80f * scalar;
-
-            //    float screenCorrection = Screen.width / 1280f;
-
-            //	Debug.Log( "CORR: "+screenCorrection);
-
-            //   float yAnchor = GENERAL.pointerScreenScalar * Screen.height + ySize * GENERAL.pointerRectScalar * screenCorrection;
-
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < PointerdisplayBuffer; i++)
             {
                 if (pointerPositions[i] != null)
                 {
                     //pointerPositions[i].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3((-640f + xAnchor + i * xSize) * screenCorrection, yAnchor, 0);
                     //pointerPositions[i].pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scalar * screenCorrection, scalar * screenCorrection, 1);
-                    pointerPositions[i].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3((-Width/2 + xAnchor + i * xSize) , 0, 0);
+                    int row = i / 6;
+                    int col = i % 6;
+
+                    pointerPositions[i].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3((-Width/2 + xAnchor + col * xSize) , row*ySize, 0);
                     pointerPositions[i].pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scalar , scalar, scalar);
                 }
             }

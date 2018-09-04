@@ -173,6 +173,14 @@ namespace StoryEngine
 
         }
 
+        public static StoryTask FindTaskByByLabel (string id)
+        {
+
+            StoryTask r = null;
+            r=GENERAL.GetTaskForPoint(id);
+            return r;
+
+        }
 
         void Update()
         {
