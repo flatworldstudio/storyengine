@@ -91,7 +91,7 @@ namespace StoryEngine
             if (!moduleLogStatus.TryGetValue(callerId, out moduleLevel))
             {
 
-                moduleLevel = LOGLEVEL.NORMAL; // normal by default.
+                moduleLevel = LOGLEVEL.ERRORS; // normal by default.
 
             }
 
