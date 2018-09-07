@@ -388,8 +388,13 @@ namespace StoryEngine
 
             if (pointer != null)
             {
-                pointer.Kill();
 
+                // We remove it instantly. No need to mark it as deleted, nothing else to do with it.
+
+         //       pointer.Kill();
+
+                GENERAL.ALLPOINTERS.Remove(pointer);
+                Log("Removing pointer: " + pointer.currentPoint.storyLineName);
                 // Remove task associated with pointer. This is only one at all times, we just don't know which one.
 
                 //if (GENERAL.ALLTASKS.Remove(pointer.currentTask)){
