@@ -73,13 +73,14 @@ namespace StoryEngine
 
                 StoryPointer sp = GENERAL.ALLPOINTERS[p];
 
-                if (sp.GetStatus() == POINTERSTATUS.KILLED)
+
+                // For consistency of network logic, local pointers that were killed are disposed here.
+                // Global pointers are disposed by the AD, after updating clients about them.
+
+                if (sp.scope==SCOPE.LOCAL &&  sp.GetStatus() == POINTERSTATUS.KILLED)
                 {
-
-                    // if a pointer was killed, remove it now.
-
-                    Log("Removing pointer: " + sp.currentPoint.storyLineName);
-
+                               
+                   Log("Removing pointer: " + sp.currentPoint.storyLineName);
                     GENERAL.ALLPOINTERS.RemoveAt(p);
 
                 }

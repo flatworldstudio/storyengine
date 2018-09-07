@@ -558,12 +558,14 @@ namespace StoryEngine
             {
 
                 // Iterate over all pointers to see if any were killed. Clients do not kill pointers themselves.
+                // For consistency of network logic, local pointers that were killed are disposed by the director.
+                // Global pointers are disposed here, after updating clients about them.
 
-                for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++)
+                for (int p = GENERAL.ALLPOINTERS.Count-1; p>=0; p--)
                 {
 
                     StoryPointer pointer = GENERAL.ALLPOINTERS[p];
-
+                    
                     if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified && pointer.GetStatus() == POINTERSTATUS.KILLED)
                     {
 
@@ -572,6 +574,11 @@ namespace StoryEngine
                         storyUpdate.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
 
                         pointer.modified = false;
+                    
+
+                        Log("Removing pointer " + pointer.currentPoint.storyLineName);
+
+                            GENERAL.ALLPOINTERS.Remove(pointer);
 
 
                     }
