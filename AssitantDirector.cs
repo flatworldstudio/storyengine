@@ -458,7 +458,7 @@ namespace StoryEngine
                     updateTask = new StoryTask(taskUpdate.pointID, SCOPE.GLOBAL);
                     updateTask.ApplyUpdateMessage(taskUpdate);
 
-                    Verbose("Created an instance of global task " + updateTask.description);
+                    Log("Created an instance of global task " + updateTask.description);
 
                     if (taskUpdate.pointID != "GLOBALS")
                     {
@@ -472,13 +472,13 @@ namespace StoryEngine
 
                             updatePointer = new StoryPointer();
 
-                            Verbose("Created a new pointer for task "+updateTask.description);
+                            Log("Created a new pointer for task "+updateTask.description);
 
                         }
 
                         updatePointer.PopulateWithTask(updateTask);
 
-                        Verbose("Populated pointer " + updatePointer.currentPoint.storyLineName + "with task "+updateTask.description);
+                        Log("Populated pointer " + updatePointer.currentPoint.storyLineName + "with task "+updateTask.description);
 
                         DistributeTasks(new TaskArgs(updateTask));
 
