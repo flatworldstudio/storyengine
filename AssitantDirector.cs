@@ -602,6 +602,15 @@ namespace StoryEngine
                     if (task.modified)
                     {
 
+                        // Debugging: if a pointer is in the process of being killed, we may want to not send task updates
+                        // as they might result in the task being recreated clientside.
+
+                        if (task.pointer.GetStatus()==POINTERSTATUS.KILLED){
+
+                            Warning("Sending task updated for task with pointer that is dying. "+task.description);
+                        }
+
+
                         // Check if we need to send network updates.
 
                         switch (GENERAL.AUTHORITY)
