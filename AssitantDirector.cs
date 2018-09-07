@@ -339,8 +339,8 @@ namespace StoryEngine
 
                     // create globals by default.
 
-                    GENERAL.storyPoints.Add("GLOBALS", new StoryPoint("GLOBALS", "none", new string[] { "GLOBALS" }));
-                    GENERAL.GLOBALS = new StoryTask("GLOBALS", SCOPE.GLOBAL);
+                //    GENERAL.storyPoints.Add("GLOBALS", new StoryPoint("GLOBALS", "none", new string[] { "GLOBALS" }));
+                 //   GENERAL.GLOBALS = new StoryTask("GLOBALS", SCOPE.GLOBAL);
 
                     break;
 
