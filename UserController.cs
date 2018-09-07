@@ -118,8 +118,10 @@ namespace StoryEngine
                         {
                             Debug.LogWarning(ID + "No handler available, blocking task while waiting.");
                             handlerWarning = true;
-                            t++;
+                           
                         }
+
+                        t++;
 
                     }
 

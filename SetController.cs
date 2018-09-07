@@ -117,9 +117,10 @@ namespace StoryEngine
                         {
                             Warning("No handler available, blocking task while waiting.");
                             handlerWarning = true;
-                            t++;
+                           
                         }
 
+                        t++;
                     }
 
                 }
