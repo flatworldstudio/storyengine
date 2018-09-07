@@ -211,7 +211,7 @@ namespace StoryEngine
 
                 case DIRECTORSTATUS.ACTIVE:
 
-                    Verbose ( "Director active .");
+                    Verbose("Director active .");
 
                     foreach (StoryTask task in GENERAL.ALLTASKS)
                     {
@@ -339,8 +339,8 @@ namespace StoryEngine
 
                     // create globals by default.
 
-                //    GENERAL.storyPoints.Add("GLOBALS", new StoryPoint("GLOBALS", "none", new string[] { "GLOBALS" }));
-                 //   GENERAL.GLOBALS = new StoryTask("GLOBALS", SCOPE.GLOBAL);
+                    //    GENERAL.storyPoints.Add("GLOBALS", new StoryPoint("GLOBALS", "none", new string[] { "GLOBALS" }));
+                    //   GENERAL.GLOBALS = new StoryTask("GLOBALS", SCOPE.GLOBAL);
 
                     break;
 
@@ -354,7 +354,7 @@ namespace StoryEngine
 
         void ApplyStoryUpdate(StoryUpdate storyUpdate)
         {
-            
+
             PointerUpdateBundled pointerUpdateBundled;
 
             while (storyUpdate.GetPointerUpdate(out pointerUpdateBundled))
@@ -391,7 +391,7 @@ namespace StoryEngine
 
                 // We remove it instantly. No need to mark it as deleted, nothing else to do with it.
 
-         //       pointer.Kill();
+                //       pointer.Kill();
 
                 GENERAL.ALLPOINTERS.Remove(pointer);
                 Log("Removing pointer: " + pointer.currentPoint.storyLineName);
@@ -408,7 +408,7 @@ namespace StoryEngine
 
                     StoryTask task = GENERAL.ALLTASKS[i];
 
-                    if (task.point!=null && task.point.storyLineName == pointerUpdate.StoryLineName)
+                    if (task.point != null && task.point.storyLineName == pointerUpdate.StoryLineName)
                     {
 
                         Log("Removing task: " + task.description);
@@ -463,7 +463,7 @@ namespace StoryEngine
                     updateTask = new StoryTask(taskUpdate.pointID, SCOPE.GLOBAL);
                     updateTask.ApplyUpdateMessage(taskUpdate);
 
-                    Log("Created an instance of global task " + updateTask.description + " id "+updateTask.pointID);
+                    Log("Created an instance of global task " + updateTask.description + " id " + updateTask.pointID);
 
                     if (taskUpdate.pointID != "GLOBALS")
                     {
@@ -477,13 +477,13 @@ namespace StoryEngine
 
                             updatePointer = new StoryPointer();
 
-                            Log("Created a new pointer for task "+updateTask.description);
+                            Log("Created a new pointer for task " + updateTask.description);
 
                         }
 
                         updatePointer.PopulateWithTask(updateTask);
 
-                        Log("Populated pointer " + updatePointer.currentPoint.storyLineName + " with task "+updateTask.description);
+                        Log("Populated pointer " + updatePointer.currentPoint.storyLineName + " with task " + updateTask.description);
 
                         DistributeTasks(new TaskArgs(updateTask));
 
@@ -531,15 +531,31 @@ namespace StoryEngine
                 QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(NetworkServer.serverHostId, out error);
                 //  debugValue.text = "queued out server: " + QueueSize;
 
+                if ((NetworkError)error != NetworkError.Ok)
+                    Error("Networktransport error: " + (NetworkError)error);
+
+
             }
             if (GENERAL.AUTHORITY == AUTHORITY.LOCAL && NetworkClient.active)
             {
 
                 // We're an active client.
 
-                byte error;
-                QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(networkManager.client.connection.hostId, out error);
+                byte error=(byte)NetworkError.Ok;
+
+                if (networkManager.client != null && networkManager.client.connection != null)
+                {
+                    QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(networkManager.client.connection.hostId, out error);
+                }
+                else
+                {
+                    Warning("Can't get queue size (yet)");
+                }
+
                 //    debugValue.text = "queued out client: " + QueueSize;
+
+                if ((NetworkError)error != NetworkError.Ok)
+                    Error("Networktransport error: " + (NetworkError)error);
 
             }
 
@@ -566,11 +582,11 @@ namespace StoryEngine
                 // For consistency of network logic, local pointers that were killed are disposed by the director.
                 // Global pointers are disposed here, after updating clients about them.
 
-                for (int p = GENERAL.ALLPOINTERS.Count-1; p>=0; p--)
+                for (int p = GENERAL.ALLPOINTERS.Count - 1; p >= 0; p--)
                 {
 
                     StoryPointer pointer = GENERAL.ALLPOINTERS[p];
-                    
+
                     if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified && pointer.GetStatus() == POINTERSTATUS.KILLED)
                     {
 
@@ -579,11 +595,11 @@ namespace StoryEngine
                         storyUpdate.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
 
                         pointer.modified = false;
-                    
+
 
                         Log("Removing pointer " + pointer.currentPoint.storyLineName);
 
-                            GENERAL.ALLPOINTERS.Remove(pointer);
+                        GENERAL.ALLPOINTERS.Remove(pointer);
 
 
                     }
@@ -625,7 +641,7 @@ namespace StoryEngine
                         }
                         else
                         {
-                            
+
                             // Check if we need to send network updates.
 
                             switch (GENERAL.AUTHORITY)
@@ -723,7 +739,7 @@ namespace StoryEngine
 
             GENERAL.SETNEWCONNECTION(-1);
 
-       //     Logger.Message("Registering server message handlers.");
+            //     Logger.Message("Registering server message handlers.");
 
             NetworkServer.RegisterHandler(stringCode, OnMessageFromClient);
             NetworkServer.RegisterHandler(storyCode, OnStoryUpdateFromClient);
@@ -740,7 +756,7 @@ namespace StoryEngine
         void onStartClient(NetworkClient theClient)
         {
 
-      //      Logger.Message("Registering client message handlers.");
+            //      Logger.Message("Registering client message handlers.");
 
             theClient.RegisterHandler(stringCode, OnMessageFromServer);
             theClient.RegisterHandler(storyCode, OnStoryUpdateFromServer);
