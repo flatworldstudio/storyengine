@@ -31,11 +31,31 @@ namespace StoryEngine
 
         public List<StoryTask> taskList;
 
-        string me = "Data controller";
+        string ID = "DataController";
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
+
 
         void Start()
         {
-            Log.Message("Starting.");
+            Log("Starting.");
 
             taskList = new List<StoryTask>();
 
@@ -46,7 +66,7 @@ namespace StoryEngine
             if (NetworkObject == null)
             {
 
-                Log.Warning("NetworkObject not found.");
+                Warning("NetworkObject not found.");
 
             }
             else
@@ -64,7 +84,7 @@ namespace StoryEngine
             if (StoryEngineObject == null)
             {
 
-                Log.Warning("StoryEngineObject not found.");
+                Warning("StoryEngineObject not found.");
 
             }
             else
@@ -157,7 +177,7 @@ namespace StoryEngine
         public void startBroadcastClient()
         {
 
-            Log.Message("Starting broadcast client.");
+            Log("Starting broadcast client.");
 
             networkBroadcast.StartClient();
 
@@ -166,7 +186,7 @@ namespace StoryEngine
         public void startBroadcastServer()
         {
 
-            Log.Message("Starting broadcast server.");
+            Log("Starting broadcast server.");
 
             networkBroadcast.StartServer();
 
@@ -175,7 +195,7 @@ namespace StoryEngine
         public void stopBroadcast()
         {
 
-            Log.Message("Stopping broadcast server.");
+            Log("Stopping broadcast server.");
 
             networkBroadcast.Stop();
 
@@ -186,11 +206,11 @@ namespace StoryEngine
 
             if (server == "")
             {
-                Log.Error("trying to start client without server address");
+                Error("trying to start client without server address");
                 return;
             }
 
-            Log.Message("Starting client for remote server " + server);
+            Log("Starting client for remote server " + server);
 
             networkManager.StartNetworkClient(server);
 
@@ -199,7 +219,7 @@ namespace StoryEngine
         public void StopNetworkClient()
         {
 
-            Log.Message("Stopping network client.");
+            Log("Stopping network client.");
 
             networkManager.StopClient();
 
@@ -254,7 +274,7 @@ namespace StoryEngine
         public void addTaskHandler(DataTaskHandler theHandler)
         {
             dataTaskHandler = theHandler;
-            Log.Message("Handler added.");
+            Log("Handler added.");
         }
 
         void Update()
@@ -272,7 +292,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
 
-                    Log.Message("Removing task:" + task.description);
+                    Log("Removing task:" + task.description);
 
                     // Task was removed, so stop executing it.
 
@@ -288,7 +308,7 @@ namespace StoryEngine
                         if (dataTaskHandler(task))
                         {
 
-                            task.signOff(me);
+                            task.signOff(ID);
                             taskList.RemoveAt(t);
 
                         }
@@ -306,7 +326,7 @@ namespace StoryEngine
                         if (!handlerWarning)
                         {
 
-                            Log.Warning("No handler available, blocking task while waiting.");
+                            Warning("No handler available, blocking task while waiting.");
 
                             handlerWarning = true;
                             t++;

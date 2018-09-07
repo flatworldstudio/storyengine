@@ -11,12 +11,30 @@ namespace StoryEngine
 	public class Script
 	{
 
-		// COULD BE MADE STATIC??
-
+		// COULD BE MADE STATIC, we don't have multiple scripts...?
 
 		List <String> manuscript;
 		public Boolean isReady;
-		string me = "Script";
+		string ID = "Script";
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
 		public Script (string fileName)
 		{
@@ -33,7 +51,7 @@ namespace StoryEngine
 
 			} else {
 			
-				Log.Warning ("Script file didn't load.");
+				Warning ("Script file didn't load.");
 
 			}
 
@@ -86,7 +104,7 @@ namespace StoryEngine
 
 					} else {
 
-						Log.Warning ("#storyline should be followed by storypoint");
+						Warning ("#storyline should be followed by storypoint");
 
 					}
 
@@ -131,7 +149,7 @@ namespace StoryEngine
 
 					} else {
 
-						Log.Warning ("@storylabel should be followed by storypoint");
+						Warning ("@storylabel should be followed by storypoint");
 
 					}
 

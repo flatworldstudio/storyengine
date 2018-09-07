@@ -56,7 +56,7 @@ namespace StoryEngine
         public GameObject target2D, target3D;
         public UiButton targetButton;
 
-        //	string me="Uievent";
+        static   	string ID="Uievent";
 
         public bool isInert, isSpringing;
 
@@ -66,6 +66,25 @@ namespace StoryEngine
         public float tapCount;
         //			public bool inertia;
         public string callback;
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+      static  void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        static      void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        static     void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        static      void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
         public UiEvent()
         {
@@ -156,11 +175,30 @@ namespace StoryEngine
 
         //	static string me="Uxmethods";
 
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+        static string ID = "Uxmethods";
+
+     static   void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        static   void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        static    void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        static    void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
         public static void someAction(object sender, UxArgs uxArgs)
         {
 
-            Log.Message("SOME ACTION TRIGGERRED");
+            Log("SOME ACTION TRIGGERRED");
         }
 
 
@@ -178,7 +216,7 @@ namespace StoryEngine
         public static void select3dObject(object sender, UxArgs uxArgs)
         {
 
-            Log.Message("3d target: " + uxArgs.uiEvent.target3D.transform.name);
+            Log("3d target: " + uxArgs.uiEvent.target3D.transform.name);
 
             if (uxArgs.activeInterface.selectedObjects.IndexOf(uxArgs.uiEvent.target3D) != -1)
             {
@@ -724,7 +762,7 @@ namespace StoryEngine
             // catch exception: when constructing a uibutton the constructor searches for a gameobject by name, which may fail.
             if (draggedButton != null && (draggedButton.gameObject == null || draggedButton.dragTarget == null))
             {
-                Log.Error("uiButton object reference not found. Is the gameobject active?");
+                Error("uiButton object reference not found. Is the gameobject active?");
                 //			draggedButton.dragTarget = emptyObject;
             }
 
@@ -1466,7 +1504,7 @@ namespace StoryEngine
             else
             {
                 // catch exception
-                Log.Error("Uibutton gameobject reference not found. Is it disabled?");
+                Debug.LogError("Uibutton gameobject reference not found. Is it disabled?");
             }
         }
 

@@ -13,7 +13,7 @@ namespace StoryEngine
          GameObject StoryEngineObject;
        AssitantDirector ad;
 
-        string me = "Deus Controller";
+        string ID = "DeusController";
 
         List<StoryTask> taskList;
         List<StoryPointer> pointerList;
@@ -22,10 +22,29 @@ namespace StoryEngine
 
         int PointerdisplayBuffer = 24;
 
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
+
         void Start()
         {
 
-            Log.Message("Starting...");
+            Log("Starting...");
 
             taskList = new List<StoryTask>();
             pointerList = new List<StoryPointer>();
@@ -40,7 +59,7 @@ namespace StoryEngine
             if (StoryEngineObject == null)
             {
 
-                Log.Warning("StoryEngineObject with central command script not found.");
+                Warning("StoryEngineObject with central command script not found.");
 
             }
             else
@@ -53,14 +72,14 @@ namespace StoryEngine
 
             if (DeusCanvas == null)
             {
-                Log.Warning("DeusCanvas not found.");
+                Warning("DeusCanvas not found.");
             }
 
      //       DeusCanvas = GameObject.Find("DeusCanvas");
 
             if (DeusCanvas == null)
             {
-                Log.Warning("DeusCanvas not found.");
+                Warning("DeusCanvas not found.");
             }
             else
             {
@@ -72,7 +91,7 @@ namespace StoryEngine
 
             if (PointerBlock == null)
             {
-                Log.Warning("PointerBlock not found.");
+                Warning("PointerBlock not found.");
             }
             else
             {
@@ -117,7 +136,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
 
-                    Log.Message("Removing task:" + task.description);
+                    Log("Removing task:" + task.description);
 
                     taskList.RemoveAt(t);
 
@@ -131,7 +150,7 @@ namespace StoryEngine
                         case "debugon":
                             DeusCanvas.SetActive(true);
 
-                            task.signOff(me);
+                            task.signOff(ID);
                             taskList.RemoveAt(t);
                             break;
 
@@ -139,7 +158,7 @@ namespace StoryEngine
                         case "debugoff":
 
                             DeusCanvas.SetActive(false);
-                            task.signOff(me);
+                            task.signOff(ID);
                             taskList.RemoveAt(t);
                             break;
 
@@ -147,7 +166,7 @@ namespace StoryEngine
                         case "toggledebug":
 
                             DeusCanvas.SetActive(!DeusCanvas.activeSelf);
-                            task.signOff(me);
+                            task.signOff(ID);
                             taskList.RemoveAt(t);
                             break;
 
@@ -190,7 +209,7 @@ namespace StoryEngine
 
                             //					updateTaskDisplay (task);
 
-                            task.signOff(me);
+                            task.signOff(ID);
                             taskList.RemoveAt(t);
                             break;
 
@@ -216,7 +235,7 @@ namespace StoryEngine
                 if (!pointerList.Contains(pointer))
                 {
 
-                    Log.Message("Pointer is new, added display for storyline " + pointer.currentPoint.storyLineName);
+                    Log("Pointer is new, added display for storyline " + pointer.currentPoint.storyLineName);
 
                     pointerList.Add(pointer);
 
@@ -241,7 +260,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLPOINTERS.Contains(pointer))
                 {
 
-                    Log.Message("Destroying ui for pointer for storyline " + pointer.currentPoint.storyLineName);
+                    Log("Destroying ui for pointer for storyline " + pointer.currentPoint.storyLineName);
 
                     // update first. some pointers reach end in a single go - we want those to be aligned.
 
@@ -344,7 +363,7 @@ namespace StoryEngine
                 p++;
                 if (p==PointerdisplayBuffer)
                 {
-                    Log.Error("To many pointers for display, crashing now.");
+                    Error("To many pointers for display, crashing now.");
 
                 }
             }
@@ -444,7 +463,7 @@ namespace StoryEngine
                 {
                     if (pointerPositions[storyPointerIndex] != null)
                     {
-                        Log.Message("Progressing storyline" + pointerPositions[storyPointerIndex].currentPoint.storyLineName);
+                        Log("Progressing storyline" + pointerPositions[storyPointerIndex].currentPoint.storyLineName);
 
                         //					cc.progressPointer (pointerPositions [storyPointerIndex].uid);
 
@@ -467,7 +486,7 @@ namespace StoryEngine
 
             if (Input.GetKey("escape"))
             {
-                Log.Message("Quitting application.");
+                Warning("Quitting application.");
                 Application.Quit();
             }
 

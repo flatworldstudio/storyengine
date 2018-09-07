@@ -178,23 +178,67 @@ namespace StoryEngine
     //}
 
 
+    //public class PointerUpdateBundled
+    //{
+
+    //    public string storyPointID;
+    //    public bool killed = false;
+
+
+    //    public string Deserialize(ref NetworkReader reader)
+    //    {
+
+    //        string DebugLog = "Deserialising pointer update.";
+
+    //        storyPointID = reader.ReadString();
+    //        killed = reader.ReadBoolean();
+
+    //        DebugLog += "Storypoint ID: " + storyPointID;
+    //        DebugLog += "Killed: " + killed.ToString();
+
+    //        return DebugLog;
+
+    //    }
+
+    //    public string Serialize(ref NetworkWriter writer)
+    //    {
+
+    //        string DebugLog = "Serialising pointer update.";
+
+    //        DebugLog += "Storypoint ID: " + storyPointID;
+    //        DebugLog += "Killed: " + killed.ToString();
+
+    //        writer.Write(storyPointID);
+    //        writer.Write(killed);
+
+    //        return DebugLog;
+
+    //    }
+
+    //}
+
+
     public class PointerUpdateBundled
     {
 
-        public string storyPointID;
-        public bool killed = false;
+        // only has a string, because we just telling clients kill this storyline.
 
+
+        //public string storyPointID;
+        //public bool killed = false;
+
+       public string StoryLineName;
 
         public string Deserialize(ref NetworkReader reader)
         {
 
             string DebugLog = "Deserialising pointer update.";
 
-            storyPointID = reader.ReadString();
-            killed = reader.ReadBoolean();
+            StoryLineName = reader.ReadString();
+            //killed = reader.ReadBoolean();
 
-            DebugLog += "Storypoint ID: " + storyPointID;
-            DebugLog += "Killed: " + killed.ToString();
+            DebugLog += "Storyline: " + StoryLineName;
+            //DebugLog += "Killed: " + killed.ToString();
 
             return DebugLog;
 
@@ -205,19 +249,17 @@ namespace StoryEngine
 
             string DebugLog = "Serialising pointer update.";
 
-            DebugLog += "Storypoint ID: " + storyPointID;
-            DebugLog += "Killed: " + killed.ToString();
+            DebugLog += "Storyline: " + StoryLineName;
+            //DebugLog += "Killed: " + killed.ToString();
 
-            writer.Write(storyPointID);
-            writer.Write(killed);
+            writer.Write(StoryLineName);
+            //writer.Write(killed);
 
             return DebugLog;
 
         }
 
     }
-
-
 
 
     public class TaskUpdateBundled

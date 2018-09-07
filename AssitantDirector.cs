@@ -20,75 +20,63 @@ namespace StoryEngine
 
     public class AssitantDirector : MonoBehaviour
     {
-        //List<PointerUpdate> PointerUpdateStack;
-        List<StoryUpdate> StoryUpdateStack;
- //       public UnityEngine.UI.Text debugValue;
-
-        public event NewTasksEvent newTasksEvent;
-
-        int lastStoryUpdateAtFrame = -1;
-
-        double[] frameDurationBuffer;
-        double frameDurrationBufferSum;
-        int frameDurationBufferIndex = 0;
-        double frameDurationAverage;
-
-        string me = "Assistant director";
-
-        Director theDirector;
         public string scriptName;
+        public string launchOSX, launchWIN, launchIOS, launchAndroid;
 
+
+        string ID = "AD";
+        List<StoryUpdate> StoryUpdateStack;
+        public event NewTasksEvent newTasksEvent;
+        Director theDirector;
         string launchOnStoryline;
-        public string launchOSX, launchWIN, launchIOS,launchAndroid;
+
 
 #if NETWORKED
 
         public ExtendedNetworkManager networkManager;
-
         const short stringCode = 1002;
-        //const short pointerCode = 1003;
-        //const short taskCode = 1004;
         const short storyCode = 1005;
-        //static public double loadBalance = 1;
-        //static public bool BufferStatusOk = true;
         static public int BufferStatusOut = 0;
         static public int BufferStatusIn = 0;
 
-
-
 #endif
 
-        void Awake()
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
         {
-
-            Log.Init();// this initialises the dictionary without entries, if not handled by developer.
-
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
         }
 
         void Start()
         {
 
-            Log.Message("Starting.");
+            Verbose("Starting.");
 
             UUID.setIdentity();
-
-            Log.Message("Identity stamp " + UUID.identity);
+            Verbose("Identity stamp " + UUID.identity);
 
             GENERAL.AUTHORITY = AUTHORITY.LOCAL;
-
             theDirector = new Director();
-
             GENERAL.ALLTASKS = new List<StoryTask>();
-            //   PointerUpdateStack = new List<PointerUpdate>();
-
             StoryUpdateStack = new List<StoryUpdate>();
-
-            frameDurationBuffer = new double[5];
 
 
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
 
-            Log.Message("Running on OSX platform.");
+            Log("Running on OSX platform.");
 
             launchOnStoryline = launchOSX;
 
@@ -97,7 +85,7 @@ namespace StoryEngine
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 
-            Log.Message("Running on WINDOWS platform.");
+            Log("Running on WINDOWS platform.");
 
             launchOnStoryline = launchWIN;
 
@@ -105,7 +93,7 @@ namespace StoryEngine
 
 #if UNITY_IOS
 
-		Log.Message ("Running on IOS platform. ");
+		Log ("Running on IOS platform. ");
 
 		launchOnStoryline = launchIOS;
 
@@ -114,7 +102,7 @@ namespace StoryEngine
 
 #if UNITY_ANDROID
 
-		Log.Message ("Running on Android platform. ");
+		Log ("Running on Android platform. ");
 
             launchOnStoryline = launchAndroid;
 
@@ -141,17 +129,9 @@ namespace StoryEngine
             // IOS: first app leaves focus, then it pauzes. on return app enteres focus and then resumes
 
             if (paused)
-            {
-
-                Log.Message("pauzing ...");
-
-            }
+                Warning("pauzing ...");
             else
-            {
-
-                Log.Message("resuming ...");
-
-            }
+                Warning("resuming ...");
 
         }
 
@@ -159,25 +139,17 @@ namespace StoryEngine
         {
 
             if (focus)
-            {
-
-                Log.Message("entering focus ...");
-
-            }
+                Warning("entering focus ...");
             else
-            {
-
-                Log.Message("leaving focus ...");
-
-            }
+                Warning("leaving focus ...");
 
         }
 
-        public static StoryTask FindTaskByByLabel (string id)
+        public static StoryTask FindTaskByByLabel(string id)
         {
 
             StoryTask r = null;
-            r=GENERAL.GetTaskForPoint(id);
+            r = GENERAL.GetTaskForPoint(id);
             return r;
 
         }
@@ -188,8 +160,6 @@ namespace StoryEngine
             // Handle story updates, aiming for 1 per frame.
 
             int UpdateCount = StoryUpdateStack.Count;
-
-           
 
             switch (UpdateCount)
             {
@@ -204,7 +174,6 @@ namespace StoryEngine
 
                     ApplyStoryUpdate(StoryUpdateStack[0]);
                     StoryUpdateStack.RemoveAt(0);
-                    //BufferStatusOk = true;
                     BufferStatusIn = 1;
 
                     break;
@@ -216,7 +185,6 @@ namespace StoryEngine
 
                     ApplyStoryUpdate(StoryUpdateStack[0]);
                     StoryUpdateStack.RemoveAt(0);
-                    //    BufferStatusOk = true;
                     BufferStatusIn = 1;
 
                     break;
@@ -224,6 +192,7 @@ namespace StoryEngine
                 default:
 
                     // Overflowing. Apply the oldest ones, keep the latest.
+
                     BufferStatusIn = 2;
                     for (int u = UpdateCount - 2; u >= 0; u--)
                     {
@@ -233,7 +202,6 @@ namespace StoryEngine
 
                     }
 
-                 //   BufferStatusOk = false;
                     break;
 
             }
@@ -243,7 +211,7 @@ namespace StoryEngine
 
                 case DIRECTORSTATUS.ACTIVE:
 
-                    //			Log.Message ( "director active ...");
+                    Verbose ( "Director active .");
 
                     foreach (StoryTask task in GENERAL.ALLTASKS)
                     {
@@ -297,11 +265,8 @@ namespace StoryEngine
                                             newTasks.Add(task);
                                             task.modified = true;
 
-                                            Log.Message("Creating and distributing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
+                                            Verbose("Creating and pushing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
 
-                                            //if (task.description=="moodon"){
-                                            //    Debug.Log("moodon task created at "+Time.frameCount);
-                                            //}
                                         }
 
                                     }
@@ -323,7 +288,7 @@ namespace StoryEngine
 
                                         newTasks.Add(task);
 
-                                        Log.Message("Creating local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
+                                        Verbose("Creating local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
 
                                     }
 
@@ -350,16 +315,16 @@ namespace StoryEngine
                     if (GENERAL.SIGNOFFS == 0)
                     {
 
-                        Log.Warning("No handlers registred. Pausing director.");
+                        Error("No handlers registred. Pausing director.");
                         theDirector.status = DIRECTORSTATUS.PAUSED;
 
                     }
                     else
                     {
 
-                        Log.Message("" + GENERAL.SIGNOFFS + " handlers registred.");
+                        Verbose("" + GENERAL.SIGNOFFS + " handlers registred.");
 
-                        Log.Message("Starting storyline " + launchOnStoryline);
+                        Log("Starting storyline " + launchOnStoryline);
 
                         theDirector.beginStoryLine(launchOnStoryline);
                         theDirector.status = DIRECTORSTATUS.ACTIVE;
@@ -389,15 +354,7 @@ namespace StoryEngine
 
         void ApplyStoryUpdate(StoryUpdate storyUpdate)
         {
-
-            //Debug.Log("Applying storyupdate \n"+storyUpdate.DebugLog);
-
-            // load balance
-
-        //    loadBalance = frameDurationAverage / storyUpdate.frameDuration;
-
-            //Debug.Log("load balance ours/theirs (>1 they run faster) "+ loadBalance);
-
+            
             PointerUpdateBundled pointerUpdateBundled;
 
             while (storyUpdate.GetPointerUpdate(out pointerUpdateBundled))
@@ -423,26 +380,59 @@ namespace StoryEngine
 
             // Right now the only update we send for pointers is when they are killed.
 
-            StoryPointer pointer = GENERAL.GetStorylinePointerForPointID(pointerUpdate.storyPointID);
+            //   StoryPointer pointer = GENERAL.GetStorylinePointerForPointID(pointerUpdate.storyPointID);
 
-            Log.Message("Server update for pointer " + pointerUpdate.storyPointID);
+            StoryPointer pointer = GENERAL.GetPointerForStoryline(pointerUpdate.StoryLineName);
 
-            if (pointer != null && pointerUpdate.killed)
+            Log("Server says kill pointer: " + pointerUpdate.StoryLineName);
+
+            if (pointer != null)
             {
                 pointer.Kill();
 
-                if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
+                // Remove task associated with pointer. This is only one at all times, we just don't know which one.
+
+                //if (GENERAL.ALLTASKS.Remove(pointer.currentTask)){
+                //    Log.Message("Removing local task: " + pointer.currentTask.description);
+                //}
+
+                // Server passes tasks, so if it is faster, client may be processing more than one task for a storyline. (Even if the deus dash would show it)
+
+                for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i++)
                 {
 
-                    Log.Message("Removing task " + pointer.currentTask.description);
+                    StoryTask task = GENERAL.ALLTASKS[i];
 
+                    if (task.point.storyLineName == pointerUpdate.StoryLineName)
+                    {
+
+                        Log("Removing task: " + task.description);
+
+                        GENERAL.ALLTASKS.Remove(task);
+
+                    }
                 }
-                else
-                {
 
-                    Log.Warning("Failed removing task " + pointer.currentTask.description);
 
-                }
+                // Need to remove tasks for storyline. Normally there should be only one, but we don't know at which point this storyline is.
+
+
+                // On server, tasks are blocking, so the only task currently active would be currenttask.
+                // But on client, tasks are asynchronous. We do not know which task is active.
+
+
+                //if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
+                //{
+
+                //    Log.Message("Removing task " + pointer.currentTask.description);
+
+                //}
+                //else
+                //{
+
+                //    Log.Warning("Failed removing task " + pointer.currentTask.description);
+
+                //}
 
             }
 
@@ -468,7 +458,7 @@ namespace StoryEngine
                     updateTask = new StoryTask(taskUpdate.pointID, SCOPE.GLOBAL);
                     updateTask.ApplyUpdateMessage(taskUpdate);
 
-                    Log.Message("Created an instance of global task " + updateTask.description);
+                    Verbose("Created an instance of global task " + updateTask.description);
 
                     if (taskUpdate.pointID != "GLOBALS")
                     {
@@ -482,13 +472,13 @@ namespace StoryEngine
 
                             updatePointer = new StoryPointer();
 
-                            Log.Message("Created a new pointer for new task.");
+                            Verbose("Created a new pointer for task "+updateTask.description);
 
                         }
 
                         updatePointer.PopulateWithTask(updateTask);
 
-                        Log.Message("Populated pointer from task. " + updatePointer.currentPoint.storyLineName);
+                        Verbose("Populated pointer " + updatePointer.currentPoint.storyLineName + "with task "+updateTask.description);
 
                         DistributeTasks(new TaskArgs(updateTask));
 
@@ -504,7 +494,7 @@ namespace StoryEngine
 
                 updateTask.scope = SCOPE.GLOBAL;
 
-                Log.Message("Applied update to existing task.");
+                Verbose("Applied update to existing task.");
 
             }
 
@@ -519,29 +509,13 @@ namespace StoryEngine
         void LateUpdate()
         {
 
-            // New approach: bundled updates.
+            StoryUpdate storyUpdate = new StoryUpdate(); // Contains a collection of task and pointer updates.
 
-            StoryUpdate storyUpdate = new StoryUpdate();
-
-            // Calculate average framerate.
-
-            //float current = Time.deltaTime;
-
-            //frameDurrationBufferSum -= frameDurationBuffer[frameDurationBufferIndex];
-            //frameDurationBuffer[frameDurationBufferIndex] = current;
-            //frameDurrationBufferSum += current;
-            //frameDurationBufferIndex = (frameDurationBufferIndex + 1) % frameDurationBuffer.Length;
-            //frameDurationAverage = (frameDurrationBufferSum / frameDurationBuffer.Length);
-
-            //storyUpdate.frameDuration = frameDurationAverage;
-
-            // Check our loadbalance. If we're sending too many updates we'll randomly drop frames.
+            // Check our loadbalance. If we're sending too many updates we'll randomly drop frames. 
             // All changes will be sent but if values are updated in the meantime the previous value will never be sent.
             // This is ok for running values but not ok for status values etc.
 
-            //  networkManager.getmess
-
-            int QueueSize=0;
+            int QueueSize = 0;
 
             if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && NetworkServer.active)
             {
@@ -550,7 +524,7 @@ namespace StoryEngine
 
                 byte error;
                 QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(NetworkServer.serverHostId, out error);
-              //  debugValue.text = "queued out server: " + QueueSize;
+                //  debugValue.text = "queued out server: " + QueueSize;
 
             }
             if (GENERAL.AUTHORITY == AUTHORITY.LOCAL && NetworkClient.active)
@@ -560,7 +534,7 @@ namespace StoryEngine
 
                 byte error;
                 QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(networkManager.client.connection.hostId, out error);
-            //    debugValue.text = "queued out client: " + QueueSize;
+                //    debugValue.text = "queued out client: " + QueueSize;
 
             }
 
@@ -579,16 +553,9 @@ namespace StoryEngine
 
             }
 
+            if (QueueSize < 3)
 
-            //    int a= networkManager.client.connection.hostId;
-
-
-
-
-            if (QueueSize<3)
-
-          //      if (loadBalance > 0.90f || Random.value < loadBalance)
-                {
+            {
 
                 // Iterate over all pointers to see if any were killed. Clients do not kill pointers themselves.
 
@@ -600,11 +567,9 @@ namespace StoryEngine
                     if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified && pointer.GetStatus() == POINTERSTATUS.KILLED)
                     {
 
-                        Log.Message("Sending pointer (killed) update to clients: " + pointer.currentPoint.storyLineName);
+                        Log("Sending pointer kill update to clients: " + pointer.currentPoint.storyLineName);
 
                         storyUpdate.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
-
-                        //SendPointerUpdateToClients(pointer.GetUpdateMessage()); // individual
 
                         pointer.modified = false;
 
@@ -627,7 +592,7 @@ namespace StoryEngine
 
                         GENERAL.ALLTASKS.RemoveAt(i);
 
-                        Log.Message("Task " + task.description + " completed, removing from alltasks. ");
+                        Verbose("Task " + task.description + " completed, removing from alltasks. ");
 
                         //if (task.description=="moodon"){
                         //    Debug.Log("moodon task removed at "+Time.frameCount);
@@ -647,11 +612,9 @@ namespace StoryEngine
                                 if (task.scope == SCOPE.GLOBAL)
                                 {
 
-                                    Log.Message("Global task " + task.description + " changed, sending update to server.");
+                                    Verbose("Global task " + task.description + " changed, sending update to server.");
 
                                     storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
-
-                                    //sendTaskUpdateToServer(task.GetUpdateMessage());
 
                                 }
 
@@ -662,15 +625,10 @@ namespace StoryEngine
                                 if (task.scope == SCOPE.GLOBAL)
                                 {
 
-                                    Log.Message("Global task " + task.description + " changed, sending update to clients.");
+                                    Verbose("Global task " + task.description + " changed, sending update to clients.");
 
                                     storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
 
-                                    //sendTaskUpdateToClients(task.GetUpdateMessage());
-
-                                    //if (task.description=="moodon"){
-                                    //    Debug.Log("moodon task update sent at "+Time.frameCount);
-                                    //}
                                 }
 
                                 break;
@@ -689,12 +647,11 @@ namespace StoryEngine
                 // If anything to send, send. 
                 // If not, and buffer is overflowing, send updates randomly once a second.
 
-             //   if (storyUpdate.AnythingToSend() || (!AssitantDirector.BufferStatusOk && Random.value < frameDurationAverage))
-                    if (storyUpdate.AnythingToSend() )
+                if (storyUpdate.AnythingToSend())
 
-                    {
+                {
 
-                        switch (GENERAL.AUTHORITY)
+                    switch (GENERAL.AUTHORITY)
                     {
                         case AUTHORITY.LOCAL:
                             SendStoryUpdateToServer(storyUpdate);
@@ -740,7 +697,7 @@ namespace StoryEngine
 
             GENERAL.SETNEWCONNECTION(-1);
 
-            Log.Message("Registering server message handlers.");
+       //     Logger.Message("Registering server message handlers.");
 
             NetworkServer.RegisterHandler(stringCode, OnMessageFromClient);
             NetworkServer.RegisterHandler(storyCode, OnStoryUpdateFromClient);
@@ -757,7 +714,7 @@ namespace StoryEngine
         void onStartClient(NetworkClient theClient)
         {
 
-            Log.Message("Registering client message handlers.");
+      //      Logger.Message("Registering client message handlers.");
 
             theClient.RegisterHandler(stringCode, OnMessageFromServer);
             theClient.RegisterHandler(storyCode, OnStoryUpdateFromServer);
@@ -767,7 +724,7 @@ namespace StoryEngine
         void OnStopClient()
         {
 
-            Log.Message("Client stopped. Resetting scope to local.");
+            Warning("Client stopped. Resetting scope to local.");
 
             revertAllToLocal();
 
@@ -777,7 +734,7 @@ namespace StoryEngine
         void OnServerConnect(NetworkConnection conn)
         {
 
-            Log.Message("incoming server connection delegate called");
+            Verbose("Incoming server connection delegate called ");
 
             GENERAL.SETNEWCONNECTION(conn.connectionId);
 
@@ -786,7 +743,7 @@ namespace StoryEngine
         void OnClientConnect(NetworkConnection conn)
         {
 
-            Log.Message("Client connection delegate called");
+            Verbose("Client connection delegate called");
 
             GENERAL.AUTHORITY = AUTHORITY.LOCAL;
 
@@ -822,7 +779,7 @@ namespace StoryEngine
         void OnClientDisconnect(NetworkConnection conn)
         {
 
-            Log.Message("Lost client connection. Resetting scope to local.");
+            Warning("Lost client connection. Resetting scope to local.");
 
             revertAllToLocal();
 
@@ -834,7 +791,7 @@ namespace StoryEngine
         {
             var message = netMsg.ReadMessage<StringMessage>();
 
-            Log.Message("Message received from client: " + message.value);
+            Verbose("Message received from client: " + message.value);
 
         }
 
@@ -842,12 +799,12 @@ namespace StoryEngine
         {
             var message = netMsg.ReadMessage<StringMessage>();
 
-            Log.Message("Message received from server: " + message.value);
+            Verbose("Message received from server: " + message.value);
 
             if (message.value == "suspending")
             {
 
-                Log.Message("Client will be suspending, closing their connection.");
+                Verbose("Client will be suspending, closing their connection.");
 
                 netMsg.conn.Disconnect();
 
@@ -962,14 +919,14 @@ namespace StoryEngine
         {
             var msg = new StringMessage(value);
             networkManager.client.Send(stringCode, msg);
-            Log.Message("Sending message to server: " + value);
+            Verbose("Sending message to server: " + value);
         }
 
         public void sendMessageToClients(string value)
         {
             var msg = new StringMessage(value);
             NetworkServer.SendToAll(stringCode, msg);
-            Log.Message("Sending message to all clients: " + value);
+            Verbose("Sending message to all clients: " + value);
         }
 
 

@@ -42,10 +42,29 @@ namespace StoryEngine
 
 #if NETWORKED
         public bool modified;
-        PointerUpdateBundled updateMessageSend;
+    //    PointerUpdateBundled updateMessageSend;
 #endif
 
-        string me = "Storypointer";
+        string ID = "Storypointer";
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
         public StoryPointer()
         {
@@ -55,7 +74,7 @@ namespace StoryEngine
             status = POINTERSTATUS.PAUSED;
            GENERAL.ALLPOINTERS.Add(this);
 
-            updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
+        //    updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
 
 
         }
@@ -75,7 +94,7 @@ namespace StoryEngine
 
             GENERAL.ALLPOINTERS.Add(this);
 
-            updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
+          //  updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
 
 
         }
@@ -119,12 +138,24 @@ namespace StoryEngine
         //    return message;
 
         //}
+       
 
         public PointerUpdateBundled GetUpdate()
+
         {
             // bundled approach.
-            // Generate a network update message for this pointer. (In effect: if it was killed.)
+            // Generate a network update message for this pointer. Only case is KILL.
 
+
+            PointerUpdateBundled updateMessageSend=new PointerUpdateBundled();
+            updateMessageSend.StoryLineName=currentPoint.storyLineName;
+
+
+        //updateMessageSend =;
+
+        //updateMessageSend.storyPointID= currentPoint.ID;
+
+            /*
             updateMessageSend.storyPointID = currentPoint.ID;
 
             if (status == POINTERSTATUS.KILLED)
@@ -136,7 +167,7 @@ namespace StoryEngine
                 updateMessageSend.killed = false;
 
             }
-
+*/
             return updateMessageSend;
 
         }
@@ -182,7 +213,7 @@ namespace StoryEngine
             if (currentPoint.getNextStoryPoint() == null)
             {
 
-                Log.Message("No next point");
+                Log("No next point");
 
             }
             else

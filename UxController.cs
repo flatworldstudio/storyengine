@@ -19,7 +19,7 @@ namespace StoryEngine
         GraphicRaycaster targetRaycaster;
         // TO DO !!!!!
 
-        string me = "Uxcontroller";
+        string ID = "Uxcontroller";
 
 
         UiEvent activeUiEvent, emptyUiEvent;
@@ -32,6 +32,24 @@ namespace StoryEngine
 
         List<UiEvent> uiEventStack;
 
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
 
         public UxController()
@@ -95,7 +113,7 @@ namespace StoryEngine
             if (e == 0)
             {
 
-                Log.Message("No ui event found, adding a temp one");
+                Log("No ui event found, adding a temp one");
 
                 UiEvent springEvent = new UiEvent();
 
@@ -112,7 +130,7 @@ namespace StoryEngine
             if (e > 1)
             {
 
-                Log.Warning("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ");
+                Log("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ");
 
             }
 
@@ -127,7 +145,7 @@ namespace StoryEngine
             if (!warnOnce)
             {
                 warnOnce = true;
-                Log.Warning("Update method updated, use updateUx instead.");
+                Log("Update method updated, use updateUx instead.");
             }
 
             return updateUx(activeInterface).label;
@@ -313,7 +331,7 @@ namespace StoryEngine
             }
 
             if (stackSizeNew > 10)
-                Log.Warning("Ui event stack exceeds 10, potential overflow.");
+                Log("Ui event stack exceeds 10, potential overflow.");
 
             return callBack;
 

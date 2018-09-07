@@ -33,8 +33,9 @@ namespace StoryEngine
 
     public class StoryTask
     {
+        
 
-        string me = "Storytask";
+        string ID = "Storytask";
 
         public string pointID;
         public StoryPoint point;
@@ -72,6 +73,25 @@ namespace StoryEngine
         public int MaxUpdatesPerFrame = 0;
 
 #endif
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
         public void MarkAllAsModified()
         {
@@ -1025,7 +1045,7 @@ namespace StoryEngine
             else
             {
 
-                Log.Warning("A task was completed more than once.");
+                Warning("A task was completed more than once.");
 
             }
 
@@ -1069,7 +1089,7 @@ namespace StoryEngine
 
             if (GENERAL.SIGNOFFS == 0)
             {
-                Log.Warning("Trying to signoff on a task with 0 required signoffs.");
+                Warning("Trying to signoff on a task with 0 required signoffs.");
             }
 
             signoffs++;

@@ -20,7 +20,6 @@ namespace StoryEngine
         ACTIVE,
         PASSIVE,
         PAUSED
-        //	ASSISTANT
     }
 
     public class Director
@@ -29,9 +28,28 @@ namespace StoryEngine
         List<StoryPointer> pointerStack;
         public DIRECTORSTATUS status;
 
-        string me = "Director";
+        string ID = "Director";
 
         static public Director Instance;
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
 
         public Director()
@@ -42,7 +60,6 @@ namespace StoryEngine
 
         }
 
-        
 
         public void evaluatePointers()
         {
@@ -61,7 +78,7 @@ namespace StoryEngine
 
                     // if a pointer was killed, remove it now.
 
-                    Log.Message("Removing pointer: " + sp.currentPoint.storyLineName);
+                    Log("Removing pointer: " + sp.currentPoint.storyLineName);
 
                     GENERAL.ALLPOINTERS.RemoveAt(p);
 
@@ -84,7 +101,7 @@ namespace StoryEngine
             }
 
             if (pointerStack.Count > 0)
-                Log.Message("Evaluating " + pointerStack.Count + " of " + GENERAL.ALLPOINTERS.Count + " storypointers.");
+                Log("Evaluating " + pointerStack.Count + " of " + GENERAL.ALLPOINTERS.Count + " storypointers.");
 
             while (pointerStack.Count > 0)
             {
@@ -98,7 +115,7 @@ namespace StoryEngine
 
                 pointer = pointerStack[0];
 
-                Log.Message("Evaluating pointer: " + pointer.currentPoint.storyLineName);
+                Log("Evaluating pointer: " + pointer.currentPoint.storyLineName);
 
                 pointer.LoadPersistantData();
 
@@ -116,7 +133,7 @@ namespace StoryEngine
 
                                 // Put this pointer on hold. Remove from stack.
 
-                                Log.Message("Pausing pointer.");
+                                Log("Pausing pointer.");
 
                                 pointer.SetStatus(POINTERSTATUS.PAUSED);
 
@@ -149,19 +166,19 @@ namespace StoryEngine
                                     else
                                     {
 
-                                        Log.Warning("Tell was unable to find the indicated storypoint.");
+                                        Warning("Tell was unable to find the indicated storypoint.");
 
                                     }
 
                                     targetPointer.SetStatus(POINTERSTATUS.EVALUATE);
 
-                                    Log.Message("Telling pointer on storyline " + targetPointerName + " to move to point " + targetValue);
+                                    Log("Telling pointer on storyline " + targetPointerName + " to move to point " + targetValue);
 
                                 }
                                 else
                                 {
 
-                                    Log.Warning("Tell was unable to find the indicated storypointer.");
+                                    Warning("Tell was unable to find the indicated storypointer.");
 
                                 }
 
@@ -182,13 +199,13 @@ namespace StoryEngine
 
                                     pointer.currentPoint = targetPoint;
 
-                                    Log.Message("Go to point " + targetValue);
+                                    Log("Go to point " + targetValue);
 
                                 }
                                 else
                                 {
 
-                                    Log.Warning("Goto point not found.");
+                                    Warning("Goto point not found.");
 
                                 }
 
@@ -207,7 +224,7 @@ namespace StoryEngine
                                 if (GENERAL.GetPointerForStoryline(targetPointerName) == null)
                                 {
 
-                                    Log.Message("Starting new pointer for storypoint: " + targetPointerName);
+                                    Log("Starting new pointer for storypoint: " + targetPointerName);
 
                                     newPointer = new StoryPointer(targetPointerName, pointer.scope);
                                     pointerStack.Add(newPointer);
@@ -216,7 +233,7 @@ namespace StoryEngine
                                 else
                                 {
 
-                                    Log.Message("Storyline already active for storypoint " + targetPointerName);
+                                    Log("Storyline already active for storypoint " + targetPointerName);
                                 }
 
                                 moveToNextPoint(pointer);
@@ -238,20 +255,20 @@ namespace StoryEngine
                                         if (stp != pointer)
                                         {
 
-                                            Log.Message("Stopping pointer " + stp.currentPoint.storyLineName);
+                                            Log("Stopping pointer " + stp.currentPoint.storyLineName);
 
                                             stp.Kill();
 
                                             if (GENERAL.ALLTASKS.Remove(stp.currentTask))
                                             {
 
-                                                Log.Message("Removing task " + stp.currentTask.description);
+                                                Log("Removing task " + stp.currentTask.description);
 
                                             }
                                             else
                                             {
 
-                                                Log.Warning("Failed removing task " + stp.currentTask.description);
+                                                Warning("Failed removing task " + stp.currentTask.description);
 
                                             }
 
@@ -275,7 +292,7 @@ namespace StoryEngine
                                     if (targetPointer != null)
                                     {
 
-                                        Log.Message("Stopping pointer " + targetPointer.currentPoint.storyLineName);
+                                        Log("Stopping pointer " + targetPointer.currentPoint.storyLineName);
 
                                         pointerStack.Remove(targetPointer);
                                         targetPointer.Kill();
@@ -283,13 +300,13 @@ namespace StoryEngine
                                         if (GENERAL.ALLTASKS.Remove(targetPointer.currentTask))
                                         {
 
-                                            Log.Message("Removing task " + targetPointer.currentTask.description);
+                                            Log("Removing task " + targetPointer.currentTask.description);
 
                                         }
                                         else
                                         {
 
-                                            Log.Warning("Failed removing task " + targetPointer.currentTask.description);
+                                            Warning("Failed removing task " + targetPointer.currentTask.description);
 
                                         }
 
@@ -298,7 +315,7 @@ namespace StoryEngine
                                     else
                                     {
 
-                                        Log.Message("No pointer found for " + targetPointerName);
+                                        Log("No pointer found for " + targetPointerName);
 
                                     }
 
@@ -325,7 +342,7 @@ namespace StoryEngine
 
                         if (pointer.currentTask != null && pointer.currentTask.getStatus() != TASKSTATUS.COMPLETE)
                         {
-                            Log.Warning("Encountered end of storyline, but current task didn't complete?");
+                            Warning("Encountered end of storyline, but current task didn't complete?");
 
                         }
 
@@ -342,7 +359,7 @@ namespace StoryEngine
 
                             // A normal task to be executed. Assistant director will generate task.
 
-                            Log.Message("Task to be executed: " + pointer.currentPoint.task[0]);
+                            Log("Task to be executed: " + pointer.currentPoint.task[0]);
 
                             pointer.SetStatus(POINTERSTATUS.NEWTASK);
 
@@ -364,7 +381,7 @@ namespace StoryEngine
 
                                 // Task was completed, progress to the next point.
 
-                                Log.Message("task completed: " + pointer.currentTask.description);
+                                Log("task completed: " + pointer.currentTask.description);
 
                                 pointer.SetStatus(POINTERSTATUS.EVALUATE);
 
@@ -397,7 +414,7 @@ namespace StoryEngine
 
                         // This shouldn't occur.
 
-                        Log.Warning("Error: unkown storypoint type. ");
+                        Warning("Error: unkown storypoint type. ");
 
                         pointerStack.RemoveAt(0);
 
@@ -431,7 +448,7 @@ namespace StoryEngine
             if (GENERAL.GetPointerForStoryline(pointer.currentTask.getCallBack()) == null)
             {
 
-                Log.Message("New callback storyline: " + callBackValue);
+                Log("New callback storyline: " + callBackValue);
 
                 StoryPointer newStoryPointer = new StoryPointer(callBackValue, pointer.scope);
 
@@ -439,7 +456,7 @@ namespace StoryEngine
                 {
                     // callback value was invalid, no point was found, we don't add the pointer.
                     GENERAL.ALLPOINTERS.Remove(newStoryPointer);// was auto-added in constructor, so must be removed
-                    Log.Warning("Callback storyline doesn't exist: " + callBackValue);
+                    Warning("Callback storyline doesn't exist: " + callBackValue);
                 }
                 else
                 {
@@ -455,7 +472,7 @@ namespace StoryEngine
             else
             {
 
-                Log.Message("Callback storyline already started: " + callBackValue);
+                Log("Callback storyline already started: " + callBackValue);
             }
 
             return true;
@@ -488,7 +505,7 @@ namespace StoryEngine
             if (!thePointer.ProgressToNextPoint())
             {
 
-                Log.Warning("Error: killing pointer ");
+                Warning("Error: killing pointer ");
 
                 thePointer.SetStatus(POINTERSTATUS.KILLED);
 

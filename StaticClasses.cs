@@ -69,8 +69,26 @@ namespace StoryEngine
 
         public static string broadcastServer, networkServer;
 
-        public static string me = "General";
+        public static string ID = "General";
 
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        static void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        static   void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        static    void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        static     void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
         public static void AddPointer(StoryPointer pointer)
         {
@@ -86,7 +104,7 @@ namespace StoryEngine
 
             if (!storyPoints.TryGetValue(pointID, out r))
             {
-                Log.Warning("Storypoint " + pointID + " not found.");
+                Warning("Storypoint " + pointID + " not found.");
             }
 
             return r;
@@ -98,7 +116,7 @@ namespace StoryEngine
 
             if (ALLPOINTERS.Count > 25)
             {
-                Log.Warning("Potential pointer overflow.");
+                Warning("Potential pointer overflow.");
             }
 
         }
@@ -108,7 +126,7 @@ namespace StoryEngine
 
             if (ALLTASKS.Count > 25)
             {
-                Log.Warning("Potential task overflow.");
+                Warning("Potential task overflow.");
 
 
                 //			foreach (Task t in ALLTASKS) {

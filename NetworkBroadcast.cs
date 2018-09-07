@@ -12,10 +12,29 @@ namespace StoryEngine
 
         public string serverAddress, serverMessage;
 
-        string me = "Networkbroadcast";
+        string ID = "Networkbroadcast";
 
         bool resumeClient = false;
         bool resumeServer = false;
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
         public void ResetMessage()
         {
@@ -46,7 +65,7 @@ namespace StoryEngine
                     resumeClient = true;
                     Stop();
 
-                    Log.Message("Pausing broadcast client.");
+                    Log("Pausing broadcast client.");
 
                 }
 
@@ -56,7 +75,7 @@ namespace StoryEngine
                     resumeServer = true;
                     Stop();
 
-                    Log.Message("Pausing broadcast server.");
+                    Log("Pausing broadcast server.");
 
                 }
 
@@ -70,7 +89,7 @@ namespace StoryEngine
                     resumeClient = false;
                     StartClient();
 
-                    Log.Message("Resuming broadcast client.");
+                    Log("Resuming broadcast client.");
 
                 }
 
@@ -80,7 +99,7 @@ namespace StoryEngine
                     resumeServer = false;
                     StartServer();
 
-                    Log.Message("Resuming broadcast server.");
+                    Log("Resuming broadcast server.");
 
                 }
 
@@ -111,7 +130,7 @@ namespace StoryEngine
             // Handler to respond to received broadcast message event.
             // Since our engine is loop based, we just store the info for the loop to pick up on.
 
-            Log.Message("Received broadcast: " + data + " from " + fromAddress);
+            Log("Received broadcast: " + data + " from " + fromAddress);
 
             serverMessage = data;
             serverAddress = fromAddress;

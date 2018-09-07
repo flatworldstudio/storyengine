@@ -10,9 +10,6 @@ namespace StoryEngine
     public delegate void OnClientMessageHandler(NetworkMessage netMessage);
     public delegate void messageHandler(NetworkMessage netMessage);
 
-
-
-
     // Client delegates.
 
     public delegate void OnStartClientDelegate(NetworkClient theClient);
@@ -31,11 +28,30 @@ namespace StoryEngine
 
     public class ExtendedNetworkManager : NetworkManager
     {
-        string me = "Network manager";
+        string ID = "Network manager";
 
         const short connectionMessageCode = 1001;
 
-        //
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
+
 
         void OnApplicationQuit()
         {
@@ -66,7 +82,7 @@ namespace StoryEngine
 
         public override void OnStartClient(NetworkClient theClient)
         {
-            Log.Message("Client has started.");
+            Log("Client has started.");
 
             if (onStartClientDelegate != null)
                 onStartClientDelegate(theClient);
@@ -76,7 +92,7 @@ namespace StoryEngine
         public override void OnClientConnect(NetworkConnection conn)
         {
 
-            Log.Message("Client connected to server.");
+            Log("Client connected to server.");
 
             if (onClientConnectDelegate != null)
                 onClientConnectDelegate(conn);
@@ -86,7 +102,7 @@ namespace StoryEngine
         public override void OnClientDisconnect(NetworkConnection connection)
         {
 
-            Log.Message("Client disconnected from server.");
+            Log("Client disconnected from server.");
 
             if (onClientDisconnectDelegate != null)
                 onClientDisconnectDelegate(connection);
@@ -103,7 +119,7 @@ namespace StoryEngine
         public override void OnStopClient()
         {
 
-            Log.Message("Client has stopped.");
+            Log("Client has stopped.");
 
             if (onStopClientDelegate != null)
                 onStopClientDelegate();
@@ -135,7 +151,7 @@ namespace StoryEngine
 
         public override void OnStartServer()
         {
-            Log.Message("Server started.");
+            Log("Server started.");
 
             if (onStartServerDelegate != null)
                 onStartServerDelegate();
@@ -144,7 +160,7 @@ namespace StoryEngine
 
         public override void OnStopServer()
         {
-            Log.Message("Server stopped.");
+            Log("Server stopped.");
 
             if (onStopServerDelegate != null)
                 onStopServerDelegate();
@@ -153,7 +169,7 @@ namespace StoryEngine
 
         public override void OnServerConnect(NetworkConnection connection)
         {
-            Log.Message("Remote client connected.");
+            Log("Remote client connected.");
 
             if (onServerConnectDelegate != null)
                 onServerConnectDelegate(connection);
@@ -162,7 +178,7 @@ namespace StoryEngine
 
         public override void OnServerDisconnect(NetworkConnection connection)
         {
-            Log.Message("Remote client disconnected.");
+            Log("Remote client disconnected.");
 
             if (onServerDisconnectDelegate != null)
                 onServerDisconnectDelegate(connection);

@@ -18,11 +18,30 @@ namespace StoryEngine
 
         public List<StoryTask> taskList;
 
-        string me = "User controller";
+        string ID = "UserController";
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+        }
+        void Warning(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+        }
+        void Error(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+        }
+        void Verbose(string message)
+        {
+            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+        }
 
         void Start()
         {
-            Log.Message("Starting...");
+            Log("Starting...");
 
             taskList = new List<StoryTask>();
 
@@ -31,7 +50,7 @@ namespace StoryEngine
             if (StoryEngineObject == null)
             {
 
-                Log.Warning("StoryEngineObject not found.");
+                Warning("StoryEngineObject not found.");
 
             }
             else
@@ -47,7 +66,7 @@ namespace StoryEngine
         public void addTaskHandler(UserTaskHandler theHandler)
         {
             userTaskHandler = theHandler;
-            Log.Message("Handler added");
+            Log("Handler added");
         }
 
 
@@ -66,7 +85,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
 
-                    Log.Message("Removing task:" + task.description);
+                    Log("Removing task:" + task.description);
 
                     taskList.RemoveAt(t);
 
@@ -80,7 +99,7 @@ namespace StoryEngine
                         if (userTaskHandler(task))
                         {
 
-                            task.signOff(me);
+                            task.signOff(ID);
                             taskList.RemoveAt(t);
 
                         }
@@ -97,7 +116,7 @@ namespace StoryEngine
 
                         if (!handlerWarning)
                         {
-                            Debug.LogWarning(me + "No handler available, blocking task while waiting.");
+                            Debug.LogWarning(ID + "No handler available, blocking task while waiting.");
                             handlerWarning = true;
                             t++;
                         }
