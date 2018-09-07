@@ -617,50 +617,55 @@ namespace StoryEngine
                         // Debugging: if a pointer is in the process of being killed, we may want to not send task updates
                         // as they might result in the task being recreated clientside.
 
-                        if (task.pointer.GetStatus()==POINTERSTATUS.KILLED){
-
-                            Warning("Sending task updated for task with pointer that is dying. "+task.description);
-                        }
-
-
-                        // Check if we need to send network updates.
-
-                        switch (GENERAL.AUTHORITY)
+                        if (task.pointer.GetStatus() == POINTERSTATUS.KILLED)
                         {
 
-                            case AUTHORITY.LOCAL:
-
-                                if (task.scope == SCOPE.GLOBAL)
-                                {
-
-                                    Verbose("Global task " + task.description + " changed, sending update to server.");
-
-                                    storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
-
-                                }
-
-                                break;
-
-                            case AUTHORITY.GLOBAL:
-
-                                if (task.scope == SCOPE.GLOBAL)
-                                {
-
-                                    Verbose("Global task " + task.description + " changed, sending update to clients.");
-
-                                    storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
-
-                                }
-
-                                break;
-
-                            default:
-
-                                break;
+                            Warning("Supressing sending task update for task with pointer that is dying. " + task.description);
 
                         }
+                        else
+                        {
+                            
+                            // Check if we need to send network updates.
 
-                        task.modified = false;
+                            switch (GENERAL.AUTHORITY)
+                            {
+
+                                case AUTHORITY.LOCAL:
+
+                                    if (task.scope == SCOPE.GLOBAL)
+                                    {
+
+                                        Verbose("Global task " + task.description + " changed, sending update to server.");
+
+                                        storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+
+                                    }
+
+                                    break;
+
+                                case AUTHORITY.GLOBAL:
+
+                                    if (task.scope == SCOPE.GLOBAL)
+                                    {
+
+                                        Verbose("Global task " + task.description + " changed, sending update to clients.");
+
+                                        storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+
+                                    }
+
+                                    break;
+
+                                default:
+
+                                    break;
+
+                            }
+
+                            task.modified = false;
+
+                        }
                     }
 
                 }
