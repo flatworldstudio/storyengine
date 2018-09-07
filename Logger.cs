@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System;
 
 namespace StoryEngine
 {
@@ -48,6 +50,23 @@ namespace StoryEngine
             return;
             #endif
 
+            // If in editor, retrieve line number.
+
+            string line="";
+
+            #if UNITY_EDITOR
+
+            StackFrame callStack = new StackFrame(2, true);
+
+            Char[] delimiter = { '/', '.', '\\' };
+          //  string[] caller = callStack.GetFileName().Split(delimiter);
+           // string callerId = caller[caller.Length - 2];
+
+             line = "" + callStack.GetFileLineNumber();
+
+            #endif
+
+
             LOGLEVEL moduleLevel;
 
             if (!Modules.TryGetValue(callerId, out moduleLevel))
@@ -60,15 +79,15 @@ namespace StoryEngine
                 {
 
                     case LOGLEVEL.ERRORS:
-                        UnityEngine.Debug.LogError(callerId + ": " + message);
+                        UnityEngine.Debug.LogError(callerId + ": " + message + ((line!="") ? " at line: "+line : ""));
                         break;
 
                     case LOGLEVEL.WARNINGS:
-                        UnityEngine.Debug.LogWarning(callerId + ": " + message);
+                        UnityEngine.Debug.LogWarning(callerId + ": " +message+ ((line!="") ? " at line: "+line : ""));
                         break;
 
                     default:
-                        UnityEngine.Debug.Log(callerId + ": " + message);
+                        UnityEngine.Debug.Log(callerId + ": " +message+ ((line!="") ? " at line: "+line : ""));
                         break;
 
                 }
