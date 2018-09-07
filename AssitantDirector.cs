@@ -398,12 +398,12 @@ namespace StoryEngine
 
                 // Server passes tasks, so if it is faster, client may be processing more than one task for a storyline. (Even if the deus dash would show it)
 
-                for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i++)
+                for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i--)
                 {
 
                     StoryTask task = GENERAL.ALLTASKS[i];
 
-                    if (task.point.storyLineName == pointerUpdate.StoryLineName)
+                    if (task.point!=null && task.point.storyLineName == pointerUpdate.StoryLineName)
                     {
 
                         Log("Removing task: " + task.description);
