@@ -56,7 +56,7 @@ namespace StoryEngine
         public GameObject target2D, target3D;
         public UiButton targetButton;
 
-        static   	string ID="Uievent";
+        static string ID = "Uievent";
 
         public bool isInert, isSpringing;
 
@@ -69,19 +69,19 @@ namespace StoryEngine
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
-      static  void Log(string message)
+        static void Log(string message)
         {
             Logger.Output(message, ID, LOGLEVEL.NORMAL);
         }
-        static      void Warning(string message)
+        static void Warning(string message)
         {
             Logger.Output(message, ID, LOGLEVEL.WARNINGS);
         }
-        static     void Error(string message)
+        static void Error(string message)
         {
             Logger.Output(message, ID, LOGLEVEL.ERRORS);
         }
-        static      void Verbose(string message)
+        static void Verbose(string message)
         {
             Logger.Output(message, ID, LOGLEVEL.VERBOSE);
         }
@@ -178,19 +178,19 @@ namespace StoryEngine
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
         static string ID = "Uxmethods";
 
-     static   void Log(string message)
+        static void Log(string message)
         {
             Logger.Output(message, ID, LOGLEVEL.NORMAL);
         }
-        static   void Warning(string message)
+        static void Warning(string message)
         {
             Logger.Output(message, ID, LOGLEVEL.WARNINGS);
         }
-        static    void Error(string message)
+        static void Error(string message)
         {
             Logger.Output(message, ID, LOGLEVEL.ERRORS);
         }
-        static    void Verbose(string message)
+        static void Verbose(string message)
         {
             Logger.Output(message, ID, LOGLEVEL.VERBOSE);
         }
@@ -1165,6 +1165,8 @@ namespace StoryEngine
 
         public string tapNoneCallback = "";
 
+        public bool HighlightButtons = true;
+
         public UxMapping defaultUxMap;
 
         public Dictionary<string, UxMapping> uxMappings;
@@ -1182,10 +1184,10 @@ namespace StoryEngine
 
         //	public float lockValueY;
 
-            public void HideButton (string button)
+        public void HideButton(string button)
         {
             UiButton target;
-            if (uiButtons.TryGetValue(button,out target))
+            if (uiButtons.TryGetValue(button, out target))
             {
 
                 if (target.gameObject != null)
@@ -1194,7 +1196,7 @@ namespace StoryEngine
 
         }
 
-        public void ShowButton (string button)
+        public void ShowButton(string button)
         {
             UiButton target;
             if (uiButtons.TryGetValue(button, out target))
@@ -1208,7 +1210,8 @@ namespace StoryEngine
         }
 
 
-        public UiButton GetButton (string name){
+        public UiButton GetButton(string name)
+        {
 
             UiButton button;
 
@@ -1401,20 +1404,23 @@ namespace StoryEngine
         public Image image;
         public Color color;
         public float brightness, targetBrightness, stepBrightness;
-
+        public bool ChangeColor = true;
         // Provide a void button. 
 
         static UiButton _void;
 
-        public static UiButton Void {
+        public static UiButton Void
+        {
 
-            get{
-                if (_void==null)
-                    _void= new UiButton();
+            get
+            {
+                if (_void == null)
+                    _void = new UiButton();
                 return _void;
 
             }
-            set{
+            set
+            {
 
 
             }
@@ -1496,10 +1502,13 @@ namespace StoryEngine
             stepBrightness = 1f / 0.25f;
 
             gameObject = GameObject.Find(theName);
+
             if (gameObject != null)
             {
                 image = gameObject.GetComponent<Image>();
-                image.color = brightness * color;
+
+                if (ChangeColor)
+                    image.color = brightness * color;
             }
             else
             {
@@ -1533,8 +1542,8 @@ namespace StoryEngine
                     brightness = targetBrightness;
                 }
             }
-
-            image.color = brightness * color;
+            if (ChangeColor)
+                image.color = brightness * color;
         }
     }
 

@@ -795,15 +795,15 @@ namespace StoryEngine
             }
 
             // apply brightness for all button objects
+           
+                Dictionary<string, UiButton>.ValueCollection allButtons =
+                    activeInterface.uiButtons.Values;
 
-            Dictionary<string, UiButton>.ValueCollection allButtons =
-                activeInterface.uiButtons.Values;
-
-            foreach (UiButton button in allButtons)
-            {
-                button.applyColour();
-            }
-
+                foreach (UiButton button in allButtons)
+                {
+                    button.applyColour();
+                }
+            
             //			if (ui.touch == UITOUCH.NONE && ui.target2D != null) {
             //				// no touch, lettings springs run out while we have a target: apply a singledrag with delta 0
             //				singleDrag2D (state, ui, Vector2.zero);
