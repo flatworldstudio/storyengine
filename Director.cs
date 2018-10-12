@@ -28,6 +28,7 @@ namespace StoryEngine
 
         List<StoryPointer> pointerStack;
         public DIRECTORSTATUS status;
+       static public Director Instance;
 
         string me = "Director";
 
@@ -36,7 +37,7 @@ namespace StoryEngine
 
             GENERAL.ALLPOINTERS = new List<StoryPointer>();
             status = DIRECTORSTATUS.NOTREADY;
-
+            Instance = this;
         }
 
         public void evaluatePointers()
