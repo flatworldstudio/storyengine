@@ -50,6 +50,9 @@ namespace StoryEngine
 		void Start ()
 		{
 
+      
+
+
 			Log.Message ("Starting.", me);
 
 			UUID.setIdentity ();
