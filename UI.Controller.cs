@@ -313,12 +313,7 @@ namespace StoryEngine.UI
 
             // Moves an interface segment (dragtarget, so a parent object) to a given spring. 
             // it uses a button as a hook. checks if any event is targeting the same dragtarget to prevent interference.
-            // If there is we just take over. Could delete and replace it as well...
-
-            // Warns if there's more than 1 event: that shouldn't happen...
-
-
-
+                        
             int e = 0;
 
             int i = uiEventStack.Count - 1;
@@ -328,75 +323,34 @@ namespace StoryEngine.UI
 
                 Event uie = uiEventStack[i];
 
-                if (uie.targetButton != null && uie.targetButton.GetDragTarget(uie.direction) == button.GetDragTarget(dir))
-                {
+                   if (uie.targetButton != null && button.GetDragTarget(dir) !=null && uie.targetButton.GetDragTarget(uie.direction) == button.GetDragTarget(dir))
+             //   if (uie.targetButton != null )
+                    {
+                    Debug.Log(uie.targetButton.name+ " " + uie.targetButton.GetDragTarget(uie.direction).name+ " " + button.GetDragTarget(dir).name);
+
 
                     // the event explicitly targets the (explicit) target of the passed in button
                     //remove the event
                     uiEventStack.RemoveAt(i);
-
+                    Log.Message("UI event targeting spring target, removing.", me);
                 }
 
                 i--;
 
             }
-
-
-
-
-
-            //foreach (UiEvent uie in uiEventStack)
-
-
-
-
-            //{
-
-            //    if (uie.targetButton != null)
-            //    {
-
-            //   //     if (uie.targetButton.dragTarget == button.dragTarget)
-            //   // Assuming 
-            //            if (uie.targetButton.GetDragTarget(uie.direction)==button.GetDragTarget(dir))
-            //            {
-
-            //            e++;
-            //            uie.targetButton = button;
-            //            uie.action = UIACTION.SINGLEDRAG;
-            //            uie.target2D = button.gameObject;
-
-            //            uie.isSpringing = true;
-            //            uie.springIndex = index;
-
-            //        }
-
-            //    }
-
-            //}
-
-            //if (e == 0)
-            //{
-
-            Log.Message("No ui event found, adding a temp one", me);
-
+            
             Event springEvent = new Event();
 
             springEvent.targetButton = button;
+            springEvent.direction = dir;
             springEvent.action = ACTION.SINGLEDRAG;
             springEvent.target2D = button.gameObject;
-            springEvent.isSpringing = true;
+                        springEvent.isSpringing = true;
             springEvent.springIndex = index;
 
+
             uiEventStack.Add(springEvent);
-
-            // }
-
-            //if (e > 1)
-            //{
-
-            //    Log.Warning("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ", me);
-
-            //}
+               
 
         }
 
