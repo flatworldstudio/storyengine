@@ -18,7 +18,7 @@ namespace StoryEngine
 
 		public List <StoryTask> taskList;
 
-		string me = "User controller";
+		string me = "UserController";
 
 		void Start ()
 		{
@@ -44,7 +44,7 @@ namespace StoryEngine
 		public void addTaskHandler (UserTaskHandler theHandler)
 		{
 			userTaskHandler = theHandler;
-			Log.Message ("Handler added", me);
+			Log.Message ("Handler added.", me);
 		}
 
 
@@ -82,10 +82,15 @@ namespace StoryEngine
 
 					} else {
 					
+                        task.signOff (me);
+                        taskList.RemoveAt (t);
+
 						if (!handlerWarning) {
-							Debug.LogWarning (me + "No handler available, blocking task while waiting.");
+							
+                            Log.Warning ("No handler available, blocking task while waiting.",me);
+
 							handlerWarning = true;
-							t++;
+							
 						} 
 
 					}

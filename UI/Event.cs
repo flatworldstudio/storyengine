@@ -10,40 +10,6 @@ namespace StoryEngine.UI
 {
 
 
-
-    // ------------------------------------------------------------------------------------------------------------------------------------------
-
-    // data objects
-
-
-    public enum TOUCH
-    {
-        BEGAN,
-        TOUCHING,
-        ENDED,
-        NONE
-    }
-
-    public enum ACTION
-    {
-        // describes the action outcome. note that this is independent of UITOUCH which describes actual touch state.
-
-        SINGLEDRAG,
-        DOUBLEDRAG,
-        TAP,
-        VOID,
-        DELETE
-    }
-
-    public enum DIRECTION
-    {
-        // Direction of drag. Ortho buttons snap to either horizontal or vertical.
-
-        FREE,
-        HORIZONTAL,
-        VERTICAL
-    }
-
     public class Event
     {
         // holds user interaction description. note that x and y are NOT continuously updated for touch.
@@ -60,21 +26,35 @@ namespace StoryEngine.UI
 
         public Button targetButton;
 
-
-        // Moved targets here because they may differ per event for the same button.
-
-        //   public GameObject dragTarget;
-        //   public UiConstraint dragConstraint;
-
-
         public bool isInert, isSpringing;
         public int springIndex;
 
         public float tapCount;
         public string callback;
 
+        Vector2 __position;
+
+        public Vector2 position {
+
+            get
+            {
+                __position.x=x;
+                __position.y=y;
+                return __position;
+            }
+            set
+            {
+                Debug.LogWarning("Can't set this value.");
+
+            }
+
+
+        }
+
         public Event()
         {
+            __position=Vector2.zero;
+
             target2D = null;
             target3D = null;
             targetButton = null;
@@ -145,14 +125,7 @@ namespace StoryEngine.UI
                 result += " 2d: " + target2D.transform.name;
             }
 
-            //				r += " x: " + x + " y: " + y + " dd: " + dd;
-            //
-            //				if (target2D != null) {
-            //					r += " 2d: " + target2D.transform.name;
-            //				}
-            //				if (target3D != null) {
-            //					r += " 3d: " + target3D.transform.name;
-            //				}
+       
             return result;
         }
     }
@@ -196,7 +169,9 @@ namespace StoryEngine.UI
             if (gameObject != null)
             {
                 image = gameObject.GetComponent<Image>();
+                if (image!=null){
                 image.color = brightness * color;
+                }
             }
             else
             {
@@ -357,14 +332,7 @@ namespace StoryEngine.UI
 
             return deltaPosition;
         }
-
-
-        //			public void setBrightness (float theBrightness)
-        //			{
-        //				brightness = theBrightness;
-        //				targetBrightness = theBrightness;
-        //				setColor ();
-        //			}
+          
 
         public void ApplyColour()
         {
@@ -385,6 +353,7 @@ namespace StoryEngine.UI
                 }
             }
 
+            if (image!=null)
             image.color = brightness * color;
         }
     }

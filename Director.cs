@@ -461,7 +461,10 @@ namespace StoryEngine
                     StoryPointer newStoryPointer = new StoryPointer(targetPoint);
 
                     newStoryPointer.scope = pointer.scope; // INHERIT SCOPE...
+
+                    #if NETWORKED
                     newStoryPointer.modified = true;
+                    #endif
 
                     pointerStack.Add(newStoryPointer);
 
@@ -510,7 +513,10 @@ namespace StoryEngine
         public void beginStoryLine(string beginName)
         {
 
-            new StoryPointer(GENERAL.getStoryPointByID(beginName)); // constructor adds pointer to GENERAL.allpointers
+            StoryPoint begin = GENERAL.getStoryPointByID(beginName);
+
+            if (begin!=null)
+            new StoryPointer(begin); // constructor adds pointer to GENERAL.allpointers
 
         }
 

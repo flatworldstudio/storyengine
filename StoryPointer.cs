@@ -57,7 +57,8 @@ namespace StoryEngine
 
 		#if NETWORKED
 		public bool modified;
-		#endif
+
+	#endif
 
 		string me = "Storypointer";
 
@@ -94,6 +95,7 @@ namespace StoryEngine
 
 		}
 
+        #if NETWORKED
 		public PointerUpdate getUpdateMessage ()
 		{
 
@@ -116,6 +118,8 @@ namespace StoryEngine
 			return r;
 
 		}
+
+        #endif
 
 		public void loadPersistantData ()
 		{

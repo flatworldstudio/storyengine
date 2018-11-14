@@ -30,7 +30,7 @@ namespace StoryEngine
 
 		public List <StoryTask> taskList;
 
-		string me = "Data controller";
+		string me = "DataController";
 
 		void Start ()
 		{
@@ -286,15 +286,19 @@ namespace StoryEngine
 						}
 
 					} else {
-					
-						if (!handlerWarning) {
-						
-							Log.Warning ("No handler available, blocking task while waiting.", me);
 
-							handlerWarning = true;
-							t++;
+                        task.signOff (me);
+                        taskList.RemoveAt (t);
 
-						} 
+                        if (!handlerWarning) {
+
+                            Log.Warning ("No handler available, blocking task while waiting.",me);
+
+                            handlerWarning = true;
+
+                        } 
+
+
 
 					}
 

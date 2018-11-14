@@ -22,7 +22,7 @@ namespace StoryEngine
 	
 		public event NewTasksEvent newTasksEvent;
 
-		string me = "Assistant director";
+		string me = "AssistantDirector";
 
 		Director theDirector;
 		public string scriptName;
@@ -179,7 +179,7 @@ namespace StoryEngine
 
 					StoryPointer pointer = GENERAL.ALLPOINTERS [p];
 
-					if (pointer.modified) {
+				//	if (pointer.modified) {
 
 						switch (pointer.scope) {
 
@@ -201,7 +201,9 @@ namespace StoryEngine
 									pointer.currentTask = task;
 									newTasks.Add (task);
 
+                                        #if NETWORKED
 									task.modified = true;
+                                        #endif
 
 									Log.Message ("Creating and distributing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName, me);
 
@@ -238,7 +240,7 @@ namespace StoryEngine
 
 						}
 
-					}
+				//	}
 
 				}
 

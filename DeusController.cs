@@ -13,7 +13,7 @@ namespace StoryEngine
 
 		AssitantDirector ad;
 
-		string me = "Deus Controller";
+		string me = "DeusController";
 
 		List <StoryTask> taskList;
 		List <StoryPointer> pointerList;
@@ -111,6 +111,7 @@ namespace StoryEngine
 					switch (task.description) {
 
 					case "debugon":
+                            
 						DeusCanvas.SetActive (true);
 
 						task.signOff (me);

@@ -63,14 +63,14 @@ namespace StoryEngine
 		List<string> changedTaskValue;
 		public bool modified = false;
 		bool allModified = false;
-		#endif
-
-
+	
 		public void markAllAsModified ()
 		{
 			allModified = true;
 			modified = true;
 		}
+
+        #endif
 
 		public StoryTask ()
 		{
