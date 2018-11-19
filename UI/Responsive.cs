@@ -25,8 +25,9 @@ namespace StoryEngine.UI
         public void WatchLayout(Layout _layout){
             
             watchLayout=_layout;
-
+            this.enabled=true;
         }
+
 
         void Update()
         {
@@ -39,7 +40,7 @@ namespace StoryEngine.UI
 
                 if (watchLayout != null)
                 {
-                    watchLayout.UpdateLayout(lastWidth, lastHeight);
+                    watchLayout.Resize(lastWidth, lastHeight);
                 }
 
             }

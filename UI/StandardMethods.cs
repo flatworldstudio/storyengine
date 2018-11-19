@@ -1,11 +1,102 @@
 ﻿using UnityEngine;
 using StoryEngine;
+using UnityEngine.Serialization;
 
 namespace StoryEngine.UI
 {
+    
     public static class Methods
     {
+        public static GameObject DefaultPanePrefab;
+        public static float DefaultPaneMargin;
 
+        public static void AddDefaultPane(Interface _interface)
+        {
+
+            if (_interface != null)
+
+            {
+
+                if (DefaultPanePrefab != null)
+                {
+                    _interface.gameObject = GameObject.Instantiate(DefaultPanePrefab);
+                    _interface.gameObject.transform.SetParent(_interface.canvasObject.transform, false);
+                }
+                else
+                {
+                    Log.Warning("Default pane prefab is null, can't instantiate. (Did you forget to assign it?)");
+
+                }
+
+                float m = DefaultPaneMargin;
+                Plane plane = _interface.plane;
+
+                if (plane != null)
+                {
+
+                    Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
+                    _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+                    Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
+                    _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
+
+                    //_interface.anchorPosition=anchorPosition;
+
+                    //Vector2 anchorPos = _plane.interFace.gameObject.GetComponent<RectTransform>().anchoredPosition;
+
+                }
+                else
+                {
+
+                    Log.Warning("Plane reference for interface is null, can't set dimensions on default pane.");
+
+                }
+
+            }
+            else
+            {
+
+                Log.Warning("Interface reference is null, can't add default pane.");
+
+            }
+        }
+
+
+        public static void ResizeDefaultPane(Interface _interface)
+        {
+
+            if (_interface != null)
+
+            {
+                              
+
+                float m = DefaultPaneMargin;
+                Plane plane = _interface.plane;
+
+                if (plane != null)
+                {
+
+                    Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
+                    _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+                    Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
+                    _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
+
+
+                }
+                else
+                {
+
+                    Log.Warning("Plane reference for interface is null, can't set dimensions on default pane.");
+
+                }
+
+            }
+            else
+            {
+
+                Log.Warning("Interface reference is null, can't add default pane.");
+
+            }
+        }
         // --------------------------------------------   2D    ----------------------------------------------------------------------
 
 
@@ -13,12 +104,12 @@ namespace StoryEngine.UI
 
         public static void Drag2D(object sender, UIArgs uxArgs)
         {
-            
+
             if (uxArgs.uiEvent.targetButton == null)
                 return;
-            
+
             Translate2D(uxArgs.uiEvent.targetButton.GetDragTarget(uxArgs.uiEvent.direction), uxArgs.delta, uxArgs.uiEvent.targetButton.GetConstraint(uxArgs.uiEvent.direction), uxArgs.uiEvent);
-                       
+
         }
 
         static void Translate2D(GameObject target, Vector2 delta, Constraint constraint, Event ui)
@@ -385,7 +476,7 @@ void HullClamp{
             // !!!!!!!!!!!!!!!!!!!!!
             //          float hullHeight = cc.getActiveLandscape ().getHeight (cameraPositionOut.x, cameraPositionOut.z) + minimumHeight;
 
-            
+
                 if (false)
                 {
 
@@ -450,7 +541,7 @@ void HullClamp{
                     //          Log.Message ( "y: " + cameraPositionOut.y + " unmod y: " + state.lockValueY);
 
                 }
-    
+
 }
 */
 
@@ -589,8 +680,8 @@ void HullClamp{
 
 
 
-  
-       
+
+
 
         //  static public  void orbitCamera (UxInterface state, Vector2 delta)
 
@@ -746,7 +837,7 @@ void HullClamp{
 
 
 
-       
+
 
 
         //  public static void panCamera (UxInterface state, Vector2 delta)

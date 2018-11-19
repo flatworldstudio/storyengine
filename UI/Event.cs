@@ -388,6 +388,22 @@ namespace StoryEngine.UI
             pitchClamp = false;
         }
 
+        public void AddPitchClamp(float _min, float _max){
+
+            pitchClampMin=_min;
+            pitchClampMax=_max;
+            pitchClamp=true;
+
+        }
+
+        public void AddHardClamp(Vector3 _min, Vector3 _max){
+
+            hardClampMin=_min;
+            hardClampMax=_max;
+            hardClamp=true;
+
+        }
+
         static public Constraint empty
         {
 
@@ -402,8 +418,6 @@ namespace StoryEngine.UI
             {
 
             }
-
-
 
 
         }

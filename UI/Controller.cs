@@ -15,7 +15,10 @@ namespace StoryEngine.UI
         Event activeUiEvent;
         int cycle = 0;
         List<Event> uiEventStack;
-        float currentScale = 1;
+
+        // Scale currently not implementened, working with fixed size....
+
+     //   float currentScale = 1;
 
 
         public Controller()
@@ -46,7 +49,7 @@ namespace StoryEngine.UI
 
             //currentScale = activeInterface.canvasObject.GetComponent<Canvas>().scaleFactor;
 
-            currentScale = _layout.canvas.scaleFactor;
+      //      currentScale = _layout.canvas.scaleFactor;
 
             // log current stack count to track changes.
             // apply this frame's user interaction to the 'active' ui event.
@@ -61,12 +64,25 @@ namespace StoryEngine.UI
 
             if (activePlane != null)
             {
-                //Debug.Log(activeUiEvent.position + "Pointing at " + pointingAt.address);
-                activeInterface = _layout.GetInterfaceByAddress(activePlane.address);
 
-                //Vector3 planeOffset = _layout.GetOffsetForPlane(pointingAt);
+                activeInterface=activePlane.interFace;
+
 
             }
+
+
+
+
+            //if (activePlane != null)
+            //{
+            //    //Debug.Log(activeUiEvent.position + "Pointing at " + pointingAt.address);
+            // //   activeInterface = _layout.GetInterfaceByAddress(activePlane.address);
+
+            //    activeInterface=activePlane.interFace;
+
+            //    //Vector3 planeOffset = _layout.GetOffsetForPlane(pointingAt);
+
+            //}
 
             // if a user action started, perform additional handling before processing. (If it ended we process first, then perform additional handling, see below).
 
@@ -75,7 +91,7 @@ namespace StoryEngine.UI
 
                 // a user action just began. find any objects and buttons the event is targeting. 
 
-                setUiTargetObjects(activeUiEvent,activePlane, activeInterface);
+                setUiTargetObjects(activeUiEvent, activePlane);
 
                 // if this new action is targeting the same object or button as an event already on the stack, the old event should be removed.
 
@@ -162,7 +178,7 @@ namespace StoryEngine.UI
 
                 //			Log.Message ( "handling event stack of size " + uiEventStack.Count);
 
-                processUiEvent(uiEvent, activeInterface);
+                processUiEvent(uiEvent, activeInterface); // note that this may not work as expected
 
                 // If an old event is no longer inert or springing, remove it.
 
@@ -272,7 +288,7 @@ namespace StoryEngine.UI
             if (activeInterface != null)
             {
 
-                Dictionary<string, Button>.ValueCollection allButtons = activeInterface.uiButtons.Values;
+                Dictionary<string, Button>.ValueCollection allButtons = activePlane.interFace.uiButtons.Values;
 
                 foreach (Button button in allButtons)
                 {
@@ -361,10 +377,10 @@ namespace StoryEngine.UI
             ui.x = Input.mousePosition.x;
             ui.y = Input.mousePosition.y;
             ui.dx = ui.x - ui.px;
-            ui.dx = ui.dx / currentScale;
+//            ui.dx = ui.dx / currentScale;
 
             ui.dy = ui.y - ui.py;
-            ui.dy = ui.dy / currentScale;
+   //         ui.dy = ui.dy / currentScale;
 
             ui.px = ui.x;
             ui.py = ui.y;
@@ -572,10 +588,10 @@ namespace StoryEngine.UI
         }
 
 
-        void setUiTargetObjects(Event _uiEvent,Plane _plane, Interface _interface)
+        void setUiTargetObjects(Event _uiEvent, Plane _plane)
         {
 
-            if (_interface == null)
+            if (_plane.interFace == null)
                 return;
 
 
@@ -585,26 +601,30 @@ namespace StoryEngine.UI
 
             Vector2 uiPosition = new Vector2(_uiEvent.x, _uiEvent.y);
 
+            uiPosition-=_plane.interFace.GetAnchorOffset();
+
+
             // Correct for the layout of the plane, and possibly in the plane. The offset can be controlled via the plane drawing delegate.
-           
-            Vector2 anchorPos=_plane.gameObject.GetComponent<RectTransform>().anchoredPosition;
-         uiPosition-=anchorPos;
-            uiPosition-=_plane.screenOffset;
+
+            //Vector2 anchorPos = _plane.interFace.gameObject.GetComponent<RectTransform>().anchoredPosition;
+
+            //uiPosition -= anchorPos;
+            //uiPosition -= _plane.screenOffset;
+
             //Vector3 screenPosition =new Vector3(uiPosition.x,uiPosition.y,0); 
 
             // cast a 3d ray from the camera we are controlling to find any 3D objects.
 
             _uiEvent.target3D = null;
 
-            if (_interface.uiCam3D != null)
+            if (_plane.interFace.uiCam3D != null)
             {
 
-                UnityEngine.Camera activeCamera = _interface.uiCam3D.camera;
+                UnityEngine.Camera activeCamera = _plane.interFace.uiCam3D.camera;
 
                 Ray ray = activeCamera.ScreenPointToRay(uiPosition);
 
-                Debug.DrawRay(ray.origin,10f*ray.direction,Color.red,3f,false);
-                //Debug.DrawRay(Vector3.zero,Vector3.up,Color.green,1f);
+                //Debug.DrawRay(ray.origin, 10f * ray.direction, Color.red, 3f, false);
 
                 int layerMask = 1 << 8; // only check colliders in layer '8'. 
 
@@ -612,7 +632,7 @@ namespace StoryEngine.UI
                 {
 
                     _uiEvent.target3D = hit.transform.gameObject;
-                    Debug.Log("raycast hit: "+hit.transform.gameObject.name);
+                    Debug.Log("raycast hit: " + hit.transform.gameObject.name);
 
                 }
 
@@ -620,7 +640,7 @@ namespace StoryEngine.UI
 
             // cast a 2d ray in the canvas we're controlling.
 
-            GraphicRaycaster gfxRayCaster = _interface.canvasObject.GetComponent<GraphicRaycaster>();
+            GraphicRaycaster gfxRayCaster = _plane.interFace.canvasObject.GetComponent<GraphicRaycaster>();
 
             //Create the PointerEventData with null for the EventSystem
 
@@ -646,7 +666,7 @@ namespace StoryEngine.UI
                 // find out if this 2d object is a button.
 
                 Button checkButton = null;
-                _interface.uiButtons.TryGetValue(_uiEvent.target2D.transform.name, out checkButton);
+                _plane.interFace.uiButtons.TryGetValue(_uiEvent.target2D.transform.name, out checkButton);
 
                 _uiEvent.targetButton = checkButton;
 
@@ -778,26 +798,27 @@ namespace StoryEngine.UI
             {
 
                 float iVel = 0f;
-               
+
                 if (Mathf.Abs(ui.dd) < 1f)
                     ui.dd = 0;
                 else
                     ui.dd = Mathf.SmoothDamp(ui.dd, 0, ref iVel, 0.075f);
-                
+
                 if (Mathf.Abs(ui.dx) < 1f)
                     ui.dx = 0;
                 else
                     ui.dx = Mathf.SmoothDamp(ui.dx, 0, ref iVel, 0.075f);
-                
+
                 if (Mathf.Abs(ui.dy) < 1f)
                     ui.dy = 0;
                 else
                     ui.dy = Mathf.SmoothDamp(ui.dy, 0, ref iVel, 0.075f);
-                
-                if (ui.dx == 0 && ui.dy == 0 && ui.dd==0){
+
+                if (ui.dx == 0 && ui.dy == 0 && ui.dd == 0)
+                {
                     ui.isInert = false;
                 }
-                
+
 
             }
 

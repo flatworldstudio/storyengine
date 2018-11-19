@@ -7,114 +7,68 @@ using System.Linq;
 namespace StoryEngine.UI
 {
 
-    public delegate void PopulatePlanes(Plane root);
-    public delegate void OnUpdatePlane(Plane branch, GameObject gameObject);
+    // A layout contains planes.
+    // A plane can contain an interface.
+    // An interface holds references to objects in the scene.
+
+   public delegate void InitialiseLayout(Plane root); // called on init to create the layout
+    public delegate void ResizeLayout(Plane root); // called when layout is resized
 
     public class Layout
     {
 
-        // Class to hold, update, visualise a (binairy tree) layout of planes. 
+        // Class to manage a (binairy tree) layout of Planes. 
 
-        GameObject planePrefab;
+        InitialiseLayout initialiseLayout;
+        ResizeLayout resizeLayout;
 
-        public Canvas canvas;
-        int margin;
-        public PopulatePlanes populatePlanes;
-        public OnUpdatePlane onUpdatePlane;
+        Plane rootPlane;
 
-        Plane uiRoot;
-
-        //Dictionary<Plane, GameObject> gameObjectMap;
-        //Dictionary<string, Interface> interfaceMap;
-     //   Dictionary<string, Plane> planeAddresses;
-
-        public Layout(float _width, float _height, Canvas _canvas, GameObject _planePrefab, int _margin)
-        {
-            margin = _margin;
-            planePrefab = _planePrefab;
-            canvas = _canvas;
-
-            if (_canvas == null || _planePrefab == null)
-            {
-                Log.Warning("Canvas or plane reference is null, cannot make layout.");
-                return;
-            }
-
-            List<Transform> tempList = canvas.gameObject.transform.Cast<Transform>().ToList();
-
-            foreach (Transform child in tempList)
-            {
-                GameObject.Destroy(child.gameObject);
-            }
-
-            //gameObjectMap = new Dictionary<Plane, GameObject>();
-            //interfaceMap = new Dictionary<string, Interface>();
-        //    planeAddresses= new  Dictionary<string, Plane>();
-
-
-            uiRoot = new Plane(0, _width, 0, _height);
-
-         //   planeAddresses.Add(uiRoot.address,uiRoot);
-
-        }
-
-        public void AddInterfaceByAddress(Interface _interface, string _planeAddress)
-        {
-            Plane plane;
-
-            plane= uiRoot.SearchAddress(_planeAddress);
-
-         //   planeAddresses.TryGetValue(_planeAddress,out plane);
-
-            if (plane!=null)
-                plane.interFace=_interface;
-
-            //if (interfaceMap.ContainsKey(_planeAddress))
-            //    interfaceMap.Remove(_planeAddress);
-
-            //interfaceMap.Add(_planeAddress, _interface);
-
-        }
-
-        public Interface GetInterfaceByAddress(string _planeAddress)
-        {
-
-           // Interface returnInterface;
-
-            Plane plane;
-            plane= uiRoot.SearchAddress(_planeAddress);
-            //planeAddresses.TryGetValue(_planeAddress,out plane);
-
-            if (plane!=null)
-                return plane.interFace;
-            
-
-            //interfaceMap.TryGetValue(_planeAddress, out returnInterface);
-
-            return null;
-
-        }
-
-        //public GameObject GetGameObjectByPlane(Plane _plane)
+        //public Layout(float _width, float _height, InitialiseLayout _initialiseLayout)
         //{
 
-        //    GameObject gameObject = null;
-        //    gameObjectMap.TryGetValue(_plane, out gameObject);
-        //    return gameObject;
+        //    initialiseLayout = _initialiseLayout;
+        //    Initialise(_width, _height);
 
         //}
 
-       
+        public Layout(float _width, float _height,InitialiseLayout _initialiseLayout=null,ResizeLayout _resizeLayout=null)
+
+        {
+
+
+            initialiseLayout = _initialiseLayout;
+            resizeLayout=_resizeLayout;
+
+            Initialise(_width, _height);
+
+        }
+
+        void Initialise(float _width, float _height)
+        {
+
+            rootPlane = new Plane(0, _width, 0, _height);
+
+            if (initialiseLayout != null)
+                initialiseLayout(rootPlane);
+
+        }
+
+        public Plane GetPlaneByAddress(string _planeAddress)
+        {
+
+            return (rootPlane.SearchAddress(_planeAddress));
+
+        }
 
         public Plane FindPlaneByPoint(Vector2 _point)
         {
 
-            Plane plane = RecursivePointSearch(uiRoot, _point);
+            Plane plane = RecursivePointSearch(rootPlane, _point);
 
 
             return plane;
         }
-
 
         Plane RecursivePointSearch(Plane _plane, Vector2 _point)
         {
@@ -158,12 +112,45 @@ namespace StoryEngine.UI
 
         }
 
-
-        public void UpdateLayout(float _width, float _height)
+        public void Resize(float _width, float _height)
         {
 
-            uiRoot.x1 = _width;
-            uiRoot.y1 = _height;
+            rootPlane.x1 = _width;
+            rootPlane.y1 = _height;
+
+            if (resizeLayout != null)
+                resizeLayout(rootPlane);
+
+
+            ResizePlaneRecursive(rootPlane);
+
+
+        }
+
+        public void ResizePlaneRecursive(Plane _plane){
+
+            if (_plane.children != null)
+            {
+
+                ResizePlaneRecursive(_plane.children[0]);
+                ResizePlaneRecursive(_plane.children[1]);
+
+            }
+            else
+            {
+                // We call resize on the plane. Plane will call resize on interface if present.
+                _plane.Resize();
+
+            }
+
+        }
+
+        /*
+        public void Resize(float _width, float _height)
+        {
+
+            rootPlane.x1 = _width;
+            rootPlane.y1 = _height;
 
             UpdateLayout();
 
@@ -173,13 +160,13 @@ namespace StoryEngine.UI
         public void UpdateLayout()
         {
 
-            if (uiRoot != null)
+            if (rootPlane != null)
             {
 
                 if (populatePlanes != null)
-                    populatePlanes(uiRoot);
+                    populatePlanes(rootPlane);
 
-                DrawPlanes(uiRoot);
+                DrawPlanes(rootPlane);
 
             }
 
@@ -206,37 +193,56 @@ namespace StoryEngine.UI
 
         void DrawPlane(Plane _plane)
         {
+                   
 
+            // if there's a prefab, we use that as template for gameobject. 
 
-            GameObject gameObject=null;
+            // 
 
-            //if (!gameObjectMap.TryGetValue(_plane, out gameObject))
-            if (_plane.gameObject==null)
+            if (planePrefab != null)
             {
-                gameObject = GameObject.Instantiate(planePrefab);
-                gameObject.transform.SetParent(canvas.gameObject.transform, false);
-                //gameObjectMap.Add(_plane, gameObject);
-                _plane.gameObject=gameObject;
+
+
+                GameObject gameObject=null;
+
+                //if (!gameObjectMap.TryGetValue(_plane, out gameObject))
+
+                if (_plane.gameObject == null)
+                {
+                    gameObject = GameObject.Instantiate(planePrefab);
+                    gameObject.transform.SetParent(canvas.gameObject.transform, false);
+                    //gameObjectMap.Add(_plane, gameObject);
+                    _plane.gameObject = gameObject;
+
+                }
+
+                float m = margin;
+
+                Vector2 anchorPosition = new Vector2(_plane.x0 + m, _plane.y0 + m);
+                gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+                Vector2 sizeDelta = new Vector2(_plane.x1 - _plane.x0 - 2 * m, _plane.y1 - _plane.y0 - 2 * m);
+                gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
+
 
             }
 
-            float m = margin;
+            // Call external delegate to handle any specifics.
 
-            Vector2 anchorPosition = new Vector2(_plane.x0 + m, _plane.y0 + m);
-            gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
-            Vector2 sizeDelta = new Vector2(_plane.x1 - _plane.x0 - 2 * m, _plane.y1 - _plane.y0 - 2 * m);
-            gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
-
-            if (onUpdatePlane != null)
-                onUpdatePlane(_plane, gameObject);
+            if (_plane.gameObject!=null && onUpdatePlane != null)
+                onUpdatePlane(_plane, _plane.gameObject);
 
 
         }
-
+*/
 
 
     }
 
+
+
+
+    //   public delegate void InitialisePlane (Plane _plane);
+    //   public delegate void ResizePlane(Plane _plane);
 
     public class Plane
     {
@@ -248,13 +254,15 @@ namespace StoryEngine.UI
         public float splitValue;
         public DIRECTION splitDirection;
 
-        public Plane parent;
+        public Plane parent, root;
         public Plane[] children;
         public string address;
 
-        public GameObject gameObject;
+        //public Canvas canvas;
         public Interface interFace;
-        public Vector2 screenOffset=Vector2.zero;
+        //public GameObject gameObject;
+        //     public Vector2 screenOffset = Vector2.zero;
+
 
         public Plane()
         {
@@ -264,6 +272,7 @@ namespace StoryEngine.UI
         {
             parent = _parent;
             address = parent.address + "x";
+            root = parent.root;
         }
 
         public Plane(float _x0, float _x1, float _y0, float _y1)
@@ -274,29 +283,41 @@ namespace StoryEngine.UI
             y0 = _y0;
             y1 = _y1;
             address = "r";
+            root = this;
 
         }
 
-        public Plane SearchAddress(string _address){
+        public void Resize(){
 
-            Plane returnPlane=null;
+            if (interFace!=null)
+                interFace.Resize();
 
-            if (children!=null){
+        }
 
-                returnPlane=children[0].SearchAddress(_address);
-                if (returnPlane!=null)
+        public Plane SearchAddress(string _address)
+        {
+
+            Plane returnPlane = null;
+
+            if (children != null)
+            {
+
+                returnPlane = children[0].SearchAddress(_address);
+                if (returnPlane != null)
                     return returnPlane;
-                
-                returnPlane=children[1].SearchAddress(_address);
 
-                if (returnPlane!=null)
+                returnPlane = children[1].SearchAddress(_address);
+
+                if (returnPlane != null)
                     return returnPlane;
-                
 
-            }else{
 
-                if (address==_address)
-                    returnPlane=this;
+            }
+            else
+            {
+
+                if (address == _address)
+                    returnPlane = this;
 
             }
 
@@ -311,6 +332,13 @@ namespace StoryEngine.UI
 
         //}
 
+        public void AddInterface(Interface _interface)
+        {
+
+            interFace = _interface;
+            interFace.plane = this;
+
+        }
 
         void AddChildren()
         {

@@ -2,7 +2,7 @@
 using StoryEngine;
 using UnityEngine;
 
-public class DataHandler : MonoBehaviour
+public class DataHandlerExample : MonoBehaviour
 {
     
     // Copy this as a template.
