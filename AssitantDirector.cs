@@ -15,300 +15,329 @@ namespace StoryEngine
 {
 
 
-	public delegate void NewTasksEvent (object sender, TaskArgs e);
+    public delegate void NewTasksEvent(object sender, TaskArgs e);
 
-	public class AssitantDirector : MonoBehaviour
-	{
-	
-		public event NewTasksEvent newTasksEvent;
+    public class AssitantDirector : MonoBehaviour
+    {
 
-		string me = "Assistant director";
+        public event NewTasksEvent newTasksEvent;
 
-		Director theDirector;
-		public string scriptName;
+        string me = "Assistant director";
 
-		string launchOnStoryline;
-		public string launchOSX, launchWIN, launchIOS;
+        Director theDirector;
+        public string scriptName;
 
-		#if NETWORKED
+        string launchOnStoryline;
+        public string launchOSX, launchWIN, launchIOS;
 
-		public ExtendedNetworkManager networkManager;
+        public static AssitantDirector instance;
 
-		const short stringCode = 1002;
-		const short pointerCode = 1003;
-		const short taskCode = 1004;
+#if NETWORKED
 
-		#endif
+        public ExtendedNetworkManager networkManager;
 
-		void Awake ()
-		{
+        const short stringCode = 1002;
+        const short pointerCode = 1003;
+        const short taskCode = 1004;
 
-			Log.Init ();// this initialises the dictionary without entries, if not handled by developer.
+#endif
 
-		}
+        void Awake()
+        {
+            instance = this;
 
-		void Start ()
-		{
+            Log.Init();// this initialises the dictionary without entries, if not handled by developer.
 
-      
+        }
+
+        void Start()
+        {
 
 
-			Log.Message ("Starting.", me);
 
-			UUID.setIdentity ();
 
-			Log.Message ("Identity stamp " + UUID.identity, me);
+            Log.Message("Starting.", me);
 
-			GENERAL.AUTHORITY = AUTHORITY.LOCAL;
+            UUID.setIdentity();
 
-			theDirector = new Director ();
+            Log.Message("Identity stamp " + UUID.identity, me);
 
-			GENERAL.ALLTASKS = new List<StoryTask> ();
+            GENERAL.AUTHORITY = AUTHORITY.LOCAL;
 
-			#if UNITY_IOS
+            theDirector = new Director();
+
+            GENERAL.ALLTASKS = new List<StoryTask>();
+
+#if UNITY_IOS
 
 		Log.Message ("Running on IOS platform. ",me);
 
 		launchOnStoryline = launchIOS;
 
-			#endif
+#endif
 
-			#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
 
 			Log.Message ("Running on OSX platform.", me);
 
 			launchOnStoryline = launchOSX;
 
-			#endif
-				
+#endif
 
-			#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 
-		Log.Message ("Running on WINDOWS platform.",me);
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 
-		launchOnStoryline = launchWIN;
+            Log.Message("Running on WINDOWS platform.", me);
 
-			#endif
+            launchOnStoryline = launchWIN;
 
-			#if NETWORKED
+#endif
 
-			// get the networkmanager to call network event methods on the assistant director.
+#if NETWORKED
 
-			networkManager.onStartServerDelegate = onStartServer;
-			networkManager.onStartClientDelegate = onStartClient;
-			networkManager.onServerConnectDelegate = OnServerConnect;
-			networkManager.onClientConnectDelegate = OnClientConnect;
-			networkManager.onClientDisconnectDelegate = OnClientDisconnect;
-			networkManager.onStopClientDelegate = OnStopClient;
+            // get the networkmanager to call network event methods on the assistant director.
 
-			#endif
+            networkManager.onStartServerDelegate = onStartServer;
+            networkManager.onStartClientDelegate = onStartClient;
+            networkManager.onServerConnectDelegate = OnServerConnect;
+            networkManager.onClientConnectDelegate = OnClientConnect;
+            networkManager.onClientDisconnectDelegate = OnClientDisconnect;
+            networkManager.onStopClientDelegate = OnStopClient;
 
-		}
+#endif
 
+        }
 
 
-		void OnApplicationPause (bool paused)
-		{
 
-			// IOS: first app leaves focus, then it pauzes. on return app enteres focus and then resumes
-	
-			if (paused) {
 
-				Log.Message ("pauzing ...", me);
+        void OnApplicationPause(bool paused)
+        {
 
-			} else {
+            // IOS: first app leaves focus, then it pauzes. on return app enteres focus and then resumes
 
-				Log.Message ("resuming ...", me);
+            if (paused)
+            {
 
-			}
+                Log.Message("pauzing ...", me);
 
-		}
+            }
+            else
+            {
 
-		void OnApplicationFocus (bool focus)
-		{
-		
-			if (focus) {
+                Log.Message("resuming ...", me);
 
-				Log.Message ("entering focus ...", me);
+            }
 
-			} else {
+        }
 
-				Log.Message ("leaving focus ...", me);
+        void OnApplicationFocus(bool focus)
+        {
 
-			}
+            if (focus)
+            {
 
-		}
+                Log.Message("entering focus ...", me);
 
-		void Update ()
-		{
+            }
+            else
+            {
 
-			switch (theDirector.status) {
+                Log.Message("leaving focus ...", me);
 
-			case DIRECTORSTATUS.ACTIVE:
+            }
 
-//			Log.Message ( "director active ...");
+        }
 
-				foreach (StoryTask task in GENERAL.ALLTASKS) {
+        void Update()
+        {
 
-					if (task.getCallBack () != "") {
+            switch (theDirector.status)
+            {
 
-						// if a callback was set (somewhere on the network) we act on it only if we are the server or if the task is local.
+                case DIRECTORSTATUS.ACTIVE:
 
-						if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL || task.scope == SCOPE.LOCAL) {
+                    //			Log.Message ( "director active ...");
 
-							task.pointer.setStatus (POINTERSTATUS.TASKUPDATED);
+                    foreach (StoryTask task in GENERAL.ALLTASKS)
+                    {
 
-							// wip, carry over value
+                        if (task.getCallBack() != "")
+                        {
 
-//						string callBackValue="";
-//
-//						if (task.getStringValue ("callBackValue", out callBackValue))
-//							task.pointer.carryOver = callBackValue;
+                            // if a callback was set (somewhere on the network) we act on it only if we are the server or if the task is local.
 
-						}
+                            if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL || task.scope == SCOPE.LOCAL)
+                            {
 
-					}
+                                task.pointer.setStatus(POINTERSTATUS.TASKUPDATED);
 
-				}
+                                // wip, carry over value
 
-				theDirector.evaluatePointers ();
+                                //						string callBackValue="";
+                                //
+                                //						if (task.getStringValue ("callBackValue", out callBackValue))
+                                //							task.pointer.carryOver = callBackValue;
 
-				List<StoryTask> newTasks = new List<StoryTask> ();
+                            }
 
-				for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++) {
+                        }
 
-					StoryPointer pointer = GENERAL.ALLPOINTERS [p];
+                    }
 
-					if (pointer.modified) {
+                    theDirector.evaluatePointers();
 
-						switch (pointer.scope) {
+                    List<StoryTask> newTasks = new List<StoryTask>();
 
-						case SCOPE.GLOBAL:
+                    for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++)
+                    {
 
-						// If pointer scope is global, we add a task if our own scope is global as well. (If our scope is local, we'll be receiving the task over the network)
+                        StoryPointer pointer = GENERAL.ALLPOINTERS[p];
 
-							if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL) {
+                        if (pointer.modified)
+                        {
 
-								if (pointer.getStatus () == POINTERSTATUS.NEWTASK) {
+                            switch (pointer.scope)
+                            {
 
-									pointer.setStatus (POINTERSTATUS.PAUSED);
+                                case SCOPE.GLOBAL:
 
-									StoryTask task = new StoryTask (pointer, SCOPE.GLOBAL);
+                                    // If pointer scope is global, we add a task if our own scope is global as well. (If our scope is local, we'll be receiving the task over the network)
 
-//								task.loadPersistantData (pointer);
-									task.loadPersistantData (pointer);
+                                    if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL)
+                                    {
 
-									pointer.currentTask = task;
-									newTasks.Add (task);
+                                        if (pointer.getStatus() == POINTERSTATUS.NEWTASK)
+                                        {
 
-									task.modified = true;
+                                            pointer.setStatus(POINTERSTATUS.PAUSED);
 
-									Log.Message ("Creating and distributing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName, me);
+                                            StoryTask task = new StoryTask(pointer, SCOPE.GLOBAL);
 
-								}
+                                            //								task.loadPersistantData (pointer);
+                                            task.loadPersistantData(pointer);
 
-							}
+                                            pointer.currentTask = task;
+                                            newTasks.Add(task);
 
-							break;
+                                            task.modified = true;
 
-						case SCOPE.LOCAL:
-						default:
+                                            Log.Message("Creating and distributing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName, me);
 
-						// If pointer scope is local, check if new tasks have to be generated.
+                                        }
 
-							if (pointer.getStatus () == POINTERSTATUS.NEWTASK) {
+                                    }
 
-								pointer.setStatus (POINTERSTATUS.PAUSED);
+                                    break;
 
-								StoryTask task = new StoryTask (pointer, SCOPE.LOCAL);
+                                case SCOPE.LOCAL:
+                                default:
 
-//							task.loadPersistantData (pointer);
-								task.loadPersistantData (pointer);
+                                    // If pointer scope is local, check if new tasks have to be generated.
 
+                                    if (pointer.getStatus() == POINTERSTATUS.NEWTASK)
+                                    {
 
-								pointer.currentTask = task;
+                                        pointer.setStatus(POINTERSTATUS.PAUSED);
 
-								newTasks.Add (task);
+                                        StoryTask task = new StoryTask(pointer, SCOPE.LOCAL);
 
-								Log.Message ("Creating local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName, me);
+                                        //							task.loadPersistantData (pointer);
+                                        task.loadPersistantData(pointer);
 
-							}
 
-							break;
+                                        pointer.currentTask = task;
 
-						}
+                                        newTasks.Add(task);
 
-					}
+                                        Log.Message("Creating local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName, me);
 
-				}
+                                    }
 
-				if (newTasks.Count > 0) {
+                                    break;
 
-					DistributeTasks (new TaskArgs (newTasks)); // if any new tasks call an event, passing on the list of tasks to any handlers listening
-				}
+                            }
 
-				break;
+                        }
 
-			case DIRECTORSTATUS.READY:
+                    }
 
-				GENERAL.SIGNOFFS = eventHandlerCount ();
+                    if (newTasks.Count > 0)
+                    {
 
-				if (GENERAL.SIGNOFFS == 0) {
+                        DistributeTasks(new TaskArgs(newTasks)); // if any new tasks call an event, passing on the list of tasks to any handlers listening
+                    }
 
-					Log.Warning ("No handlers registred. Pausing director.", me);
-					theDirector.status = DIRECTORSTATUS.PAUSED;
+                    break;
 
-				} else {
+                case DIRECTORSTATUS.READY:
 
-					Log.Message ("" + GENERAL.SIGNOFFS + " handlers registred.", me);
+                    GENERAL.SIGNOFFS = eventHandlerCount();
 
-					Log.Message ("Starting storyline " + launchOnStoryline, me);
+                    if (GENERAL.SIGNOFFS == 0)
+                    {
 
-					theDirector.beginStoryLine (launchOnStoryline);
-					theDirector.status = DIRECTORSTATUS.ACTIVE;
+                        Log.Warning("No handlers registred. Pausing director.", me);
+                        theDirector.status = DIRECTORSTATUS.PAUSED;
 
-//				Log.Message ( "Started storyline " + launchOnStoryline);
+                    }
+                    else
+                    {
 
-				}
+                        Log.Message("" + GENERAL.SIGNOFFS + " handlers registred.", me);
 
-				break;
+                        Log.Message("Starting storyline " + launchOnStoryline, me);
 
-			case DIRECTORSTATUS.NOTREADY:
+                        //		theDirector.beginStoryLine (launchOnStoryline);
 
-				theDirector.loadScript (scriptName);
+                        StoryEngine.Director.Instance.NewStoryLine(launchOnStoryline);
 
-				break;
+                        theDirector.status = DIRECTORSTATUS.ACTIVE;
 
-			default:
-				break;
-			}
+                        //				Log.Message ( "Started storyline " + launchOnStoryline);
 
-		}
+                    }
 
-		#if NETWORKED
+                    break;
 
-		void LateUpdate ()
-		{
+                case DIRECTORSTATUS.NOTREADY:
 
-			// Iterate over all pointers.
+                    theDirector.loadScript(scriptName);
 
-			for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++) {
+                    break;
 
-				StoryPointer pointer = GENERAL.ALLPOINTERS [p];
+                default:
+                    break;
+            }
 
-				if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified) {
+        }
 
-					Log.Message ("Sending pointer update to clients. ID: " + pointer.ID, me);
+#if NETWORKED
 
-					sendPointerUpdateToClients (pointer.getUpdateMessage ());
+        void LateUpdate()
+        {
 
-					pointer.modified = false;
+            // Iterate over all pointers.
 
-				}
+            for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++)
+            {
 
-			}
+                StoryPointer pointer = GENERAL.ALLPOINTERS[p];
 
-			/*
+                if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified)
+                {
+
+                    Log.Message("Sending pointer update to clients. ID: " + pointer.ID, me);
+
+                    sendPointerUpdateToClients(pointer.getUpdateMessage());
+
+                    pointer.modified = false;
+
+                }
+
+            }
+
+            /*
 
 		for (int p = 0; p < GENERAL.ALLPOINTERS.Count; p++) {
 
@@ -353,471 +382,500 @@ namespace StoryEngine
 		}
 		*/
 
-			// Iterate over all tasks.
+            // Iterate over all tasks.
 
-			for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i--) {
+            for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i--)
+            {
 
-				StoryTask task = GENERAL.ALLTASKS [i];
+                StoryTask task = GENERAL.ALLTASKS[i];
 
-				// Cleanup completed tasks.
+                // Cleanup completed tasks.
 
-				if (task.getStatus () == TASKSTATUS.COMPLETE) {
-				
-					GENERAL.ALLTASKS.RemoveAt (i);
+                if (task.getStatus() == TASKSTATUS.COMPLETE)
+                {
 
-					Log.Message ("Task " + task.description + " completed, removing from alltasks. ID: " + task.ID, me);
+                    GENERAL.ALLTASKS.RemoveAt(i);
 
-				}
+                    Log.Message("Task " + task.description + " completed, removing from alltasks. ID: " + task.ID, me);
 
-				if (task.modified) {
+                }
 
-					// Check if we need to send network updates.
+                if (task.modified)
+                {
 
-					switch (GENERAL.AUTHORITY) {
+                    // Check if we need to send network updates.
 
-					case AUTHORITY.LOCAL:
+                    switch (GENERAL.AUTHORITY)
+                    {
 
-						if (task.scope == SCOPE.GLOBAL) {
+                        case AUTHORITY.LOCAL:
 
-							Log.Message ("Global task " + task.description + " changed, sending update to server. ID: " + task.ID, me);
+                            if (task.scope == SCOPE.GLOBAL)
+                            {
 
-							sendTaskUpdateToServer (task.getUpdateMessage ());
+                                Log.Message("Global task " + task.description + " changed, sending update to server. ID: " + task.ID, me);
 
-						}
+                                sendTaskUpdateToServer(task.getUpdateMessage());
 
-						break;
+                            }
 
-					case AUTHORITY.GLOBAL:
+                            break;
 
-						if (task.scope == SCOPE.GLOBAL) {
+                        case AUTHORITY.GLOBAL:
 
-							Log.Message ("Global task " + task.description + " changed, sending update to clients. ID: " + task.ID, me);
+                            if (task.scope == SCOPE.GLOBAL)
+                            {
 
-							sendTaskUpdateToClients (task.getUpdateMessage ());
+                                Log.Message("Global task " + task.description + " changed, sending update to clients. ID: " + task.ID, me);
 
-						}
+                                sendTaskUpdateToClients(task.getUpdateMessage());
 
-						break;
+                            }
 
-					default:
+                            break;
 
-						break;
+                        default:
 
-					}
+                            break;
 
-					task.modified = false;
-				}
+                    }
 
-			}
+                    task.modified = false;
+                }
 
-		}
+            }
 
-		#endif
+        }
 
-		#if NETWORKED
+#endif
 
-		// Network connectivity handling.
+#if NETWORKED
 
-		void onStartServer ()
-		{
+        // Network connectivity handling.
 
-			GENERAL.AUTHORITY = AUTHORITY.GLOBAL;
+        void onStartServer()
+        {
 
-			GENERAL.SETNEWCONNECTION (-1);
+            GENERAL.AUTHORITY = AUTHORITY.GLOBAL;
 
-			Log.Message ("Registering server message handlers.", me);
+            GENERAL.SETNEWCONNECTION(-1);
 
-			NetworkServer.RegisterHandler (stringCode, onMessageFromClient);
-			NetworkServer.RegisterHandler (taskCode, onTaskUpdateFromClient);
+            Log.Message("Registering server message handlers.", me);
 
-		}
+            NetworkServer.RegisterHandler(stringCode, onMessageFromClient);
+            NetworkServer.RegisterHandler(taskCode, onTaskUpdateFromClient);
 
-		void onStopServer ()
-		{
+        }
 
-			revertAllToLocal ();
+        void onStopServer()
+        {
 
-		}
+            revertAllToLocal();
 
-		void onStartClient (NetworkClient theClient)
-		{
+        }
 
-			Log.Message ("Registering client message handlers.", me);
-			theClient.RegisterHandler (stringCode, onMessageFromServer);
-			theClient.RegisterHandler (pointerCode, onPointerUpdateFromServer);
-			theClient.RegisterHandler (taskCode, onTaskUpdateFromServer);
+        void onStartClient(NetworkClient theClient)
+        {
 
-		}
+            Log.Message("Registering client message handlers.", me);
+            theClient.RegisterHandler(stringCode, onMessageFromServer);
+            theClient.RegisterHandler(pointerCode, onPointerUpdateFromServer);
+            theClient.RegisterHandler(taskCode, onTaskUpdateFromServer);
 
-		void OnStopClient ()
-		{
+        }
 
-			Log.Message ("Client stopped. Resetting scope to local.", me);
+        void OnStopClient()
+        {
 
-			revertAllToLocal ();
+            Log.Message("Client stopped. Resetting scope to local.", me);
 
-		}
+            revertAllToLocal();
 
+        }
 
-		void OnServerConnect (NetworkConnection conn)
-		{
 
-			Log.Message ("incoming server connection delegate called", me);
+        void OnServerConnect(NetworkConnection conn)
+        {
 
-			GENERAL.SETNEWCONNECTION (conn.connectionId);
+            Log.Message("incoming server connection delegate called", me);
 
-		}
+            GENERAL.SETNEWCONNECTION(conn.connectionId);
 
-		void OnClientConnect (NetworkConnection conn)
-		{
+        }
 
-			Log.Message ("Client connection delegate called", me);
+        void OnClientConnect(NetworkConnection conn)
+        {
 
-			GENERAL.AUTHORITY = AUTHORITY.LOCAL; 
+            Log.Message("Client connection delegate called", me);
 
-		}
+            GENERAL.AUTHORITY = AUTHORITY.LOCAL;
 
-		void revertAllToLocal ()
-		{
+        }
 
-			GENERAL.AUTHORITY = AUTHORITY.LOCAL;
+        void revertAllToLocal()
+        {
 
-			// set all pointers and tasks (back) to local. 
-			// Disabled. Can work, but would need to also set/consider pointerstatus (now it defaults to 0=evaluate which isn't quite right).
+            GENERAL.AUTHORITY = AUTHORITY.LOCAL;
 
+            // set all pointers and tasks (back) to local. 
+            // Disabled. Can work, but would need to also set/consider pointerstatus (now it defaults to 0=evaluate which isn't quite right).
 
-			foreach (StoryPointer sp in GENERAL.ALLPOINTERS) {
-				sp.scope = SCOPE.LOCAL;
-				sp.setStatus (POINTERSTATUS.PAUSED);
 
-			}
+            foreach (StoryPointer sp in GENERAL.ALLPOINTERS)
+            {
+                sp.scope = SCOPE.LOCAL;
+                sp.setStatus(POINTERSTATUS.PAUSED);
 
-			foreach (StoryTask tsk in GENERAL.ALLTASKS) {
-				tsk.scope = SCOPE.LOCAL;
-			}
+            }
 
+            foreach (StoryTask tsk in GENERAL.ALLTASKS)
+            {
+                tsk.scope = SCOPE.LOCAL;
+            }
 
 
-		}
 
-		void OnClientDisconnect (NetworkConnection conn)
-		{
+        }
 
-			Log.Message ("Lost client connection. Resetting scope to local.", me);
+        void OnClientDisconnect(NetworkConnection conn)
+        {
 
-			revertAllToLocal ();
+            Log.Message("Lost client connection. Resetting scope to local.", me);
 
-		}
+            revertAllToLocal();
 
-		// Handle basic string messages.
+        }
 
-		void onMessageFromClient (NetworkMessage netMsg)
-		{
-			var message = netMsg.ReadMessage<StringMessage> ();
+        // Handle basic string messages.
 
-			Log.Message ("Message received from client: " + message.value, me);
+        void onMessageFromClient(NetworkMessage netMsg)
+        {
+            var message = netMsg.ReadMessage<StringMessage>();
 
-		}
+            Log.Message("Message received from client: " + message.value, me);
 
-		void onMessageFromServer (NetworkMessage netMsg)
-		{
-			var message = netMsg.ReadMessage<StringMessage> ();
+        }
 
-			Log.Message ("Message received from server: " + message.value, me);
+        void onMessageFromServer(NetworkMessage netMsg)
+        {
+            var message = netMsg.ReadMessage<StringMessage>();
 
-			if (message.value == "suspending") {
-			
-				Log.Message ("Client will be suspending, closing their connection.", me);
+            Log.Message("Message received from server: " + message.value, me);
 
-				netMsg.conn.Disconnect ();
+            if (message.value == "suspending")
+            {
 
-			}
+                Log.Message("Client will be suspending, closing their connection.", me);
 
-		}
+                netMsg.conn.Disconnect();
 
-		// Handle pointer messages.
+            }
 
-		void onPointerUpdateFromServer (NetworkMessage netMsg)
-		{
-			var message = netMsg.ReadMessage<PointerUpdate> ();
+        }
 
-			StoryPoint point = GENERAL.getStoryPointByID (message.storyPoint);
+        // Handle pointer messages.
 
-			if (point == null)
-				return; // Warning already logged.
+        void onPointerUpdateFromServer(NetworkMessage netMsg)
+        {
+            var message = netMsg.ReadMessage<PointerUpdate>();
 
-			Log.Message ("Server update for pointer " + point.storyLineName + " ID: " + message.pointerUuid + " | " + message.storyPoint, me);
-				
-			StoryPointer sp = GENERAL.getPointer (message.pointerUuid);
+            StoryPoint point = GENERAL.getStoryPointByID(message.storyPoint);
 
-			if (sp == null) {
-		
-				sp = new StoryPointer (point, message.pointerUuid);
-		
-				Log.Message ("Created an instance of global pointer: " + point.storyLineName + " ID: " + message.pointerUuid, me);
+            if (point == null)
+                return; // Warning already logged.
 
+            Log.Message("Server update for pointer " + point.storyLineName + " ID: " + message.pointerUuid + " | " + message.storyPoint, me);
 
+            StoryPointer sp = GENERAL.getPointer(message.pointerUuid);
 
-			} 
+            if (sp == null)
+            {
 
-			sp.currentPoint = point;
+                sp = new StoryPointer(point, message.pointerUuid);
 
-			if (message.killed)
-				sp.killPointerOnly ();
+                Log.Message("Created an instance of global pointer: " + point.storyLineName + " ID: " + message.pointerUuid, me);
 
 
 
-//		applyPointerUpdate (message.pointerUuid, message.storyPoint, message.pointerStatus);
-			
-		}
+            }
 
-		//	void applyPointerUpdate (string pointerUuid, string pointName, int pointerStatus)
-		//	{
-		//
-		//		// get the story point
-		//
-		//		StoryPoint point = GENERAL.getStoryPointByID (pointName);
-		//
-		//		// see if the pointer exists, update or create new
-		//
-		//		StoryPointer sp = GENERAL.getPointer (pointerUuid);
-		//
-		//		if (sp == null) {
-		//
-		//			sp = new StoryPointer (point, pointerUuid);
-		//
-		//			Log.Message ( "Created a new (remotely owned) pointer with ID: " + sp.ID);
-		//
-		//		}
-		//
-		//		sp.currentPoint = point;
-		//
-		////		sp.setStatus ((POINTERSTATUS)pointerStatus);
-		//
-		////		sp.setStatus (POINTERSTATUS.PAUSED); // overrule the status sent over the network, since global pointers aren't updated locally.
-		//
-		//	}
+            sp.currentPoint = point;
 
-		public void sendPointerUpdateToClients (PointerUpdate pointerMessage)
-		{
-	
-			NetworkServer.SendToAll (pointerCode, pointerMessage);
+            if (message.killed)
+                sp.killPointerOnly();
 
-			Log.Message ("Sending pointer update to all clients: " + pointerMessage.pointerUuid + " " + pointerMessage.storyPoint, me);
 
-		}
 
-		// Handle task messages.
+            //		applyPointerUpdate (message.pointerUuid, message.storyPoint, message.pointerStatus);
 
-		void onTaskUpdateFromServer (NetworkMessage networkMessage)
-		{
+        }
 
-			var taskUpdate = networkMessage.ReadMessage<TaskUpdate> ();
+        //	void applyPointerUpdate (string pointerUuid, string pointName, int pointerStatus)
+        //	{
+        //
+        //		// get the story point
+        //
+        //		StoryPoint point = GENERAL.getStoryPointByID (pointName);
+        //
+        //		// see if the pointer exists, update or create new
+        //
+        //		StoryPointer sp = GENERAL.getPointer (pointerUuid);
+        //
+        //		if (sp == null) {
+        //
+        //			sp = new StoryPointer (point, pointerUuid);
+        //
+        //			Log.Message ( "Created a new (remotely owned) pointer with ID: " + sp.ID);
+        //
+        //		}
+        //
+        //		sp.currentPoint = point;
+        //
+        ////		sp.setStatus ((POINTERSTATUS)pointerStatus);
+        //
+        ////		sp.setStatus (POINTERSTATUS.PAUSED); // overrule the status sent over the network, since global pointers aren't updated locally.
+        //
+        //	}
 
-			Log.Message ("Incoming task update for " + taskUpdate.description + " ID: " + taskUpdate.taskID, me);
+        public void sendPointerUpdateToClients(PointerUpdate pointerMessage)
+        {
 
+            NetworkServer.SendToAll(pointerCode, pointerMessage);
 
-			applyTaskUpdate (taskUpdate);
+            Log.Message("Sending pointer update to all clients: " + pointerMessage.pointerUuid + " " + pointerMessage.storyPoint, me);
 
-		}
+        }
 
-		void onTaskUpdateFromClient (NetworkMessage netMsg)
-		{
+        // Handle task messages.
 
-			var taskUpdate = netMsg.ReadMessage<TaskUpdate> ();
+        void onTaskUpdateFromServer(NetworkMessage networkMessage)
+        {
 
-			string debug = "";
+            var taskUpdate = networkMessage.ReadMessage<TaskUpdate>();
 
-			debug += "Incoming task update on connection ID " + netMsg.conn.connectionId;
+            Log.Message("Incoming task update for " + taskUpdate.description + " ID: " + taskUpdate.taskID, me);
 
-			applyTaskUpdate (taskUpdate);
 
-			List <NetworkConnection> connections = new List<NetworkConnection> (NetworkServer.connections);
+            applyTaskUpdate(taskUpdate);
 
-			int c = 0;
+        }
 
-			for (int ci = 0; ci < connections.Count; ci++) {
+        void onTaskUpdateFromClient(NetworkMessage netMsg)
+        {
 
-				NetworkConnection nc = connections [ci];
+            var taskUpdate = netMsg.ReadMessage<TaskUpdate>();
 
-				if (nc != null) {
+            string debug = "";
 
-					if (nc.connectionId != netMsg.conn.connectionId) {
+            debug += "Incoming task update on connection ID " + netMsg.conn.connectionId;
 
-						debug += " sending update to connection ID " + nc.connectionId;
+            applyTaskUpdate(taskUpdate);
 
-						NetworkServer.SendToClient (ci, taskCode, taskUpdate);
-						c++;
+            List<NetworkConnection> connections = new List<NetworkConnection>(NetworkServer.connections);
 
-					} else {
+            int c = 0;
 
-						debug += " skipping client connection ID " + nc.connectionId;
+            for (int ci = 0; ci < connections.Count; ci++)
+            {
 
-					}
+                NetworkConnection nc = connections[ci];
 
-				} else {
+                if (nc != null)
+                {
 
-					debug += (" skipping null connection ");
+                    if (nc.connectionId != netMsg.conn.connectionId)
+                    {
 
-				}
+                        debug += " sending update to connection ID " + nc.connectionId;
 
-			}
+                        NetworkServer.SendToClient(ci, taskCode, taskUpdate);
+                        c++;
 
-			Log.Message (debug, me);
+                    }
+                    else
+                    {
 
-		}
+                        debug += " skipping client connection ID " + nc.connectionId;
 
-		void applyTaskUpdate (TaskUpdate taskUpdate)
-		{
+                    }
 
+                }
+                else
+                {
 
+                    debug += (" skipping null connection ");
 
-			StoryPointer updatePointer = GENERAL.getPointer (taskUpdate.pointerID);
+                }
 
-			// If we receive updates for a task for which we haven't spawned a pointer yet we ignore them.
+            }
 
-			if (updatePointer == null)
-				return;
+            Log.Message(debug, me);
 
+        }
 
+        void applyTaskUpdate(TaskUpdate taskUpdate)
+        {
 
-			StoryTask updateTask = GENERAL.getTask (taskUpdate.taskID);
 
-			if (updateTask == null) {
-			
-				updateTask = new StoryTask (taskUpdate.description, updatePointer, taskUpdate.taskID);
 
-				updateTask.ApplyUpdateMessage (taskUpdate);
+            StoryPointer updatePointer = GENERAL.getPointer(taskUpdate.pointerID);
 
-				Log.Message ("Created an instance of global task " + updateTask.description + " ID: " + taskUpdate.taskID, me);
+            // If we receive updates for a task for which we haven't spawned a pointer yet we ignore them.
 
-				DistributeTasks (new TaskArgs (updateTask));
+            if (updatePointer == null)
+                return;
 
-				if (updatePointer == null) {
 
-					Log.Warning ("update pointer not found: " + taskUpdate.pointerID, me);
 
-				} else {
+            StoryTask updateTask = GENERAL.getTask(taskUpdate.taskID);
 
-					updatePointer.currentTask = updateTask;
-//				updateTask.pointer = updatePointer;
+            if (updateTask == null)
+            {
 
-//				Log.MessageWarning ( "Pointer existed but task did not." + taskUpdate.pointerID);
+                updateTask = new StoryTask(taskUpdate.description, updatePointer, taskUpdate.taskID);
 
+                updateTask.ApplyUpdateMessage(taskUpdate);
 
-				}
+                Log.Message("Created an instance of global task " + updateTask.description + " ID: " + taskUpdate.taskID, me);
 
-			} else {
+                DistributeTasks(new TaskArgs(updateTask));
 
+                if (updatePointer == null)
+                {
 
-				updateTask.ApplyUpdateMessage (taskUpdate);
+                    Log.Warning("update pointer not found: " + taskUpdate.pointerID, me);
 
-				//	Log.Message ( "Applied update to existing task.");
+                }
+                else
+                {
 
-				if (updatePointer == null) {
+                    updatePointer.currentTask = updateTask;
+                    //				updateTask.pointer = updatePointer;
 
-					Log.Warning ("update pointer not found: " + taskUpdate.pointerID, me);
+                    //				Log.MessageWarning ( "Pointer existed but task did not." + taskUpdate.pointerID);
 
-				} else {
 
-					updatePointer.currentTask = updateTask;
+                }
 
-				}
+            }
+            else
+            {
 
 
+                updateTask.ApplyUpdateMessage(taskUpdate);
 
-			}
+                //	Log.Message ( "Applied update to existing task.");
 
-		}
+                if (updatePointer == null)
+                {
 
-		void sendTaskUpdateToServer (TaskUpdate message)
-		{
-		
-			networkManager.client.Send (taskCode, message);
+                    Log.Warning("update pointer not found: " + taskUpdate.pointerID, me);
 
-//		Log.Message ( "Sending task update to server. ");
-//		Log.Message (message.toString());
+                }
+                else
+                {
 
-		}
+                    updatePointer.currentTask = updateTask;
 
-		void sendTaskUpdateToClients (TaskUpdate message)
-		{
+                }
 
-			NetworkServer.SendToAll (taskCode, message);
 
-//		Log.Message ( "Sending task update to all clients. ");
-//		Log.Message (message.toString());
 
-		}
+            }
 
-		public void sendMessageToServer (string value)
-		{
-			var msg = new StringMessage (value);
-			networkManager.client.Send (stringCode, msg);
-			Log.Message ("Sending message to server: " + value, me);
-		}
+        }
 
-		public void sendMessageToClients (string value)
-		{
-			var msg = new StringMessage (value);
-			NetworkServer.SendToAll (stringCode, msg);
-			Log.Message ("Sending message to all clients: " + value, me);
-		}
+        void sendTaskUpdateToServer(TaskUpdate message)
+        {
 
+            networkManager.client.Send(taskCode, message);
 
-		#endif
+            //		Log.Message ( "Sending task update to server. ");
+            //		Log.Message (message.toString());
 
-		public int eventHandlerCount ()
-		{
+        }
 
-			if (newTasksEvent != null) {
-			
-				return newTasksEvent.GetInvocationList ().Length;
+        void sendTaskUpdateToClients(TaskUpdate message)
+        {
 
-			} else {
-			
-				return 0;
-			}
+            NetworkServer.SendToAll(taskCode, message);
 
-		}
+            //		Log.Message ( "Sending task update to all clients. ");
+            //		Log.Message (message.toString());
 
-		// Invoke event;
+        }
 
-		protected virtual void DistributeTasks (TaskArgs e)
-		{
+        public void sendMessageToServer(string value)
+        {
+            var msg = new StringMessage(value);
+            networkManager.client.Send(stringCode, msg);
+            Log.Message("Sending message to server: " + value, me);
+        }
 
-			if (newTasksEvent != null)
-				newTasksEvent (this, e); // trigger the event, if there are any listeners
+        public void sendMessageToClients(string value)
+        {
+            var msg = new StringMessage(value);
+            NetworkServer.SendToAll(stringCode, msg);
+            Log.Message("Sending message to all clients: " + value, me);
+        }
 
-		}
 
-	}
+#endif
 
-	public class TaskArgs : EventArgs
-	{
+        public int eventHandlerCount()
+        {
 
-		public List <StoryTask> theTasks;
-		//	public bool removeTask;
+            if (newTasksEvent != null)
+            {
 
+                return newTasksEvent.GetInvocationList().Length;
 
-		public TaskArgs (List <StoryTask> tasks) : base () // extend the constructor 
-		{ 
-			theTasks = tasks;
-		}
+            }
+            else
+            {
 
-		public TaskArgs (StoryTask task) : base () // extend the constructor 
-		{ 
-			theTasks = new List <StoryTask> ();
-			theTasks.Add (task);
-		}
+                return 0;
+            }
 
-		//	public TaskArgs (StoryTask task, bool remove) : base () // extend the constructor
-		//	{
-		//		removeTask = remove;
-		//		theTasks = new List <StoryTask> ();
-		//		theTasks.Add (task);
-		//	}
+        }
 
-	}
+        // Invoke event;
+
+        protected virtual void DistributeTasks(TaskArgs e)
+        {
+
+            if (newTasksEvent != null)
+                newTasksEvent(this, e); // trigger the event, if there are any listeners
+
+        }
+
+    }
+
+    public class TaskArgs : EventArgs
+    {
+
+        public List<StoryTask> theTasks;
+        //	public bool removeTask;
+
+
+        public TaskArgs(List<StoryTask> tasks) : base() // extend the constructor 
+        {
+            theTasks = tasks;
+        }
+
+        public TaskArgs(StoryTask task) : base() // extend the constructor 
+        {
+            theTasks = new List<StoryTask>();
+            theTasks.Add(task);
+        }
+
+        //	public TaskArgs (StoryTask task, bool remove) : base () // extend the constructor
+        //	{
+        //		removeTask = remove;
+        //		theTasks = new List <StoryTask> ();
+        //		theTasks.Add (task);
+        //	}
+
+    }
 
 }

@@ -326,7 +326,7 @@ namespace StoryEngine.UI
                    if (uie.targetButton != null && button.GetDragTarget(dir) !=null && uie.targetButton.GetDragTarget(uie.direction) == button.GetDragTarget(dir))
              //   if (uie.targetButton != null )
                     {
-                    Debug.Log(uie.targetButton.name+ " " + uie.targetButton.GetDragTarget(uie.direction).name+ " " + button.GetDragTarget(dir).name);
+               //     Debug.Log(uie.targetButton.name+ " " + uie.targetButton.GetDragTarget(uie.direction).name+ " " + button.GetDragTarget(dir).name);
 
 
                     // the event explicitly targets the (explicit) target of the passed in button

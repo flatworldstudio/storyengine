@@ -40,6 +40,12 @@ namespace StoryEngine
             Instance = this;
         }
 
+        public void NewStoryLine(string _name)
+        {
+            new StoryPointer(GENERAL.getStoryPointByID(_name)); // constructor adds pointer to GENERAL.allpointers
+
+        }
+
         public void evaluatePointers()
         {
 
@@ -507,12 +513,12 @@ namespace StoryEngine
 
         }
 
-        public void beginStoryLine(string beginName)
-        {
+        //public void beginStoryLine(string beginName)
+        //{
 
-            new StoryPointer(GENERAL.getStoryPointByID(beginName)); // constructor adds pointer to GENERAL.allpointers
+        //    new StoryPointer(GENERAL.getStoryPointByID(beginName)); // constructor adds pointer to GENERAL.allpointers
 
-        }
+        //}
 
         void moveToNextPoint(StoryPointer thePointer)
         {
