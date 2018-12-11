@@ -39,9 +39,18 @@ namespace StoryEngine
             status = DIRECTORSTATUS.NOTREADY;
             Instance = this;
         }
+        public void NewStoryLine(string _name, SCOPE _scope)
+        {
+            // Creates a new storypointer, sets its scope and adds it to the pointerstack.
+
+            StoryPointer pointer = new StoryPointer(GENERAL.getStoryPointByID(_name)); // constructor adds pointer to GENERAL.allpointers
+            pointer.scope = _scope;
+        }
 
         public void NewStoryLine(string _name)
         {
+            // Creates a new LOCAL storypointer and adds it to the pointerstack.
+
             new StoryPointer(GENERAL.getStoryPointByID(_name)); // constructor adds pointer to GENERAL.allpointers
 
         }
