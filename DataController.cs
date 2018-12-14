@@ -197,7 +197,7 @@ namespace StoryEngine
         {
 
             Log("Stopping broadcast server.");
-
+            //if (networkBroadcast.isServer)
             networkBroadcast.Stop();
 
         }
@@ -236,6 +236,7 @@ namespace StoryEngine
         public void stopNetworkServer()
         {
 
+            //networkManager.isNetworkActive
             networkManager.StopNetworkServer();
 
         }
