@@ -193,6 +193,8 @@ namespace StoryEngine
 
                     // Overflowing. Apply the oldest ones, keep the latest.
 
+                    Warning("network buffer overflow");
+
                     BufferStatusIn = 2;
                     for (int u = UpdateCount - 2; u >= 0; u--)
                     {
@@ -211,7 +213,7 @@ namespace StoryEngine
 
                 case DIRECTORSTATUS.ACTIVE:
 
-                    Verbose("Director active .");
+                 //   Verbose("Director active .");
 
                     foreach (StoryTask task in GENERAL.ALLTASKS)
                     {
