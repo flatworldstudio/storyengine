@@ -157,7 +157,8 @@ namespace StoryEngine
         void Update()
         {
 
-            // Handle story updates, aiming for 1 per frame.
+            // Handle story updates, aiming for 1 per frame, assuming we're tyring to run in sync.
+            // Lowest numbers are oldest.
 
             int UpdateCount = StoryUpdateStack.Count;
 
@@ -191,18 +192,27 @@ namespace StoryEngine
 
                 default:
 
-                    // Overflowing. Apply the oldest ones, keep the latest.
+                    // More than 2. Apply all the older ones in order of arrival, keep latest one.
 
-                    Warning("network buffer overflow");
+                    Warning("Update buffer >2");
 
                     BufferStatusIn = 2;
-                    for (int u = UpdateCount - 2; u >= 0; u--)
-                    {
-
-                        ApplyStoryUpdate(StoryUpdateStack[u]);
-                        StoryUpdateStack.RemoveAt(u);
+                                      
+                    while (StoryUpdateStack.Count>1){
+                        
+                        ApplyStoryUpdate(StoryUpdateStack[0]);
+                        StoryUpdateStack.RemoveAt(0);
 
                     }
+                    //    //for (int u = UpdateCount - 2; u >= 0; u--)
+
+                    //for (int u = 0; u < UpdateCount-1; u++)
+                    //{
+
+                    //    ApplyStoryUpdate(StoryUpdateStack[u]);
+                    //    StoryUpdateStack.RemoveAt(u);
+
+                    //}
 
                     break;
 
@@ -689,7 +699,6 @@ namespace StoryEngine
                 }
 
                 // If anything to send, send. 
-                // If not, and buffer is overflowing, send updates randomly once a second.
 
                 if (storyUpdate.AnythingToSend())
 
