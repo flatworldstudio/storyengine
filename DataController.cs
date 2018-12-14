@@ -107,8 +107,8 @@ namespace StoryEngine
 
 		if (paused) {
 
-			Log.Message ("pauzing ...");
-			Log.Message ("Disconnecting client ...");
+			Log ("pauzing ...");
+			Log ("Disconnecting client ...");
 
 
 			if (networkManager.client != null) {
@@ -135,7 +135,7 @@ namespace StoryEngine
 
 		} else {
 
-			Log.Message ("resuming ...");
+			Log ("resuming ...");
 
 		}
 	}
