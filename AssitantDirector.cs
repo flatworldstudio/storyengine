@@ -587,7 +587,7 @@ namespace StoryEngine
             }
 
             // forcing always send.
-            if (QueueSize < 3 && true)
+            if (QueueSize < 3 || true)
 
             {
 
