@@ -290,6 +290,14 @@ namespace StoryEngine
 
                 //			if (task.pointer.getStatus () == POINTERSTATUS.KILLED && task.description != "end") {
 
+                if (task.description == "end")
+                {
+                    Log("Encountered end task, removing pointer " + task.pointer.currentPoint.storyLineName);
+
+                    GENERAL.ALLPOINTERS.Remove(task.pointer);
+                  
+                }
+
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
 

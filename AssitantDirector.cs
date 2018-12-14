@@ -633,7 +633,7 @@ namespace StoryEngine
 
                         GENERAL.ALLTASKS.RemoveAt(i);
 
-                        Verbose("Task " + task.description + " completed, removed from alltasks. ");
+                        Verbose("Task " + task.description + " on storyline " + task.pointer.currentPoint.storyLineName +" completed, removed from alltasks. ");
 
                         //if (task.description=="moodon"){
                         //    Debug.Log("moodon task removed at "+Time.frameCount);

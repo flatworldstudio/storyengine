@@ -351,22 +351,24 @@ namespace StoryEngine
                         break;
 
 
-                    case TASKTYPE.END:
+                    //case TASKTYPE.END:
 
-                        // Ends the storyline, kills the pointer.
+                    //    // End of a storyline.
 
-                        checkForCallBack(pointer);
+                    //    checkForCallBack(pointer);
 
-                        if (pointer.currentTask != null && pointer.currentTask.getStatus() != TASKSTATUS.COMPLETE)
-                        {
-                            Warning("Encountered end of storyline, but current task didn't complete?");
+                    //    if (pointer.currentTask != null && pointer.currentTask.getStatus() != TASKSTATUS.COMPLETE)
+                    //    {
+                    //        Warning("Encountered end of storyline, but current task didn't complete?");
 
-                        }
+                    //    }
 
-                        pointer.Kill();
-                        pointerStack.RemoveAt(0);
+                    //    pointer.SetStatus(POINTERSTATUS.NEWTASK);
 
-                        break;
+                    //    //    pointer.Kill();
+                    //    pointerStack.RemoveAt(0);
+
+                    //    break;
 
                     case TASKTYPE.BASIC:
                         //			case TASKTYPE.END:
@@ -464,6 +466,7 @@ namespace StoryEngine
 
             if (GENERAL.GetPointerForStoryline(pointer.currentTask.getCallBack()) == null)
             {
+
 
                 Log("New callback storyline: " + callBackValue);
 
