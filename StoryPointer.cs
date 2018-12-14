@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
+using Amazon.S3.Model;
 
 #endif
 
@@ -174,8 +175,10 @@ namespace StoryEngine
         }
 
 
-
-
+        public void SetLocal (){
+            scope = SCOPE.LOCAL;
+            status=POINTERSTATUS.EVALUATE;
+        }
 
         public void Kill()
         {
