@@ -28,7 +28,7 @@ namespace StoryEngine
 
         List<StoryPointer> pointerStack;
         public DIRECTORSTATUS status;
-       static public Director Instance;
+        static public Director Instance;
 
         string me = "Director";
 
@@ -471,22 +471,24 @@ namespace StoryEngine
                 if (GENERAL.getPointerOnStoryline(callBackValue) == null)
                 {
 
-                    Log.Message("New callback storyline: " + callBackValue, me);
-
                     StoryPointer newStoryPointer = new StoryPointer(targetPoint);
 
-                    newStoryPointer.scope = pointer.scope; // INHERIT SCOPE...
+                    newStoryPointer.scope = pointer.scope;
+                    newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task.
                     newStoryPointer.modified = true;
 
                     pointerStack.Add(newStoryPointer);
-
-                    newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task.
-
+                    
+                    if (newStoryPointer.persistantData != null)
+                        Log.Message("New callback storyline: " + callBackValue + ", persistant data: " + newStoryPointer.persistantData, me);
+                    else
+                        Log.Message("New callback storyline: " + callBackValue + ", no persistant data.", me);
+                    
                 }
                 else
                 {
 
-                    Log.Message("Callback storyline already started: " + callBackValue, me);
+                    Log.Warning("Callback storyline already started: " + callBackValue, me);
                 }
 
                 return true;
@@ -499,12 +501,6 @@ namespace StoryEngine
                 return false;
 
             }
-
-
-            //		} else {
-            //
-            //			return false;
-            //		}
 
         }
 
