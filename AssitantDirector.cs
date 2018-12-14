@@ -587,6 +587,11 @@ namespace StoryEngine
             }
 
             // forcing always send.
+            // this means that a storyupdate is sent for every frame and they all arrive in order.
+            // they get executed in order as well, but they may be batched together.
+            // so multiple tasks might get executed in a single frame. they will be executed in the correct order.
+
+
             if (QueueSize < 3 || true)
 
             {
@@ -634,10 +639,7 @@ namespace StoryEngine
                         GENERAL.ALLTASKS.RemoveAt(i);
 
                         Verbose("Task " + task.description + " on storyline " + task.pointer.currentPoint.storyLineName +" completed, removed from alltasks. ");
-
-                        //if (task.description=="moodon"){
-                        //    Debug.Log("moodon task removed at "+Time.frameCount);
-                        //}
+                                         
                     }
 
                     if (task.modified)
