@@ -267,7 +267,7 @@ namespace StoryEngine
                                             newTasks.Add(task);
                                             task.modified = true;
 
-                                            Verbose("Creating and pushing global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
+                                            Verbose("Created global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
 
                                         }
 
@@ -290,7 +290,7 @@ namespace StoryEngine
 
                                         newTasks.Add(task);
 
-                                        Verbose("Creating local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
+                                        Verbose("Created local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
 
                                     }
 
@@ -622,7 +622,7 @@ namespace StoryEngine
 
                         GENERAL.ALLTASKS.RemoveAt(i);
 
-                        Verbose("Task " + task.description + " completed, removing from alltasks. ");
+                        Verbose("Task " + task.description + " completed, removed from alltasks. ");
 
                         //if (task.description=="moodon"){
                         //    Debug.Log("moodon task removed at "+Time.frameCount);
@@ -654,7 +654,7 @@ namespace StoryEngine
                                     if (task.scope == SCOPE.GLOBAL)
                                     {
 
-                                        Verbose("Global task " + task.description + " changed, sending update to server.");
+                                        Verbose("Global task " + task.description + " changed, adding to update for server.");
 
                                         storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
 
@@ -667,7 +667,7 @@ namespace StoryEngine
                                     if (task.scope == SCOPE.GLOBAL)
                                     {
 
-                                        Verbose("Global task " + task.description + " changed, sending update to clients.");
+                                        Verbose("Global task " + task.description + " changed, adding to update for clients.");
 
                                         storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
 
