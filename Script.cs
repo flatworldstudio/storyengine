@@ -21,22 +21,22 @@ namespace StoryEngine
 
         void Log(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+            StoryEngine.Log.Message(message, ID);
         }
         void Warning(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+            StoryEngine.Log.Warning(message, ID);
         }
         void Error(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+            StoryEngine.Log.Error(message, ID);
         }
         void Verbose(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
-		public Script (string fileName)
+        public Script (string fileName)
 		{
 
 			GENERAL.storyPoints = new Dictionary <string,StoryPoint> ();

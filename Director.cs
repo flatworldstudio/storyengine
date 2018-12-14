@@ -32,23 +32,21 @@ namespace StoryEngine
 
         static public Director Instance;
 
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
-
         void Log(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+            StoryEngine.Log.Message(message, ID);
         }
         void Warning(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+            StoryEngine.Log.Warning(message, ID);
         }
         void Error(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+            StoryEngine.Log.Error(message, ID);
         }
         void Verbose(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
 
@@ -59,7 +57,25 @@ namespace StoryEngine
             status = DIRECTORSTATUS.NOTREADY;
 
         }
+  //      new StoryPointer(beginName, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
 
+
+        public void NewStoryLine(string _name, SCOPE _scope)
+        {
+            // Creates a new storypointer, sets its scope and adds it to the pointerstack.
+
+            StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+            pointer.scope = _scope;
+        }
+      
+
+        public void NewStoryLine(string _name)
+        {
+            // Creates a new LOCAL storypointer and adds it to the pointerstack.
+
+            new StoryPointer(_name, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
+
+        }
 
         public void evaluatePointers()
         {

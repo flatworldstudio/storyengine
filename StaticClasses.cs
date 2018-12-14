@@ -59,7 +59,9 @@ namespace StoryEngine
         public static List<StoryTask> ALLTASKS;
         //	public static STORYMODE STORYMODE;
 
-        public static StoryTask GLOBALS;
+      //  public static StoryTask GLOBALS;
+
+        public static string connectionKey;
 
 
         public static bool isPauzed = false;
@@ -73,21 +75,22 @@ namespace StoryEngine
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
-        static void Log(string message)
+
+       static  void Log(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+            StoryEngine.Log.Message(message, ID);
         }
-        static   void Warning(string message)
+        static void Warning(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+            StoryEngine.Log.Warning(message, ID);
         }
-        static    void Error(string message)
+        static void Error(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+            StoryEngine.Log.Error(message, ID);
         }
-        static     void Verbose(string message)
+        static void Verbose(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
         public static void AddPointer(StoryPointer pointer)

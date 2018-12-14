@@ -24,21 +24,22 @@ namespace StoryEngine
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
+
         void Log(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.NORMAL);
+            StoryEngine.Log.Message(message, ID);
         }
         void Warning(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
+            StoryEngine.Log.Warning(message, ID);
         }
         void Error(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.ERRORS);
+            StoryEngine.Log.Error(message, ID);
         }
         void Verbose(string message)
         {
-            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
         void Start()
