@@ -509,9 +509,9 @@ namespace StoryEngine
 
                 updateTask.ApplyUpdateMessage(taskUpdate);
 
-                updateTask.scope = SCOPE.GLOBAL;
+                updateTask.scope = SCOPE.GLOBAL;//?? 
 
-                Verbose("Applied update to existing task.");
+                Verbose("Applied update to existing task "+updateTask.description);
 
             }
 
@@ -586,7 +586,7 @@ namespace StoryEngine
 
             }
 
-            if (QueueSize < 3)
+            if (QueueSize < 3 && false)
 
             {
 
