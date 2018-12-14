@@ -722,7 +722,7 @@ namespace StoryEngine
             else
             {
 
-                //  Debug.Log("Dropping update.");
+               Warning("Dropping update.");
 
             }
 
