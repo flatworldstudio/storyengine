@@ -6,203 +6,27 @@ using UnityEngine.EventSystems;
 using System;
 
 
-namespace StoryEngine
+namespace StoryEngine.UI
 {
 
-    // ------------------------------------------------------------------------------------------------------------------------------------------
-
-    // data objects
-
-    public enum UITOUCH
-    {
-        BEGAN,
-        TOUCHING,
-        ENDED,
-        NONE
-    }
-
-    public enum UIACTION
-    {
-        // describes the action outcome. note that this is independent of UITOUCH which describes actual touch state.
-
-        SINGLEDRAG,
-        //	INERTIA,
-        DOUBLEDRAG,
-        TAP,
-        VOID,
-        DELETE
-    }
-
-
-    //public enum UIRESULT
-    //{
-    //	NONE,
-    //	ADDNEW,
-    //	REMOVEME
-    //
-    //}
-
-    public class UiEvent
-    {
-        // holds user interaction description. note that x and y are NOT continuously updated for touch.
-
-        public float dx, dy, dd, x, y, d, px, py;
-        public bool firstFrame;
-
-        //			public bool touchState;
-
-        public UIACTION action;
-        public UITOUCH touch;
-        public GameObject target2D, target3D;
-        public UiButton targetButton;
-
-        static string ID = "Uievent";
-
-        public bool isInert, isSpringing;
-
-        public int springIndex;
-
-
-        public float tapCount;
-        //			public bool inertia;
-        public string callback;
-
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
-
-        static void Log(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.NORMAL);
-        }
-        static void Warning(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
-        }
-        static void Error(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.ERRORS);
-        }
-        static void Verbose(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
-        }
-
-        public UiEvent()
-        {
-            target2D = null;
-            target3D = null;
-            targetButton = null;
-            px = 0;
-            py = 0;
-            firstFrame = true;
-            action = UIACTION.VOID;
-            touch = UITOUCH.NONE;
-            isInert = false;
-            isSpringing = false;
-            springIndex = -1;
-            tapCount = 0;
-
-        }
-
-        public UiEvent clone()
-        {
-
-            UiEvent result = new UiEvent();
-            result.dx = this.dx;
-            result.dy = this.dy;
-            result.dd = this.dd;
-            result.x = this.x;
-            result.y = this.y;
-            result.d = this.d;
-            result.px = this.px;
-            result.py = this.py;
-
-            result.firstFrame = this.firstFrame;
-            result.action = this.action;
-            result.touch = this.touch;
-            result.target2D = this.target2D;
-            result.target3D = this.target3D;
-            result.targetButton = this.targetButton;
-            result.isInert = this.isInert;
-            result.isSpringing = this.isSpringing;
-            result.tapCount = this.tapCount;
-            return result;
-        }
-
-        public string toString()
-        {
-            string result = "UI event: ";
-
-            switch (action)
-            {
-                case UIACTION.SINGLEDRAG:
-                    result += "single ";
-                    break;
-                case UIACTION.DOUBLEDRAG:
-                    result += "double ";
-                    break;
-                case UIACTION.TAP:
-                    result += "tap ";
-                    break;
-
-                case UIACTION.VOID:
-                default:
-                    result += "void ";
-                    break;
-            }
-
-            result += "dx: " + dx + " dy: " + dy + " dd: " + dd;
-            if (target2D != null)
-            {
-                result += " 2d: " + target2D.transform.name;
-            }
-
-            //				r += " x: " + x + " y: " + y + " dd: " + dd;
-            //
-            //				if (target2D != null) {
-            //					r += " 2d: " + target2D.transform.name;
-            //				}
-            //				if (target3D != null) {
-            //					r += " 3d: " + target3D.transform.name;
-            //				}
-            return result;
-        }
-    }
 
 
 
-    public static class UxMethods
+
+    public static class Methods
     {
 
         //	static string me="Uxmethods";
 
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
-        static string ID = "Uxmethods";
 
-        static void Log(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.NORMAL);
-        }
-        static void Warning(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
-        }
-        static void Error(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.ERRORS);
-        }
-        static void Verbose(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
-        }
-
-        public static void someAction(object sender, UxArgs uxArgs)
+        public static void someAction(object sender, UIArgs uxArgs)
         {
 
-            Log("SOME ACTION TRIGGERRED");
+            Log.Message("SOME ACTION TRIGGERRED");
         }
 
 
-        public static void clearSelectedObjects(object sender, UxArgs uxArgs)
+        public static void clearSelectedObjects(object sender, UIArgs uxArgs)
         {
             foreach (GameObject go in uxArgs.activeInterface.selectedObjects)
             {
@@ -213,10 +37,10 @@ namespace StoryEngine
             uxArgs.activeInterface.selectedObjects.Clear();
         }
 
-        public static void select3dObject(object sender, UxArgs uxArgs)
+        public static void select3dObject(object sender, UIArgs uxArgs)
         {
 
-            Log("3d target: " + uxArgs.uiEvent.target3D.transform.name);
+            Log.Message("3d target: " + uxArgs.uiEvent.target3D.transform.name);
 
             if (uxArgs.activeInterface.selectedObjects.IndexOf(uxArgs.uiEvent.target3D) != -1)
             {
@@ -236,26 +60,54 @@ namespace StoryEngine
             }
 
         }
-        public static void tapNone(object sender, UxArgs uxArgs)
+
+        public static void tapNone(object sender, UIArgs uxArgs)
         {
 
             uxArgs.uiEvent.callback = uxArgs.activeInterface.tapNoneCallback;
         }
 
 
-        public static void highlightButton2d(object sender, UxArgs uxArgs)
+        public static void tapButton2D(object sender, UIArgs uxArgs)
         {
-            string name = uxArgs.uiEvent.target2D.transform.name;
 
-            setTargetBrightness(uxArgs.activeInterface.getButtonNames(), 0.75f, uxArgs.activeInterface);
-            setTargetBrightness(name, 1f, uxArgs.activeInterface);
+
+          //  string name = uxArgs.uiEvent.target2D.transform.name;
+
+
+
+            //    setTargetBrightness(uxArgs.activeInterface.getButtonNames(), 0.75f, uxArgs.activeInterface);
+
+            //		setTargetBrightness
+
+
+       //     setBrightness(name, 1f, uxArgs.activeInterface);
+      //      setTargetBrightness(name, 0.75f,0.25f, uxArgs.activeInterface);
+
+            //Debug.Log("highlight "+name);
+
+            //		UiButton theButton;
+            //		uxArgs.activeInterface.uiButtons.TryGetValue (name, out theButton);
+            //
 
             if (uxArgs.uiEvent.targetButton != null)
+            {
                 uxArgs.uiEvent.callback = uxArgs.uiEvent.targetButton.callback;
 
+                uxArgs.uiEvent.targetButton.Tap();
+
+            }
+              
+
+
+
+            //		uxArgs.uiEvent.callback = theButton.callback; // to be retrieved from button object..
+            //
+            //		Debug.Log ("tap callback: " + theButton.callback);
         }
 
-        public static void stopControls(object sender, UxArgs uxArgs)
+
+        public static void stopControls(object sender, UIArgs uxArgs)
         {
             //		uxArgs.uiEvent.callback = "stopControls";
 
@@ -265,29 +117,51 @@ namespace StoryEngine
 
         }
 
-        static void setTargetBrightness(string name, float value, UxInterface activeInterface)
+        static void setTargetBrightness(string name, float value, Interface activeInterface)
         {
-            UiButton theButton;
+            Button theButton;
             activeInterface.uiButtons.TryGetValue(name, out theButton);
 
             if (theButton != null)
                 theButton.targetBrightness = value;
         }
+        static void setTargetBrightness(string name, float value,float step, Interface activeInterface)
+        {
+            Button theButton;
+            activeInterface.uiButtons.TryGetValue(name, out theButton);
 
-        static void setTargetBrightness(string[] names, float value, UxInterface activeInterface)
+            if (theButton != null)
+            {
+                theButton.stepBrightness = step;
+                theButton.targetBrightness = value;
+            }
+        }
+        static void setBrightness(string name, float value,  Interface activeInterface)
+        {
+            Button theButton;
+            activeInterface.uiButtons.TryGetValue(name, out theButton);
+
+            if (theButton != null)
+            {
+                theButton.brightness = value;
+            }
+        }
+
+
+        static void setTargetBrightness(string[] names, float value, Interface activeInterface)
         {
             foreach (string name in names)
                 setTargetBrightness(name, value, activeInterface);
         }
 
-        static bool applyGUISprings(GameObject target, UiConstraint constraint)
+        static bool applyGUISprings(GameObject target, Constraint constraint)
         {
 
             return (applyGUISprings(target, constraint, -1));
 
         }
 
-        static bool applyGUISprings(GameObject target, UiConstraint constraint, int springIndex)
+        static bool applyGUISprings(GameObject target, Constraint constraint, int springIndex)
         {
             // apply springs to gui object. returns true if it did anything.
             bool result = false;
@@ -391,7 +265,7 @@ namespace StoryEngine
         //		panGUI (target, delta, emptyConstraint, emptyUiEvent);
         //	}
 
-        static void panGUI(GameObject target, Vector2 delta, UiConstraint constraint, UiEvent ui)
+        static void panGUI(GameObject target, Vector2 delta, Constraint constraint, Event ui)
         {
             Vector3 anchor = target.GetComponent<RectTransform>().anchoredPosition;
             anchor.y += delta.y;
@@ -459,7 +333,7 @@ namespace StoryEngine
                     ui.springIndex = -1;
                 }
 
-
+                //  Debug.Log("am springing");
                 // only apply springs when user not touching. reset 2d target only when springs have put object in place. 
                 //				if (applyGUISprings (target, constraint)) {
                 ////					ui.target2D = null;
@@ -472,7 +346,7 @@ namespace StoryEngine
 
         //	static public  void orbitCamera (UxInterface state, Vector2 delta)
 
-        static public void rotateCamera(object sender, UxArgs uxArgs)
+        static public void rotateCamera(object sender, UIArgs uxArgs)
         {
 
             if (uxArgs.activeInterface.camera.control == CAMERACONTROL.ORBIT)
@@ -503,7 +377,7 @@ namespace StoryEngine
         static readonly Quaternion landscapeLeft = Quaternion.Euler(0, 0, -90);
         static readonly Quaternion upsideDown = Quaternion.Euler(0, 0, 180);
 
-        static public void gyroCamera(object sender, UxArgs uxArgs)
+        static public void gyroCamera(object sender, UIArgs uxArgs)
         {
 
             GameObject co, ci;
@@ -551,7 +425,7 @@ namespace StoryEngine
 
 
 
-        static public void turnCamera(object sender, UxArgs uxArgs)
+        static public void turnCamera(object sender, UIArgs uxArgs)
         {
 
             // Create direct references for ease of use.
@@ -619,7 +493,7 @@ namespace StoryEngine
 
 
 
-        static public void orbitCamera(object sender, UxArgs uxArgs)
+        static public void orbitCamera(object sender, UIArgs uxArgs)
         {
 
             // Create direct references for ease of use.
@@ -653,7 +527,7 @@ namespace StoryEngine
 
                 euler.z = 0;
 
-                UiConstraint orbitConstraint = uxArgs.activeInterface.camera.constraint;
+                Constraint orbitConstraint = uxArgs.activeInterface.camera.constraint;
 
                 if (orbitConstraint.pitchClamp)
                 {
@@ -668,45 +542,45 @@ namespace StoryEngine
 
                     /*
 
-                    if (euler.x <= 180) {
+				if (euler.x <= 180) {
 
-                        // rotated up
+					// rotated up
 
-                        if orbitConstraint.pitchClampUp <= 180 (euler.x > orbitConstraint.pitchClampUp) {
-                            euler.x = orbitConstraint.pitchClampUp;
-                        }
+					if orbitConstraint.pitchClampUp <= 180 (euler.x > orbitConstraint.pitchClampUp) {
+						euler.x = orbitConstraint.pitchClampUp;
+					}
 
-                        if (euler.x < orbitConstraint.pitchClampDown) {
-                            euler.x = orbitConstraint.pitchClampUp;
-                        }
-
-
-
-                    } else {
-
-                        // euler.x > 180
+					if (euler.x < orbitConstraint.pitchClampDown) {
+						euler.x = orbitConstraint.pitchClampUp;
+					}
 
 
 
+				} else {
+
+					// euler.x > 180
 
 
-                    }
 
 
-                    if (euler.x > orbitConstraint.pitchClampUp && euler.x <= 180) {
-                        euler.x = orbitConstraint.pitchClampUp;
-                    }
 
-                    if (euler.x < orbitConstraint.pitchClampDown && euler.x <= 180) {
-                        euler.x = orbitConstraint.pitchClampUp;
-                    }
+				}
 
 
-                    if (euler.x <  orbitConstraint.pitchClampDown && euler.x > 180) {
-                        euler.x =  orbitConstraint.pitchClampDown;
-                    }
+				if (euler.x > orbitConstraint.pitchClampUp && euler.x <= 180) {
+					euler.x = orbitConstraint.pitchClampUp;
+				}
 
-    */
+				if (euler.x < orbitConstraint.pitchClampDown && euler.x <= 180) {
+					euler.x = orbitConstraint.pitchClampUp;
+				}
+
+
+				if (euler.x <  orbitConstraint.pitchClampDown && euler.x > 180) {
+					euler.x =  orbitConstraint.pitchClampDown;
+				}
+
+*/
                 }
 
 
@@ -746,28 +620,48 @@ namespace StoryEngine
         }
 
 
-        public static void drag2d(object sender, UxArgs uxArgs)
+        public static void drag2d(object sender, UIArgs uxArgs)
         {
 
-            // REFACTORING
 
 
+            /*
             string name = uxArgs.uiEvent.target2D.transform.name;
 
             UiButton draggedButton;
 
-            if (!uxArgs.activeInterface.uiButtons.TryGetValue(name, out draggedButton))
-                return;
+            uxArgs.activeInterface.uiButtons.TryGetValue(name, out draggedButton);
 
             // catch exception: when constructing a uibutton the constructor searches for a gameobject by name, which may fail.
+
             if (draggedButton != null && (draggedButton.gameObject == null || draggedButton.dragTarget == null))
             {
-                Error("uiButton object reference not found. Is the gameobject active?");
+                Log.Error("uiButton object reference not found. Is the gameobject active?");
                 //			draggedButton.dragTarget = emptyObject;
             }
 
+            if (draggedButton == null)
+            {
 
-            panGUI(draggedButton.dragTarget, uxArgs.delta, draggedButton.constraint, uxArgs.uiEvent);
+                Debug.Log("dragged button not found " + name);
+
+            }
+
+    */
+
+            //     panGUI (draggedButton.dragTarget, uxArgs.delta, draggedButton.constraint, uxArgs.uiEvent);
+
+            // Passing in target and constraint from event (used to be from button)
+
+
+            //   UiEvent event = UxArgs.uievent;
+
+            if (uxArgs.uiEvent.targetButton == null)
+                return;
+
+
+            panGUI(uxArgs.uiEvent.targetButton.GetDragTarget(uxArgs.uiEvent.direction), uxArgs.delta, uxArgs.uiEvent.targetButton.GetConstraint(uxArgs.uiEvent.direction), uxArgs.uiEvent);
+
             //
             //
             //		switch (name) {
@@ -814,7 +708,7 @@ namespace StoryEngine
         //	}
 
 
-        public static void panCamera(object sender, UxArgs uxArgs)
+        public static void panCamera(object sender, UIArgs uxArgs)
 
 
         //	public static void panCamera (UxInterface state, Vector2 delta, UiConstraint constraint, bool lockY)
@@ -825,7 +719,7 @@ namespace StoryEngine
             GameObject co, ci;
             co = uxArgs.activeInterface.camera.cameraObject;
             ci = uxArgs.activeInterface.camera.cameraInterest;
-            UiConstraint constraint = uxArgs.activeInterface.camera.constraint;
+            Constraint constraint = uxArgs.activeInterface.camera.constraint;
             Vector3 delta = -1f * uxArgs.delta;
 
             // Consider the camera but apply the effect to the user object instead! ?!?!?!
@@ -930,13 +824,13 @@ namespace StoryEngine
             ci.transform.position += (cameraPositionOut - cameraPositionIn);
         }
 
-        public static void none(object sender, UxArgs uxArgs)
+        public static void none(object sender, UIArgs uxArgs)
         {
 
         }
 
 
-        static void panCameraAbs(object sender, UxArgs uxArgs)
+        static void panCameraAbs(object sender, UIArgs uxArgs)
 
         //	public static void panCamera (UxInterface state, Vector3 delta, UiConstraint constraint)
         {
@@ -944,7 +838,7 @@ namespace StoryEngine
             GameObject co, ci;
             co = uxArgs.activeInterface.camera.cameraObject;
             ci = uxArgs.activeInterface.camera.cameraInterest;
-            UiConstraint constraint = uxArgs.activeInterface.camera.constraint;
+            Constraint constraint = uxArgs.activeInterface.camera.constraint;
             Vector3 delta = uxArgs.delta;
 
 
@@ -978,12 +872,12 @@ namespace StoryEngine
 
 
         //	public static void zoomCamera (UxInterface state, float delta)
-        public static void zoomCamera(object sender, UxArgs uxArgs)
+        public static void zoomCamera(object sender, UIArgs uxArgs)
         {
             GameObject co, ci;
             co = uxArgs.activeInterface.camera.cameraObject;
             ci = uxArgs.activeInterface.camera.cameraInterest;
-            UiConstraint constraint = uxArgs.activeInterface.camera.constraint;
+            Constraint constraint = uxArgs.activeInterface.camera.constraint;
 
             float delta = uxArgs.delta.z;
 
@@ -1011,22 +905,22 @@ namespace StoryEngine
 
     }
 
-    public class UxCamera
+    public class UICamera
     {
 
         public GameObject cameraObject, cameraReference, cameraInterest;
         public Camera camera;
 
-        public UiConstraint constraint;
+        public Constraint constraint;
         public CAMERACONTROL control;
 
 
-        public UxCamera()
+        public UICamera()
         {
 
         }
 
-        public UxCamera(GameObject theCameraObject)
+        public UICamera(GameObject theCameraObject)
         {
 
             // assumes that reference's parent is interest and that camera is component on reference or child
@@ -1060,18 +954,18 @@ namespace StoryEngine
     }
 
 
-    public class UxMapping
+    public class Mapping
     {
 
-        public event UxEventHandler ux_none, ux_tap_2d, ux_tap_3d, ux_tap_none, ux_single_2d, ux_single_3d, ux_single_none, ux_double_2d, ux_double_3d, ux_double_none;
+        public event UIEventHandler ux_none, ux_tap_2d, ux_tap_3d, ux_tap_none, ux_single_2d, ux_single_3d, ux_single_none, ux_double_2d, ux_double_3d, ux_double_none;
 
 
-        public UxMapping()
+        public Mapping()
         {
 
         }
 
-        public void none(object sender, UxArgs args)
+        public void none(object sender, UIArgs args)
         {
 
             ux_none(sender, args);
@@ -1079,63 +973,63 @@ namespace StoryEngine
         }
 
 
-        public void tap_2d(object sender, UxArgs args)
+        public void tap_2d(object sender, UIArgs args)
         {
 
             ux_tap_2d(sender, args);
 
         }
 
-        public void tap_3d(object sender, UxArgs args)
+        public void tap_3d(object sender, UIArgs args)
         {
 
             ux_tap_3d(sender, args);
 
         }
 
-        public void tap_none(object sender, UxArgs args)
+        public void tap_none(object sender, UIArgs args)
         {
 
             ux_tap_none(sender, args);
 
         }
 
-        public void single_2d(object sender, UxArgs args)
+        public void single_2d(object sender, UIArgs args)
         {
 
             ux_single_2d(sender, args);
 
         }
 
-        public void single_3d(object sender, UxArgs args)
+        public void single_3d(object sender, UIArgs args)
         {
 
             ux_single_3d(sender, args);
 
         }
 
-        public void single_none(object sender, UxArgs args)
+        public void single_none(object sender, UIArgs args)
         {
 
             ux_single_none(sender, args);
 
         }
 
-        public void double_2d(object sender, UxArgs args)
+        public void double_2d(object sender, UIArgs args)
         {
 
             ux_double_2d(sender, args);
 
         }
 
-        public void double_3d(object sender, UxArgs args)
+        public void double_3d(object sender, UIArgs args)
         {
 
             ux_double_3d(sender, args);
 
         }
 
-        public void double_none(object sender, UxArgs args)
+        public void double_none(object sender, UIArgs args)
         {
 
             ux_double_none(sender, args);
@@ -1148,7 +1042,7 @@ namespace StoryEngine
 
 
 
-    public class UxInterface
+    public class Interface
     {
         // holds info about the state of the UI ie what camera is active, how is it controlled.
 
@@ -1156,7 +1050,7 @@ namespace StoryEngine
 
         // a dictionary of buttons for this interface
 
-        public Dictionary<string, UiButton> uiButtons;
+        public Dictionary<string, Button> uiButtons;
 
 
         //	public event UxEventHandler ux_tap_2d,ux_tap_3d,ux_tap_none,ux_single_2d,ux_single_3d,ux_single_none;
@@ -1165,18 +1059,16 @@ namespace StoryEngine
 
         public string tapNoneCallback = "";
 
-        public bool HighlightButtons = true;
+        public Mapping defaultUxMap;
 
-        public UxMapping defaultUxMap;
-
-        public Dictionary<string, UxMapping> uxMappings;
+        public Dictionary<string, Mapping> uxMappings;
 
         public GameObject canvasObject;
 
 
         //	public GameObject cameraObject, canvasObject, cameraInterest;
 
-        public UxCamera camera;
+        public UICamera camera;
 
         //	public CAMERACONTROL cameraControl;
 
@@ -1184,44 +1076,7 @@ namespace StoryEngine
 
         //	public float lockValueY;
 
-        public void HideButton(string button)
-        {
-            UiButton target;
-            if (uiButtons.TryGetValue(button, out target))
-            {
-
-                if (target.gameObject != null)
-                    target.gameObject.transform.localScale = Vector3.zero;
-            }
-
-        }
-
-        public void ShowButton(string button)
-        {
-            UiButton target;
-            if (uiButtons.TryGetValue(button, out target))
-            {
-
-                if (target.gameObject != null)
-                    target.gameObject.transform.localScale = Vector3.one;
-            }
-
-
-        }
-
-
-        public UiButton GetButton(string name)
-        {
-
-            UiButton button;
-
-            if (uiButtons.TryGetValue(name, out button))
-                return button;
-
-            return UiButton.Void;
-        }
-
-        public void none(object sender, UxArgs args)
+        public void none(object sender, UIArgs args)
         {
 
             defaultUxMap.none(sender, args);
@@ -1229,63 +1084,63 @@ namespace StoryEngine
         }
 
 
-        public void tap_2d(object sender, UxArgs args)
+        public void tap_2d(object sender, UIArgs args)
         {
 
             defaultUxMap.tap_2d(sender, args);
 
         }
 
-        public void tap_3d(object sender, UxArgs args)
+        public void tap_3d(object sender, UIArgs args)
         {
 
             defaultUxMap.tap_3d(sender, args);
 
         }
 
-        public void tap_none(object sender, UxArgs args)
+        public void tap_none(object sender, UIArgs args)
         {
 
             defaultUxMap.tap_none(sender, args);
 
         }
 
-        public void single_2d(object sender, UxArgs args)
+        public void single_2d(object sender, UIArgs args)
         {
 
             defaultUxMap.single_2d(sender, args);
 
         }
 
-        public void single_3d(object sender, UxArgs args)
+        public void single_3d(object sender, UIArgs args)
         {
 
             defaultUxMap.single_3d(sender, args);
 
         }
 
-        public void single_none(object sender, UxArgs args)
+        public void single_none(object sender, UIArgs args)
         {
 
             defaultUxMap.single_none(sender, args);
 
         }
 
-        public void double_2d(object sender, UxArgs args)
+        public void double_2d(object sender, UIArgs args)
         {
 
             defaultUxMap.double_2d(sender, args);
 
         }
 
-        public void double_3d(object sender, UxArgs args)
+        public void double_3d(object sender, UIArgs args)
         {
 
             defaultUxMap.double_3d(sender, args);
 
         }
 
-        public void double_none(object sender, UxArgs args)
+        public void double_none(object sender, UIArgs args)
         {
 
             defaultUxMap.double_none(sender, args);
@@ -1296,7 +1151,7 @@ namespace StoryEngine
         public string[] getButtonNames()
         {
 
-            Dictionary<string, UiButton>.KeyCollection allButtons = uiButtons.Keys;
+            Dictionary<string, Button>.KeyCollection allButtons = uiButtons.Keys;
 
             string[] allButtonNames = new string[allButtons.Count];
 
@@ -1305,7 +1160,7 @@ namespace StoryEngine
             return allButtonNames;
         }
 
-        public UxInterface()
+        public Interface()
         {
 
             //		UxBegan2d += 
@@ -1313,7 +1168,7 @@ namespace StoryEngine
             editMat = Resources.Load("materials/white", typeof(Material)) as Material;
             defaultMat = Resources.Load("materials/black", typeof(Material)) as Material;
 
-            uiButtons = new Dictionary<string, UiButton>();
+            uiButtons = new Dictionary<string, Button>();
             selectedObjects = new List<GameObject>();
 
             //
@@ -1331,7 +1186,7 @@ namespace StoryEngine
 
         }
 
-        public void addButton(UiButton button)
+        public void addButton(Button button)
         {
 
             uiButtons.Remove(button.name);
@@ -1365,187 +1220,7 @@ namespace StoryEngine
     //
     //}
 
-    public class UiConstraint
-    {
-        public Vector3 hardClampMin, hardClampMax;
-        public bool hardClamp;
 
-        public Vector3 edgeSpringMin, edgeSpringMax;
-        public bool edgeSprings;
-
-        public Vector2[] springPositions;
-        public bool springs;
-
-        public Vector2 anchor;
-        public float radiusClampMin, radiusClampMax;
-        public bool radiusClamp;
-
-        public bool pitchClamp;
-        public float pitchClampMin, pitchClampMax;
-
-
-
-        public UiConstraint()
-        {
-            hardClamp = false;
-            edgeSprings = false;
-            springs = false;
-            radiusClamp = false;
-            pitchClamp = false;
-        }
-    }
-
-    public class UiButton
-    {
-        public string name;
-        public string callback;
-        public GameObject gameObject, dragTarget;
-        public UiConstraint constraint;
-        public Image image;
-        public Color color;
-        public float brightness, targetBrightness, stepBrightness;
-        public bool ChangeColor = true;
-        // Provide a void button. 
-
-        static UiButton _void;
-
-        public static UiButton Void
-        {
-
-            get
-            {
-                if (_void == null)
-                    _void = new UiButton();
-                return _void;
-
-            }
-            set
-            {
-
-
-            }
-
-
-        }
-
-        Vector2 lastPosition, deltaPosition;
-        float lastAngle, deltaAngle;
-
-        public UiButton()
-        {
-            lastPosition = Vector2.zero;
-        }
-
-        public UiButton(string theName)
-        {
-            setReferences(theName);
-            constraint = new UiConstraint();
-            dragTarget = gameObject;
-            lastPosition = Vector2.zero;
-        }
-
-        public UiButton(string theName, GameObject theDragTarget)
-        {
-            setReferences(theName);
-            dragTarget = theDragTarget;
-            constraint = new UiConstraint();
-            lastPosition = Vector2.zero;
-        }
-
-        public UiButton(string theName, GameObject theDragTarget, UiConstraint theConstraint)
-        {
-            setReferences(theName);
-            dragTarget = theDragTarget;
-            constraint = theConstraint;
-            lastPosition = Vector2.zero;
-        }
-
-        public float getDeltaAngle()
-        {
-            //				float result = 0;
-
-            Vector3 anchor = dragTarget.GetComponent<RectTransform>().anchoredPosition;
-
-            Vector2 relativePosition = new Vector2(anchor.x, anchor.y) - constraint.anchor;
-
-            float angle = Mathf.Atan2(relativePosition.y, relativePosition.x);
-
-            deltaAngle = lastAngle - angle;
-            lastAngle = angle;
-
-
-
-            return deltaAngle;
-        }
-
-        public Vector2 getDeltaPosition()
-        {
-
-
-
-            deltaPosition.x = gameObject.transform.position.x - lastPosition.x;
-            deltaPosition.y = gameObject.transform.position.y - lastPosition.y;
-
-            lastPosition.x = gameObject.transform.position.x;
-            lastPosition.y = gameObject.transform.position.y;
-
-            return deltaPosition;
-        }
-
-        void setReferences(string theName)
-        {
-            callback = "";
-            name = theName;
-            color = new Color(1, 1, 1, 1);
-            brightness = 0f;
-            targetBrightness = 0.75f;
-            stepBrightness = 1f / 0.25f;
-
-            gameObject = GameObject.Find(theName);
-
-            if (gameObject != null)
-            {
-                image = gameObject.GetComponent<Image>();
-
-                if (ChangeColor)
-                    image.color = brightness * color;
-            }
-            else
-            {
-                // catch exception
-                Debug.LogError("Uibutton gameobject reference not found. Is it disabled?");
-            }
-        }
-
-        //			public void setBrightness (float theBrightness)
-        //			{
-        //				brightness = theBrightness;
-        //				targetBrightness = theBrightness;
-        //				setColor ();
-        //			}
-
-        public void applyColour()
-        {
-            if (brightness < targetBrightness)
-            {
-                brightness += stepBrightness * Time.deltaTime;
-                if (brightness >= targetBrightness)
-                {
-                    brightness = targetBrightness;
-                }
-            }
-            if (brightness > targetBrightness)
-            {
-                brightness -= stepBrightness * Time.deltaTime;
-                if (brightness <= targetBrightness)
-                {
-                    brightness = targetBrightness;
-                }
-            }
-            if (ChangeColor)
-                image.color = brightness * color;
-        }
-    }
 
     // ------------------------------------------------------------------------------------------------------------------------------------------
     // turn physical mouse/touch interaction into a ui event
@@ -1553,18 +1228,18 @@ namespace StoryEngine
 
 
 
-    public delegate void UxEventHandler(object sender, UxArgs args);
+    public delegate void UIEventHandler(object sender, UIArgs args);
 
 
-    public class UxArgs : EventArgs
+    public class UIArgs : EventArgs
     {
 
-        public UiEvent uiEvent;
-        public UxInterface activeInterface;
+        public Event uiEvent;
+        public Interface activeInterface;
         public Vector3 delta;
         // also in uievent
 
-        public UxArgs() : base() // extend the constructor 
+        public UIArgs() : base() // extend the constructor 
         {
 
         }
@@ -1573,4 +1248,5 @@ namespace StoryEngine
 
 
     }
+
 }

@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-namespace StoryEngine
+namespace StoryEngine.UI
 {
 
-    public class UxController
+    public class Controller
     {
 
 
@@ -19,155 +19,53 @@ namespace StoryEngine
         GraphicRaycaster targetRaycaster;
         // TO DO !!!!!
 
-        string ID = "Uxcontroller";
+        string me = "Uxcontroller";
 
 
-        UiEvent activeUiEvent, emptyUiEvent;
-
-
-        UiConstraint emptyConstraint;
-
-
+        Event activeUiEvent ;
+        
         int cycle = 0;
 
-        List<UiEvent> uiEventStack;
+        List<Event> uiEventStack;
 
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
-
-        void Log(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.NORMAL);
-        }
-        void Warning(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.WARNINGS);
-        }
-        void Error(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.ERRORS);
-        }
-        void Verbose(string message)
-        {
-            Logger.Output(message, ID, LOGLEVEL.VERBOSE);
-        }
+        float currentScale = 1;
 
 
-        public UxController()
+        public Controller()
         {
-            initialise();
+            reset();
         }
 
         // 	high level
 
 
-        void initialise()
+        public void reset()
         {
 
-            activeUiEvent = new UiEvent();
-            uiEventStack = new List<UiEvent>();
+            activeUiEvent = new Event();
+            uiEventStack = new List<Event>();
             uiEventStack.Add(activeUiEvent);
 
-            emptyUiEvent = new UiEvent();
-
-            emptyConstraint = new UiConstraint();
-
-        }
-        //	public void setSpringTarget (string target,UiConstraint constraint, int index){
-
-        public void setSpringTarget(UiButton button, int index)
-        {
-
-            // Moves an interface segment (dragtarget, so a parent object) to a given spring. 
-            // it uses a button as a hook. checks if any event is targeting the same dragtarget to prevent interference.
-            // If there is we just take over. Could delete and replace it as well...
-
-            // Warns if there's more than 1 event: that shouldn't happen...
-
-
-
-            int e = 0;
-
-            foreach (UiEvent uie in uiEventStack)
-            {
-
-                if (uie.targetButton != null)
-                {
-
-                    if (uie.targetButton.dragTarget == button.dragTarget)
-                    {
-
-                        e++;
-                        uie.targetButton = button;
-                        uie.action = UIACTION.SINGLEDRAG;
-                        uie.target2D = button.gameObject;
-
-                        uie.isSpringing = true;
-                        uie.springIndex = index;
-
-                    }
-
-                }
-
-            }
-
-            if (e == 0)
-            {
-
-                Log("No ui event found, adding a temp one");
-
-                UiEvent springEvent = new UiEvent();
-
-                springEvent.targetButton = button;
-                springEvent.action = UIACTION.SINGLEDRAG;
-                springEvent.target2D = button.gameObject;
-                springEvent.isSpringing = true;
-                springEvent.springIndex = index;
-
-                uiEventStack.Add(springEvent);
-
-            }
-
-            if (e > 1)
-            {
-
-                Log("Found more than 1 user interaction event in a stack of " + uiEventStack.Count + " targeting the passed object. ");
-
-            }
-
         }
 
-        bool warnOnce = false;
-
-        public string update(UxInterface activeInterface)
+        public UserCallBack updateUx(Interface activeInterface)
         {
 
-            // legacy method returned only a string.
-            if (!warnOnce)
-            {
-                warnOnce = true;
-                Log("Update method updated, use updateUx instead.");
-            }
+            // Main UX method. Checks for user interaction and updates ux elements. Return the result of the user interaction.
+            // Set a float for the current scale applied by the canvas. We need this to convert screen pixels to ui pixels.
 
-            return updateUx(activeInterface).label;
+            currentScale = activeInterface.canvasObject.GetComponent<Canvas>().scaleFactor;
 
-
-        }
-
-
-        public UserCallBack updateUx(UxInterface activeInterface)
-
-        {
             // log current stack count to track changes.
-
-            int stackSize = uiEventStack.Count;
-
             // apply this frame's user interaction to the 'active' ui event.
 
+            int stackSize = uiEventStack.Count;
+            
             applyUserInteraction(activeUiEvent, activeInterface);
 
             // if a user action started, perform additional handling before processing. (If it ended we process first, then perform additional handling, see below).
 
-            if (activeUiEvent.touch == UITOUCH.BEGAN)
+            if (activeUiEvent.touch == TOUCH.BEGAN)
             {
 
                 // a user action just began. find any objects and buttons the event is targeting. 
@@ -181,7 +79,7 @@ namespace StoryEngine
                 while (e >= 0)
                 {
 
-                    UiEvent checkEvent = uiEventStack[e];
+                    Event checkEvent = uiEventStack[e];
 
                     if (checkEvent != activeUiEvent)
                     {
@@ -191,15 +89,17 @@ namespace StoryEngine
                         if (activeUiEvent.targetButton != null)
                         {
 
-                            // if same interface target, remove old.
-                            if (checkEvent.targetButton!=null && 
-                                activeUiEvent.targetButton.dragTarget == checkEvent.targetButton.dragTarget)
-                                                              
-                               // if (activeUiEvent.targetButton.dragTarget == checkEvent.targetButton.dragTarget)
+                            //  we check all the new events button targets against the actual single target of the check event.
+
+                            if (checkEvent.targetButton != null && activeUiEvent.targetButton.HasDragTarget(checkEvent.targetButton.GetDragTarget(checkEvent.direction)))
+
                             {
 
                                 removeThis = true;
+                                //         Debug.Log("Removing ui event targeting the same dragtarget");
+
                             }
+
 
                         }
                         else if (activeUiEvent.target3D != null)
@@ -256,7 +156,7 @@ namespace StoryEngine
             while (i < uiEventStack.Count)
             {
 
-                UiEvent uiEvent = uiEventStack[i];
+                Event uiEvent = uiEventStack[i];
 
                 //			Log.Message ( "handling event stack of size " + uiEventStack.Count);
 
@@ -268,6 +168,7 @@ namespace StoryEngine
                 {
 
                     uiEventStack.RemoveAt(i);
+                    //      Debug.Log("removing event, total left" + uiEventStack.Count);
 
                     i--;
 
@@ -290,12 +191,12 @@ namespace StoryEngine
 
             }
 
-            if (activeUiEvent.touch == UITOUCH.ENDED)
+            if (activeUiEvent.touch == TOUCH.ENDED)
             {
 
                 // the active event just ended. set inert and springing to true.
 
-                activeUiEvent.touch = UITOUCH.NONE;
+                activeUiEvent.touch = TOUCH.NONE;
                 activeUiEvent.isInert = true;
 
 
@@ -304,18 +205,76 @@ namespace StoryEngine
 
                     activeUiEvent.isSpringing = true;
 
+                    // If we were dragging an ortho button, we want an event on the other direction to spring.
+
+                    if (activeUiEvent.targetButton.orthoDragging)
+                    {
+                        if (activeUiEvent.direction != DIRECTION.FREE)
+                        {
+                            //    Debug.Log("adding springing event for " + (activeUiEvent.direction == DIRECTION.HORIZONTAL ? "vertical" :"horizontal"));
+
+                            //    activeUiEvent.action = UIACTION.SINGLEDRAG;
+
+                            Event springEvent = activeUiEvent.clone();
+                            springEvent.direction = activeUiEvent.direction == DIRECTION.HORIZONTAL ? DIRECTION.VERTICAL : DIRECTION.HORIZONTAL;
+                            springEvent.isSpringing = true;
+                            //     springEvent.isInert = false;
+                            springEvent.action = ACTION.SINGLEDRAG;
+                            uiEventStack.Add(springEvent);
+
+                        }
+                        else
+                        {
+
+                            //     Debug.Log("touch ended, ortho button, direction free");
+
+                            // Direction was never set. We'll create springing events for both direcionts.
+
+                            activeUiEvent.direction = DIRECTION.HORIZONTAL;
+                            //    activeUiEvent.action = UIACTION.SINGLEDRAG;
+                            //     activeUiEvent.isInert = false;
+
+                            Event springEvent = activeUiEvent.clone();
+                            springEvent.direction = DIRECTION.VERTICAL;
+
+                            //springEvent.isSpringing = true;
+
+                            uiEventStack.Add(springEvent);
+
+                            //UiEvent springEvent2 = activeUiEvent.clone();
+                            //springEvent2.direction =DIRECTION.VERTICAL ;
+                            //springEvent2.isSpringing = true;
+
+                            //uiEventStack.Add(springEvent2);
+
+
+
+
+                        }
+
+
+                    }
+
+
                 }
 
-                if (activeUiEvent.action == UIACTION.TAP)
+                if (activeUiEvent.action == ACTION.TAP)
                 {
 
                     // tap must only be executed once, after that it becomes an inert singledrag event.
 
-                    activeUiEvent.action = UIACTION.SINGLEDRAG;
+                    activeUiEvent.action = ACTION.SINGLEDRAG;
 
                 }
 
-                UiEvent newEvent = new UiEvent();
+
+
+
+
+
+                // Create a new uievent to catch the next interaction 
+
+                Event newEvent = new Event();
                 uiEventStack.Add(newEvent);
                 activeUiEvent = newEvent;
 
@@ -331,15 +290,93 @@ namespace StoryEngine
             }
 
             if (stackSizeNew > 10)
-                Log("Ui event stack exceeds 10, potential overflow.");
+                Log.Warning("Ui event stack exceeds 10, potential overflow.", me);
+
+            // apply brightness for all button objects
+
+            Dictionary<string, Button>.ValueCollection allButtons =
+                activeInterface.uiButtons.Values;
+
+            foreach (Button button in allButtons)
+            {
+                button.ApplyColour();
+            }
 
             return callBack;
 
         }
 
+        //	public void setSpringTarget (string target,UiConstraint constraint, int index){
+
+        public void setSpringTarget(Button button, int index, DIRECTION dir = DIRECTION.FREE)
+        {
+
+            // Moves an interface segment (dragtarget, so a parent object) to a given spring. 
+            // it uses a button as a hook. checks if any event is targeting the same dragtarget to prevent interference.
+                        
+            int e = 0;
+
+            int i = uiEventStack.Count - 1;
+
+            while (i >= 0)
+            {
+
+                Event uie = uiEventStack[i];
+
+                   if (uie.targetButton != null && button.GetDragTarget(dir) !=null && uie.targetButton.GetDragTarget(uie.direction) == button.GetDragTarget(dir))
+             //   if (uie.targetButton != null )
+                    {
+               //     Debug.Log(uie.targetButton.name+ " " + uie.targetButton.GetDragTarget(uie.direction).name+ " " + button.GetDragTarget(dir).name);
+
+
+                    // the event explicitly targets the (explicit) target of the passed in button
+                    //remove the event
+                    uiEventStack.RemoveAt(i);
+                    Log.Message("UI event targeting spring target, removing.", me);
+                }
+
+                i--;
+
+            }
+            
+            Event springEvent = new Event();
+
+            springEvent.targetButton = button;
+            springEvent.direction = dir;
+            springEvent.action = ACTION.SINGLEDRAG;
+            springEvent.target2D = button.gameObject;
+                        springEvent.isSpringing = true;
+            springEvent.springIndex = index;
+
+
+            uiEventStack.Add(springEvent);
+               
+
+        }
+
+        bool warnOnce = false;
+
+        public string update(Interface activeInterface)
+        {
+
+            // legacy method returned only a string.
+            if (!warnOnce)
+            {
+                warnOnce = true;
+                Log.Warning("Update method updated, use updateUx instead.", me);
+            }
+
+            return updateUx(activeInterface).label;
+
+
+        }
+
+
+
+
         // lower level
 
-        void applyUserInteraction(UiEvent ui, UxInterface theUiState)
+        void applyUserInteraction(Event ui, Interface theUiState)
         {
 
 
@@ -348,10 +385,9 @@ namespace StoryEngine
 
             // check user mouse/touch interaction and populate this passed-in UIEVENT accordingly
 
-            UiEvent storeUi = ui.clone();
+            Event storeUi = ui.clone();
 
-            //		ui.action = UIACTION.VOID;
-            ui.touch = UITOUCH.NONE;
+            ui.touch = TOUCH.NONE;
 
             ui.dd = 0;
 
@@ -368,27 +404,33 @@ namespace StoryEngine
                 ui.x = Input.mousePosition.x;
                 ui.y = Input.mousePosition.y;
                 ui.dx = ui.x - ui.px;
-                ui.dx = ui.dx / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+
+                //			ui.dx = ui.dx / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+
+                ui.dx = ui.dx / currentScale;
+
                 ui.dy = ui.y - ui.py;
-                ui.dy = ui.dy / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+                //				ui.dy = ui.dy / Screen.height * 720f; // normalise to the 1280 x 720 frame we're using for the ui. 
+                ui.dy = ui.dy / currentScale;
+
                 ui.px = ui.x;
                 ui.py = ui.y;
 
                 if (!ui.firstFrame)
                 { // skip first frame because delta value will jump.
 
-                    ui.action = UIACTION.SINGLEDRAG;
-                    ui.touch = UITOUCH.TOUCHING;
+                    ui.action = ACTION.SINGLEDRAG;
+                    ui.touch = TOUCH.TOUCHING;
 
                     if (Input.GetKey(KeyCode.Space))
                     {
                         // equivalent to doubletouch dragging only
-                        ui.action = UIACTION.DOUBLEDRAG;
+                        ui.action = ACTION.DOUBLEDRAG;
                     }
                     if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
                     {
                         // equivalent to doubletouch pinching only
-                        ui.action = UIACTION.DOUBLEDRAG;
+                        ui.action = ACTION.DOUBLEDRAG;
                         ui.dd = ui.dx;
                         ui.dx = 0;
                         ui.dy = 0;
@@ -397,7 +439,7 @@ namespace StoryEngine
                 else
                 {
                     ui.firstFrame = false;
-                    ui.touch = UITOUCH.BEGAN;
+                    ui.touch = TOUCH.BEGAN;
                     ui.dx = 0;
                     ui.dy = 0;
                 }
@@ -407,12 +449,12 @@ namespace StoryEngine
             if (Input.GetButtonUp("Fire1"))
             {
 
-                ui.touch = UITOUCH.ENDED;
+                ui.touch = TOUCH.ENDED;
 
                 if (wasTap(ui))
                 {
 
-                    ui.action = UIACTION.TAP;
+                    ui.action = ACTION.TAP;
 
                 }
                 else
@@ -443,32 +485,38 @@ namespace StoryEngine
 					ui.x = tp.x;
 					ui.y = tp.y;
 					trackTap (ui);
-					ui.touch = UITOUCH.BEGAN;
+					ui.touch = TOUCH.BEGAN;
 					break;
 
 				case TouchPhase.Moved:
 					Vector2 touchDelta = Input.GetTouch (0).deltaPosition;
-					ui.dx = touchDelta.x / Screen.height * 720f;
-					ui.dy = touchDelta.y / Screen.height * 720f;
-					ui.action = UIACTION.SINGLEDRAG;
-					ui.touch = UITOUCH.TOUCHING;
+
+//		ui.dx = touchDelta.x / Screen.height * 720f;
+//					ui.dy = touchDelta.y / Screen.height * 720f;
+
+		ui.dx = touchDelta.x /currentScale;
+		ui.dy = touchDelta.y /currentScale;
+
+
+					ui.action = ACTION.SINGLEDRAG;
+					ui.touch = TOUCH.TOUCHING;
 					trackTap (ui);
 					break;
 
 				case TouchPhase.Stationary:
 					ui.dx = 0;
 					ui.dy = 0;
-					ui.action = UIACTION.SINGLEDRAG;
-					ui.touch = UITOUCH.TOUCHING;
+					ui.action = ACTION.SINGLEDRAG;
+					ui.touch = TOUCH.TOUCHING;
 					trackTap (ui);
 					break;
 
 				case TouchPhase.Ended:
 
-					ui.touch = UITOUCH.ENDED;
+					ui.touch = TOUCH.ENDED;
 
 					if (wasTap (ui)) {
-						ui.action = UIACTION.TAP;
+						ui.action = ACTION.TAP;
 					} else {
 
 					}
@@ -490,33 +538,37 @@ namespace StoryEngine
 				if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && phase1 == TouchPhase.Began) {
 					// if one finger was touching, we leave the targets untouched, and initialise the d value
 					ui.d = Vector2.Distance (tp0, tp1);
-					ui.touch = UITOUCH.TOUCHING;
+					ui.touch = TOUCH.TOUCHING;
 
 				} else if (phase0 == TouchPhase.Began && phase1 == TouchPhase.Began) {
 					// if both start at the same time, aim in between to set targets and initialise the d value
 					ui.x = (tp0.x + tp1.x) / 2f;
 					ui.y = (tp0.y + tp1.y) / 2f;
 					ui.d = Vector2.Distance (tp0, tp1);
-					ui.touch = UITOUCH.BEGAN;
+					ui.touch = TOUCH.BEGAN;
 
 				} else if (phase0 == TouchPhase.Ended && phase1 == TouchPhase.Began) {
 					// unlikely but could happen: flicking fingers in a single frame. catch the start of a new single touch.
 					ui.x = tp1.x;
 					ui.y = tp1.y;
-					ui.touch = UITOUCH.BEGAN;
+					ui.touch = TOUCH.BEGAN;
 
 				} else if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && (phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary)) {
 					// dragging
 					Vector2 touchDelta0 = Input.GetTouch (0).deltaPosition;
 					Vector2 touchDelta1 = Input.GetTouch (1).deltaPosition;
 
-					ui.dx = (touchDelta0.x + touchDelta1.x) / 2f / Screen.height * 720f; 
-					ui.dy = (touchDelta0.y + touchDelta1.y) / 2f / Screen.height * 720f; 
+//					ui.dx = (touchDelta0.x + touchDelta1.x) / 2f / Screen.height * 720f; 
+//					ui.dy = (touchDelta0.y + touchDelta1.y) / 2f / Screen.height * 720f; 
+
+		ui.dx = (touchDelta0.x + touchDelta1.x) / 2f /currentScale; 
+		ui.dy = (touchDelta0.y + touchDelta1.y) / 2f /currentScale; 
+
 					ui.d = Vector2.Distance (tp0, tp1);
 					ui.dd = ui.d - storeUi.d;
 
-					ui.action = UIACTION.DOUBLEDRAG;
-					ui.touch = UITOUCH.TOUCHING;
+					ui.action = ACTION.DOUBLEDRAG;
+					ui.touch = TOUCH.TOUCHING;
 				}
 			}
 
@@ -524,12 +576,12 @@ namespace StoryEngine
 #endif
         }
 
-        void trackTap(UiEvent ui)
+        void trackTap(Event ui)
         {
             ui.tapCount += Time.deltaTime;
         }
 
-        bool wasTap(UiEvent ui)
+        bool wasTap(Event ui)
         {
             bool result = false;
 
@@ -543,7 +595,7 @@ namespace StoryEngine
         }
 
 
-        void setUiTargetObjects(UiEvent ui, UxInterface theInterface)
+        void setUiTargetObjects(Event ui, Interface theInterface)
         {
 
             // finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
@@ -572,11 +624,6 @@ namespace StoryEngine
 
             }
 
-            // Check if there is a 2d canvas.
-
-            if (theInterface.canvasObject == null)
-                return;
-
             // cast a 2d ray in the canvas we're controlling.
 
             GraphicRaycaster gfxRayCaster = theInterface.canvasObject.GetComponent<GraphicRaycaster>();
@@ -604,9 +651,15 @@ namespace StoryEngine
 
                 // find out if this 2d object is a button.
 
-                UiButton checkButton = null;
+                Button checkButton = null;
                 theInterface.uiButtons.TryGetValue(ui.target2D.transform.name, out checkButton);
+
                 ui.targetButton = checkButton;
+
+                // Set ui event drag target and constraint. We don't have any ortho direction as this point, so we get the 'free dragging' one.
+
+                //      ui.dragTarget = checkButton.GetDragTarget();
+                //     ui.dragConstraint = checkButton.GetDragConstraint();
 
 
             }
@@ -623,7 +676,7 @@ namespace StoryEngine
         // ------------------------------------------------------------------------------------------------------------------------------------------
 
 
-        void processUiEvent(UiEvent ui, UxInterface activeInterface)
+        void processUiEvent(Event ui, Interface activeInterface)
         {
 
             // this handles the result of user interaction, taking the info in the active UIEVENT and taking action by checking it against the UISTATE
@@ -634,7 +687,7 @@ namespace StoryEngine
 
             Vector2 delta;
 
-            UxArgs args = new UxArgs();
+            UIArgs args = new UIArgs();
 
             args.activeInterface = activeInterface;
             args.delta = Vector3.zero;
@@ -645,7 +698,7 @@ namespace StoryEngine
 
 
 
-                case UIACTION.TAP:
+                case ACTION.TAP:
 
                     if (ui.target2D != null)
                     {
@@ -666,11 +719,46 @@ namespace StoryEngine
 
                     }
 
+                    ui.action = ACTION.SINGLEDRAG;
+
                     break;
 
-                case UIACTION.SINGLEDRAG:
+                case ACTION.SINGLEDRAG:
 
                     delta = new Vector2(ui.dx, ui.dy);
+
+                    // If this is an orthodrag button, we need to set and lock the initial direction.
+                    // We also get the appropriate targets and constraints for that direction and load them into the uievent.
+
+                    if (ui.targetButton != null && ui.targetButton.orthoDragging && ui.direction == DIRECTION.FREE)
+                    {
+                        if (Mathf.Abs(ui.dx) > Mathf.Abs(ui.dy))
+                        {
+                            ui.direction = DIRECTION.HORIZONTAL;
+                            //    ui.dragTarget=ui.targetButton.GetDragTarget(ui.direction);
+                            //     ui.dragConstraint = ui.targetButton.GetDragConstraint(ui.direction);
+
+                            //        Debug.Log("Locking to drag horizontally");
+                        }
+                        if (Mathf.Abs(ui.dx) < Mathf.Abs(ui.dy))
+                        {
+                            ui.direction = DIRECTION.VERTICAL;
+
+                            //    ui.dragTarget = ui.targetButton.GetDragTarget(ui.direction);
+                            //      ui.dragConstraint = ui.targetButton.GetDragConstraint(ui.direction);
+
+                            //ui.targetButton.SetOrthoConstraints(ui.direction);
+                            //       Debug.Log("Locking to drag vertically");
+                        }
+
+
+
+
+                    }
+
+
+
+
 
                     //			Debug.Log ("single drag");
 
@@ -699,7 +787,7 @@ namespace StoryEngine
 
                     break;
 
-                case UIACTION.DOUBLEDRAG:
+                case ACTION.DOUBLEDRAG:
 
                     delta = new Vector2(ui.dx, ui.dy);
 
@@ -794,16 +882,8 @@ namespace StoryEngine
 
             }
 
-            // apply brightness for all button objects
-           
-                Dictionary<string, UiButton>.ValueCollection allButtons =
-                    activeInterface.uiButtons.Values;
+     
 
-                foreach (UiButton button in allButtons)
-                {
-                    button.applyColour();
-                }
-            
             //			if (ui.touch == UITOUCH.NONE && ui.target2D != null) {
             //				// no touch, lettings springs run out while we have a target: apply a singledrag with delta 0
             //				singleDrag2D (state, ui, Vector2.zero);
@@ -822,9 +902,9 @@ namespace StoryEngine
         // execution of ui events
 
 
-        void setRaycastActive(string name, bool value, UxInterface activeInterface)
+        void setRaycastActive(string name, bool value, Interface activeInterface)
         {
-            UiButton theButton;
+            Button theButton;
             activeInterface.uiButtons.TryGetValue(name, out theButton);
 
             if (theButton != null)
@@ -832,10 +912,10 @@ namespace StoryEngine
 
         }
 
-        bool brightnessIsChanging(string name, UxInterface activeInterface)
+        bool brightnessIsChanging(string name, Interface activeInterface)
         {
             bool result = false;
-            UiButton theButton;
+            Button theButton;
             activeInterface.uiButtons.TryGetValue(name, out theButton);
 
             if (theButton != null)
@@ -860,9 +940,9 @@ namespace StoryEngine
 
     }
 
-
-
-
-
-
 }
+
+
+
+
+
