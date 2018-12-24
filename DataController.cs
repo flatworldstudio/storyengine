@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 #if NETWORKED
 using UnityEngine.Networking;
+using System.Runtime.Remoting.Messaging;
 
 #endif
 
@@ -16,6 +17,7 @@ namespace StoryEngine
     public class DataController : MonoBehaviour
     {
 
+
         GameObject StoryEngineObject;
         DataTaskHandler dataTaskHandler;
 
@@ -23,6 +25,7 @@ namespace StoryEngine
         GameObject NetworkObject;
         NetworkBroadcast networkBroadcast;
         ExtendedNetworkManager networkManager;
+        List<string> TrackConnectedAddresses;
 #endif
 
         AssitantDirector ad;
@@ -100,45 +103,50 @@ namespace StoryEngine
 
 
 #if UNITY_IOS && NETWORKED
-	
-
-	void OnApplicationPause(bool paused){
 
 
-		if (paused) {
-
-			Log ("pauzing ...");
-			Log ("Disconnecting client ...");
+        void OnApplicationPause(bool paused)
+        {
 
 
-			if (networkManager.client != null) {
+            if (paused)
+            {
 
-	StopNetworkClient();
-
-//				networkManager.client.Disconnect ();
-
-//	networkManager.client.Shutdown ();
-
-//	Network.CloseConnection(Network.connections[0], true);
-
-//	NetworkManager.InformServerOnDisconnect();
+                Log("pauzing ...");
+                Log("Disconnecting client ...");
 
 
+                if (networkManager.client != null)
+                {
 
+                    StopNetworkClient();
 
-	//or maybe better use  Shutdown(); 
+                    //				networkManager.client.Disconnect ();
+
+                    //	networkManager.client.Shutdown ();
+
+                    //	Network.CloseConnection(Network.connections[0], true);
+
+                    //	NetworkManager.InformServerOnDisconnect();
 
 
 
-			}
+
+                    //or maybe better use  Shutdown(); 
 
 
-		} else {
 
-			Log ("resuming ...");
+                }
 
-		}
-	}
+
+            }
+            else
+            {
+
+                Log("resuming ...");
+
+            }
+        }
 
 #endif
 
@@ -146,6 +154,39 @@ namespace StoryEngine
 
         // These are networking methods to be called from datahandler to establish connections.
         // Once connected, handling is done internally by the assistant directors.
+
+        public List<string> ConnectedAddresses(){
+
+            return networkManager.ConnectedAddresses();
+
+        }
+
+        public bool NewClientsConnected()
+        {
+
+            // Returns if new clients connected since the last call.
+
+            List<string> NewConnectedAddresses = networkManager.ConnectedAddresses();
+
+            if (TrackConnectedAddresses==null)
+                return NewConnectedAddresses.Count>0 ? true : false;
+            
+            bool NewClient = false;
+
+            foreach (string address in NewConnectedAddresses)
+            {
+                if (!TrackConnectedAddresses.Contains(address))
+                {
+                    NewClient = true;
+                    break;
+                }
+            }
+
+            TrackConnectedAddresses=NewConnectedAddresses;
+
+            return NewClient;
+
+        }
 
         public int serverConnections()
         {
@@ -291,18 +332,18 @@ namespace StoryEngine
 
                 //			if (task.pointer.getStatus () == POINTERSTATUS.KILLED && task.description != "end") {
 
-                if (task.description == "end")
+                if (task.Instruction == "end")
                 {
-                    Log("Encountered end task, removing pointer " + task.pointer.currentPoint.storyLineName);
+                    Log("Encountered end task, removing pointer " + task.Pointer.currentPoint.StoryLine);
 
-                    GENERAL.ALLPOINTERS.Remove(task.pointer);
-                  
+                    GENERAL.ALLPOINTERS.Remove(task.Pointer);
+
                 }
 
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
 
-                    Log("Removing task:" + task.description);
+                    Log("Removing task:" + task.Instruction);
 
                     // Task was removed, so stop executing it.
 
@@ -339,7 +380,7 @@ namespace StoryEngine
                             Warning("No handler available, blocking task while waiting.");
 
                             handlerWarning = true;
-                          
+
 
                         }
                         t++;

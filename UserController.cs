@@ -86,7 +86,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
 
-                    Log("Removing task:" + task.description);
+                    Log("Removing task:" + task.Instruction);
 
                     taskList.RemoveAt(t);
 

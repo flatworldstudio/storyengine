@@ -137,7 +137,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
 
-                    Log("Removing task:" + task.description);
+                    Log("Removing task:" + task.Instruction);
 
                     taskList.RemoveAt(t);
 
@@ -145,7 +145,7 @@ namespace StoryEngine
                 else
                 {
 
-                    switch (task.description)
+                    switch (task.Instruction)
                     {
 
                         case "debugon":
@@ -236,7 +236,7 @@ namespace StoryEngine
                 if (!pointerList.Contains(pointer))
                 {
 
-                    Log("Pointer is new, added display for storyline " + pointer.currentPoint.storyLineName);
+                    Log("Pointer is new, added display for storyline " + pointer.currentPoint.StoryLine);
 
                     pointerList.Add(pointer);
 
@@ -261,7 +261,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLPOINTERS.Contains(pointer))
                 {
 
-                    Log("Destroying ui for pointer for storyline " + pointer.currentPoint.storyLineName);
+                    Log("Destroying ui for pointer for storyline " + pointer.currentPoint.StoryLine);
 
                     // update first. some pointers reach end in a single go - we want those to be aligned.
 
@@ -300,7 +300,7 @@ namespace StoryEngine
                 return;
 
 
-            if (theTask.description != "wait")
+            if (theTask.Instruction != "wait")
             {
 
                 string displayText;
@@ -317,7 +317,7 @@ namespace StoryEngine
 
                 }
 
-                displayText = displayText + theTask.description + " | ";
+                displayText = displayText + theTask.Instruction + " | ";
 
                 // If a task has a value for "debug" we display it along with task description.
 
@@ -330,14 +330,14 @@ namespace StoryEngine
 
                 }
 
-                theTask.pointer.deusText.text = displayText;
-                theTask.pointer.deusTextSuper.text = theTask.pointer.currentPoint.storyLineName + " " + GENERAL.ALLPOINTERS.Count;
+                theTask.Pointer.deusText.text = displayText;
+                theTask.Pointer.deusTextSuper.text = theTask.Pointer.currentPoint.StoryLine + " " + GENERAL.ALLPOINTERS.Count;
 
             }
             else
             {
 
-                theTask.pointer.deusTextSuper.text = theTask.pointer.currentPoint.storyLineName;
+                theTask.Pointer.deusTextSuper.text = theTask.Pointer.currentPoint.StoryLine;
 
             }
 
@@ -464,7 +464,7 @@ namespace StoryEngine
                 {
                     if (pointerPositions[storyPointerIndex] != null)
                     {
-                        Log("Progressing storyline" + pointerPositions[storyPointerIndex].currentPoint.storyLineName);
+                        Log("Progressing storyline" + pointerPositions[storyPointerIndex].currentPoint.StoryLine);
 
                         //					cc.progressPointer (pointerPositions [storyPointerIndex].uid);
 

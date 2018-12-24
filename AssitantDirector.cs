@@ -23,6 +23,7 @@ namespace StoryEngine
         public string scriptName;
         public string launchOSX, launchWIN, launchIOS, launchAndroid;
 
+        public static AssitantDirector Instance;
 
         string ID = "AD";
         List<StoryUpdate> StoryUpdateStack;
@@ -60,7 +61,12 @@ namespace StoryEngine
             StoryEngine.Log.Message(message, ID,LOGLEVEL.VERBOSE);
         }
 
-        void Start()
+		 void Awake()
+		{
+            Instance=this; 
+		}
+
+		void Start()
         {
 
             Verbose("Starting.");
@@ -236,7 +242,7 @@ namespace StoryEngine
                             if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL || task.scope == SCOPE.LOCAL)
                             {
 
-                                task.pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
+                                task.Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
 
                             }
 
@@ -277,7 +283,7 @@ namespace StoryEngine
                                             newTasks.Add(task);
                                             task.modified = true;
 
-                                            Verbose("Created global task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
+                                            Verbose("Created global task " + task.Instruction + " for pointer " + pointer.currentPoint.StoryLine);
 
                                         }
 
@@ -300,7 +306,7 @@ namespace StoryEngine
 
                                         newTasks.Add(task);
 
-                                        Verbose("Created local task " + task.description + " for pointer " + pointer.currentPoint.storyLineName);
+                                        Verbose("Created local task " + task.Instruction + " for pointer " + pointer.currentPoint.StoryLine);
 
                                     }
 
@@ -406,7 +412,7 @@ namespace StoryEngine
                 //       pointer.Kill();
 
                 GENERAL.ALLPOINTERS.Remove(pointer);
-                Log("Removing pointer: " + pointer.currentPoint.storyLineName);
+                Log("Removing pointer: " + pointer.currentPoint.StoryLine);
                 // Remove task associated with pointer. This is only one at all times, we just don't know which one.
 
                 //if (GENERAL.ALLTASKS.Remove(pointer.currentTask)){
@@ -420,10 +426,10 @@ namespace StoryEngine
 
                     StoryTask task = GENERAL.ALLTASKS[i];
 
-                    if (task.point != null && task.point.storyLineName == pointerUpdate.StoryLineName)
+                    if (task.Point != null && task.Point.StoryLine == pointerUpdate.StoryLineName)
                     {
 
-                        Log("Removing task: " + task.description);
+                        Log("Removing task: " + task.Instruction);
 
                         GENERAL.ALLTASKS.Remove(task);
 
@@ -475,7 +481,7 @@ namespace StoryEngine
                     updateTask = new StoryTask(taskUpdate.pointID, SCOPE.GLOBAL);
                     updateTask.ApplyUpdateMessage(taskUpdate);
 
-                    Log("Created an instance of global task " + updateTask.description + " id " + updateTask.pointID);
+                    Log("Created an instance of global task " + updateTask.Instruction + " id " + updateTask.PointID);
 
                     if (taskUpdate.pointID != "GLOBALS")
                     {
@@ -489,13 +495,13 @@ namespace StoryEngine
 
                             updatePointer = new StoryPointer();
 
-                            Log("Created a new pointer for task " + updateTask.description);
+                            Log("Created a new pointer for task " + updateTask.Instruction);
 
                         }
 
                         updatePointer.PopulateWithTask(updateTask);
 
-                        Log("Populated pointer " + updatePointer.currentPoint.storyLineName + " with task " + updateTask.description);
+                        Log("Populated pointer " + updatePointer.currentPoint.StoryLine + " with task " + updateTask.Instruction);
 
                         DistributeTasks(new TaskArgs(updateTask));
 
@@ -511,7 +517,7 @@ namespace StoryEngine
 
                 updateTask.scope = SCOPE.GLOBAL;//?? 
 
-                Verbose("Applied update to existing task "+updateTask.description);
+                Verbose("Applied update to existing task "+updateTask.Instruction);
 
             }
 
@@ -608,14 +614,14 @@ namespace StoryEngine
                     if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL && pointer.scope == SCOPE.GLOBAL && pointer.modified && pointer.GetStatus() == POINTERSTATUS.KILLED)
                     {
 
-                        Log("Sending pointer kill update to clients: " + pointer.currentPoint.storyLineName);
+                        Log("Sending pointer kill update to clients: " + pointer.currentPoint.StoryLine);
 
                         storyUpdate.AddStoryPointerUpdate(pointer.GetUpdate()); // bundled
 
                         pointer.modified = false;
 
 
-                        Log("Removing pointer " + pointer.currentPoint.storyLineName);
+                        Log("Removing pointer " + pointer.currentPoint.StoryLine);
 
                         GENERAL.ALLPOINTERS.Remove(pointer);
 
@@ -638,7 +644,7 @@ namespace StoryEngine
 
                         GENERAL.ALLTASKS.RemoveAt(i);
 
-                        Verbose("Task " + task.description + " on storyline " + task.pointer.currentPoint.storyLineName +" completed, removed from alltasks. ");
+                        Verbose("Task " + task.Instruction + " on storyline " + task.Pointer.currentPoint.StoryLine +" completed, removed from alltasks. ");
                                          
                     }
 
@@ -648,10 +654,10 @@ namespace StoryEngine
                         // Debugging: if a pointer is in the process of being killed, we may want to not send task updates
                         // as they might result in the task being recreated clientside.
 
-                        if (task.pointer.GetStatus() == POINTERSTATUS.KILLED)
+                        if (task.Pointer.GetStatus() == POINTERSTATUS.KILLED)
                         {
 
-                            Warning("Supressing sending task update for task with pointer that is dying. " + task.description);
+                            Warning("Supressing sending task update for task with pointer that is dying. " + task.Instruction);
 
                         }
                         else
@@ -667,7 +673,7 @@ namespace StoryEngine
                                     if (task.scope == SCOPE.GLOBAL)
                                     {
 
-                                        Verbose("Global task " + task.description + " changed, adding to update for server.");
+                                        Verbose("Global task " + task.Instruction + " changed, adding to update for server.");
 
                                         storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
 
@@ -680,7 +686,7 @@ namespace StoryEngine
                                     if (task.scope == SCOPE.GLOBAL)
                                     {
 
-                                        Verbose("Global task " + task.description + " changed, adding to update for clients.");
+                                        Verbose("Global task " + task.Instruction + " changed, adding to update for clients.");
 
                                         storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
 

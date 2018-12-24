@@ -76,37 +76,16 @@ namespace StoryEngine
         {
 
             networkAddress = server;
-
             StartClient();
 
         }
 
         public override void OnStartClient(NetworkClient theClient)
         {
-            Log("Client has started.");
+            Log("Started as Client.");
 
             if (onStartClientDelegate != null)
                 onStartClientDelegate(theClient);
-
-        }
-
-        public override void OnClientConnect(NetworkConnection conn)
-        {
-
-            Log("Client connected to server.");
-
-            if (onClientConnectDelegate != null)
-                onClientConnectDelegate(conn);
-
-        }
-
-        public override void OnClientDisconnect(NetworkConnection connection)
-        {
-
-            Log("Client disconnected from server.");
-
-            if (onClientDisconnectDelegate != null)
-                onClientDisconnectDelegate(connection);
 
         }
 
@@ -120,12 +99,34 @@ namespace StoryEngine
         public override void OnStopClient()
         {
 
-            Log("Client has stopped.");
+            Log("Stopped as Client.");
 
             if (onStopClientDelegate != null)
                 onStopClientDelegate();
 
         }
+
+        public override void OnClientConnect(NetworkConnection conn)
+        {
+
+            Log("Connected to remote Server as Client.");
+
+            if (onClientConnectDelegate != null)
+                onClientConnectDelegate(conn);
+
+        }
+
+        public override void OnClientDisconnect(NetworkConnection connection)
+        {
+
+            Log("Disconnected from remote Server as Client");
+
+            if (onClientDisconnectDelegate != null)
+                onClientDisconnectDelegate(connection);
+
+        }
+
+
 
         // Server methods.
 
@@ -152,7 +153,7 @@ namespace StoryEngine
 
         public override void OnStartServer()
         {
-            Log("Server started.");
+            Log("Started as Server.");
 
             if (onStartServerDelegate != null)
                 onStartServerDelegate();
@@ -161,7 +162,7 @@ namespace StoryEngine
 
         public override void OnStopServer()
         {
-            Log("Server stopped.");
+            Log("Stopped as Server");
 
             if (onStopServerDelegate != null)
                 onStopServerDelegate();
@@ -186,6 +187,24 @@ namespace StoryEngine
 
         }
 
+        public List<string> ConnectedAddresses()
+        {
+
+            NetworkConnection[] connections = new NetworkConnection[NetworkServer.connections.Count];
+            NetworkServer.connections.CopyTo(connections, 0);
+
+            List<string> addresses = new List<string>();
+
+            for (int c = 0; c < connections.Length; c++)
+            {
+                if (connections[c] != null && connections[c].isConnected)
+                    addresses.Add(connections[c].address);
+
+            }
+
+            return addresses;
+
+        }
 
         /*
     //	public void 

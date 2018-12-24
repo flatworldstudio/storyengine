@@ -106,9 +106,9 @@ namespace StoryEngine
 
             // Filling an empty pointer with task info. Used for network task and pointer creation.
 
-            currentPoint = GENERAL.GetStoryPointByID(task.pointID);
+            currentPoint = GENERAL.GetStoryPointByID(task.PointID);
             currentTask = task;
-            task.pointer = this;
+            task.Pointer = this;
             scope = task.scope;
 
         }
@@ -150,7 +150,7 @@ namespace StoryEngine
 
 
             PointerUpdateBundled updateMessageSend=new PointerUpdateBundled();
-            updateMessageSend.StoryLineName=currentPoint.storyLineName;
+            updateMessageSend.StoryLineName=currentPoint.StoryLine;
 
 
         //updateMessageSend =;

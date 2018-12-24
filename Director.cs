@@ -96,7 +96,7 @@ namespace StoryEngine
                 if (sp.scope==SCOPE.LOCAL &&  sp.GetStatus() == POINTERSTATUS.KILLED)
                 {
                                
-                   Log("Removing pointer: " + sp.currentPoint.storyLineName);
+                   Log("Removing pointer: " + sp.currentPoint.StoryLine);
                     GENERAL.ALLPOINTERS.RemoveAt(p);
 
                 }
@@ -132,7 +132,7 @@ namespace StoryEngine
 
                 pointer = pointerStack[0];
 
-                Log("Evaluating pointer: " + pointer.currentPoint.storyLineName);
+                Log("Evaluating pointer: " + pointer.currentPoint.StoryLine);
 
                 pointer.LoadPersistantData();
 
@@ -141,7 +141,7 @@ namespace StoryEngine
 
                     case TASKTYPE.ROUTING:
 
-                        string type = pointer.currentPoint.task[0];
+                        string type = pointer.currentPoint.Instructions[0];
 
                         switch (type)
                         {
@@ -163,9 +163,9 @@ namespace StoryEngine
                                 // Control another pointer. Finds a/the(!) pointer on the given storyline and moves it to the given storypoint, marking the pointer for evaluation.
                                 // Progress this pointer, keeping it on the stack
 
-                                targetPointerName = pointer.currentPoint.task[1];
+                                targetPointerName = pointer.currentPoint.Instructions[1];
 
-                                targetValue = pointer.currentPoint.task[2];
+                                targetValue = pointer.currentPoint.Instructions[2];
 
                                 targetPointer = GENERAL.GetPointerForStoryline(targetPointerName);
 
@@ -207,7 +207,7 @@ namespace StoryEngine
 
                                 // Moves this pointer to another point anywhere in the script. Mark for evaluation, keep on stack.
 
-                                targetValue = pointer.currentPoint.task[1];
+                                targetValue = pointer.currentPoint.Instructions[1];
 
                                 targetPoint = GENERAL.GetStoryPointByID(targetValue);
 
@@ -236,7 +236,7 @@ namespace StoryEngine
                                 // Create a new pointer, add it to the list of pointers and add it to the stack.
                                 // Progress the current pointer, keeping it on the stack.
 
-                                targetPointerName = pointer.currentPoint.task[1];
+                                targetPointerName = pointer.currentPoint.Instructions[1];
 
                                 if (GENERAL.GetPointerForStoryline(targetPointerName) == null)
                                 {
@@ -261,7 +261,7 @@ namespace StoryEngine
 
                                 // Stop another storypointer by storyline name, or all other storylines with 'all'.
 
-                                targetPointerName = pointer.currentPoint.task[1];
+                                targetPointerName = pointer.currentPoint.Instructions[1];
 
                                 if (targetPointerName == "all")
                                 {
@@ -272,20 +272,20 @@ namespace StoryEngine
                                         if (stp != pointer)
                                         {
 
-                                            Log("Stopping pointer " + stp.currentPoint.storyLineName);
+                                            Log("Stopping pointer " + stp.currentPoint.StoryLine);
 
                                             stp.Kill();
 
                                             if (GENERAL.ALLTASKS.Remove(stp.currentTask))
                                             {
 
-                                                Log("Removing task " + stp.currentTask.description);
+                                                Log("Removing task " + stp.currentTask.Instruction);
 
                                             }
                                             else
                                             {
 
-                                                Warning("Failed removing task " + stp.currentTask.description);
+                                                Warning("Failed removing task " + stp.currentTask.Instruction);
 
                                             }
 
@@ -309,7 +309,7 @@ namespace StoryEngine
                                     if (targetPointer != null)
                                     {
 
-                                        Log("Stopping pointer " + targetPointer.currentPoint.storyLineName);
+                                        Log("Stopping pointer " + targetPointer.currentPoint.StoryLine);
 
                                         pointerStack.Remove(targetPointer);
                                         targetPointer.Kill();
@@ -317,13 +317,13 @@ namespace StoryEngine
                                         if (GENERAL.ALLTASKS.Remove(targetPointer.currentTask))
                                         {
 
-                                            Log("Removing task " + targetPointer.currentTask.description);
+                                            Log("Removing task " + targetPointer.currentTask.Instruction);
 
                                         }
                                         else
                                         {
 
-                                            Warning("Failed removing task " + targetPointer.currentTask.description);
+                                            Warning("Failed removing task " + targetPointer.currentTask.Instruction);
 
                                         }
 
@@ -378,7 +378,7 @@ namespace StoryEngine
 
                             // A normal task to be executed. Assistant director will generate task.
 
-                            Log("Task to be executed: " + pointer.currentPoint.task[0]);
+                            Log("Task to be executed: " + pointer.currentPoint.Instructions[0]);
 
                             pointer.SetStatus(POINTERSTATUS.NEWTASK);
 
@@ -400,7 +400,7 @@ namespace StoryEngine
 
                                 // Task was completed, progress to the next point.
 
-                                Log("task completed: " + pointer.currentTask.description);
+                                Log("task completed: " + pointer.currentTask.Instruction);
 
                                 pointer.SetStatus(POINTERSTATUS.EVALUATE);
 

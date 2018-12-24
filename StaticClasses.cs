@@ -144,7 +144,7 @@ namespace StoryEngine
         public static StoryPointer GetStorylinePointerForPointID(string pointID)
         {
 
-            string storyline = GetStoryPointByID(pointID).storyLineName;
+            string storyline = GetStoryPointByID(pointID).StoryLine;
 
             flagPointerOverflow();
 
@@ -153,7 +153,7 @@ namespace StoryEngine
             foreach (StoryPointer p in GENERAL.ALLPOINTERS)
             {
 
-                if (p.currentPoint.storyLineName == storyline)
+                if (p.currentPoint.StoryLine == storyline)
                 {
                     r = p;
                     break;
@@ -176,7 +176,7 @@ namespace StoryEngine
             foreach (StoryPointer p in GENERAL.ALLPOINTERS)
             {
 
-                if (p.currentPoint.storyLineName == theStoryLine)
+                if (p.currentPoint.StoryLine == theStoryLine)
                 {
                     r = p;
                     break;
@@ -215,7 +215,7 @@ namespace StoryEngine
             for (int t = 0; t < ALLTASKS.Count; t++)
             {
 
-                if (ALLTASKS[t].pointID == pointID)
+                if (ALLTASKS[t].PointID == pointID)
                 {
 
                     return ALLTASKS[t];

@@ -455,8 +455,8 @@ namespace StoryEngine
     public class StoryPoint
     {
         public string ID;
-        public string storyLineName;
-        public string[] task;
+        public string StoryLine;
+        public string[] Instructions;
 
         public TASKTYPE taskType;
         StoryPoint nextStoryPoint;
@@ -482,11 +482,11 @@ namespace StoryEngine
         public StoryPoint(string myName, string myStoryLine, string[] myTask)
         {
             ID = myName;
-            storyLineName = myStoryLine;
+            StoryLine = myStoryLine;
 
-            task = myTask;
+            Instructions = myTask;
 
-            switch (task[0])
+            switch (Instructions[0])
             {
 
                 case "start":

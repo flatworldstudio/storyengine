@@ -34,16 +34,16 @@ namespace StoryEngine
     public class StoryTask
     {
         
-
         string ID = "Storytask";
 
-        public string pointID;
-        public StoryPoint point;
-        public StoryPointer pointer;
+
+         StoryPoint __point;
+         StoryPointer __pointer;
+
         public SCOPE scope;
-        public string description;
 
         int signoffs;
+
         TASKSTATUS status;
 
         public Dictionary<string, Int32> taskIntValues;
@@ -65,7 +65,6 @@ namespace StoryEngine
         List<string> changedTaskValue;
         public bool modified = false;
         bool allModified = false;
-
 
         int LastUpdateFrame = -1;
         int UpdatesPerFrame = 0;
@@ -94,39 +93,100 @@ namespace StoryEngine
             StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
+        // ----------------
+
+        public StoryPoint Point
+        {
+            get
+            {
+                return __point;
+            }
+            set
+            {
+                Warning("Can't set Point value directly.");
+            }
+        }
+
+        public StoryPointer Pointer
+        {
+            get
+            {
+                return __pointer;
+            }
+            set
+            {
+                Warning("Can't set Pointer value directly.");
+            }
+        }
+
+
+        public string Instruction
+        {
+            get
+            {
+                if (__point == null || __point.Instructions == null || __point.Instructions.Length == 0)
+                    return "";
+                else
+                    return __point.Instructions[0];
+            }
+            set
+            {
+               Warning("Can't set Instruction value directly.");
+            }
+        }
+
+        public string PointID
+        {
+            get
+            {
+                if (__point==null)
+                    return "";
+                else
+                    return __point.ID;
+            }
+            set
+            {
+                Warning("Can't set PointID value directly.");
+            }
+        }
+          
+
         public void MarkAllAsModified()
         {
             allModified = true;
             modified = true;
         }
 
-        public StoryTask(string storyPointID, SCOPE setScope)
+        public StoryTask(string _fromPointID, SCOPE _scope)
         {
 
             // Creating a task from a storypoint -> pointer to be created from this task.
 
-            pointID = storyPointID;
-            point = GENERAL.GetStoryPointByID(storyPointID);
-            description = point.task[0];
-            scope = setScope;
-            pointer = null;
+            //pointID = storyPointID;
+            __point = GENERAL.GetStoryPointByID(_fromPointID);
+            //description = point.task[0];
+            scope = _scope;
+            __pointer = null;
 
             setDefaults();
+
             GENERAL.ALLTASKS.Add(this);
 
         }
 
-        public StoryTask(StoryPointer fromStoryPointer, SCOPE setScope)
+        public StoryTask(StoryPointer _fromPointer, SCOPE _scope)
         {
 
             // Create a task based on the current storypoint of the pointer.
             // Note that setting scope is explicit, but in effect the scope of the task is the same as the scope of the pointer.
 
-            pointer = fromStoryPointer;
-            description = pointer.currentPoint.task[0];
-            pointID = pointer.currentPoint.ID;
-            fromStoryPointer.currentTask = this;
-            scope = setScope;
+            __pointer = _fromPointer;
+            //description = pointer.currentPoint.task[0];
+            __point = __pointer.currentPoint;
+            //pointID = pointer.currentPoint.ID;
+
+            _fromPointer.currentTask = this;
+            scope = _scope;
 
             setDefaults();
             GENERAL.ALLTASKS.Add(this);
@@ -177,7 +237,7 @@ namespace StoryEngine
 
             TaskUpdateBundled msg = new TaskUpdateBundled();
 
-            msg.pointID = pointID;
+            msg.pointID = PointID;
 
             string[] intNames = taskIntValues.Keys.ToArray();
 
@@ -915,10 +975,10 @@ namespace StoryEngine
 
             taskStringArrayValues[valueName] = value;
 
-            #if NETWORKED
+#if NETWORKED
             taskValuesChangeMask[valueName] = true;
             modified = true;
-            #endif
+#endif
 
         }
 
@@ -969,7 +1029,7 @@ namespace StoryEngine
 
                     // we're the global server or running solo so we can trigger the pointer. regardless of the task's scope.
 
-                    pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
+                    Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
 
                     break;
 
@@ -980,7 +1040,7 @@ namespace StoryEngine
                     if (scope == SCOPE.LOCAL)
                     {
 
-                        pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
+                        Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
 
                     }
 
