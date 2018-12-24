@@ -121,7 +121,7 @@ namespace StoryEngine
         {
 
             StopBroadcast();
-            ResetMessage();
+            //ResetMessage();
 
         }
 
@@ -136,7 +136,7 @@ namespace StoryEngine
             serverMessage = data;
             serverAddress = fromAddress;
 
-            DataController.Instance.RemoteBroadcastServerAddress = fromAddress;
+       //     DataController.Instance.RemoteBroadcastServerAddress = fromAddress;
 
           //  GENERAL.broadcastServer = fromAddress;
 

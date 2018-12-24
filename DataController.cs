@@ -231,16 +231,22 @@ namespace StoryEngine
         public void startBroadcastClient()
         {
 
-            Log("Starting broadcast client.");
-
+            Log("Starting broadcast client, key: "+ networkBroadcast.broadcastKey);
             networkBroadcast.StartClient();
 
+        }
+
+        public void startBroadcastClient(int _key)
+        {
+
+            networkBroadcast.broadcastKey = _key;
+            startBroadcastClient();
         }
 
         public void startBroadcastServer()
         {
 
-            Log("Starting broadcast server.");
+            Log("Starting broadcast server, key: "+networkBroadcast.broadcastKey);
                       
             networkBroadcast.StartServer();
 
