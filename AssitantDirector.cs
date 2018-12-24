@@ -757,7 +757,7 @@ namespace StoryEngine
 
             GENERAL.AUTHORITY = AUTHORITY.GLOBAL;
 
-            GENERAL.SETNEWCONNECTION(-1);
+     //       GENERAL.SETNEWCONNECTION(-1);
 
             //     Logger.Message("Registering server message handlers.");
 
@@ -798,7 +798,7 @@ namespace StoryEngine
 
             Verbose("Incoming server connection delegate called ");
 
-            GENERAL.SETNEWCONNECTION(conn.connectionId);
+       //     GENERAL.SETNEWCONNECTION(conn.connectionId);
 
         }
 

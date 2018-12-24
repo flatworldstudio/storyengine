@@ -45,29 +45,25 @@ namespace StoryEngine
 
     public static class GENERAL
     {
-        //public static bool UserInConfinedArea=true;
-        //public static bool UserCalibrated=false;
-
+  
         public static AUTHORITY AUTHORITY = AUTHORITY.LOCAL;
 
         public static float pointerScreenScalar = -0.5f;
         public static float pointerRectScalar = 0.5f;
 
         public static int SIGNOFFS;
+
         public static Dictionary<string, StoryPoint> storyPoints;
         public static List<StoryPointer> ALLPOINTERS;
         public static List<StoryTask> ALLTASKS;
-        //	public static STORYMODE STORYMODE;
-
-      //  public static StoryTask GLOBALS;
-
-        public static string connectionKey;
+        
+     //   public static string connectionKey;
 
 
         public static bool isPauzed = false;
         public static bool hasFocus = true;
 
-        public static bool wasConnected = false;
+    //    public static bool wasConnected = false;
 
         public static string broadcastServer, networkServer;
 
@@ -228,25 +224,25 @@ namespace StoryEngine
 
         }
 
-        public static int CONNECTIONINDEX;
+        //public static int CONNECTIONINDEX;
 
-        static int NEWCONNECTION;
+        //static int NEWCONNECTION;
 
 
-        public static void SETNEWCONNECTION(int value)
-        {
-            NEWCONNECTION = value;
+        //public static void SETNEWCONNECTION(int value)
+        //{
+        //    NEWCONNECTION = value;
 
-        }
+        //}
 
-        public static int GETNEWCONNECTION()
-        {
+        //public static int GETNEWCONNECTION()
+        //{
 
-            int r = NEWCONNECTION;
-            NEWCONNECTION = -1;
-            return r;
+        //    int r = NEWCONNECTION;
+        //    NEWCONNECTION = -1;
+        //    return r;
 
-        }
+        //}
 
     }
 

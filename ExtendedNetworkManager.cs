@@ -31,7 +31,7 @@ namespace StoryEngine
         string ID = "Network manager";
 
         const short connectionMessageCode = 1001;
-
+        List<string> __connectedAddresses;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
@@ -141,6 +141,7 @@ namespace StoryEngine
         {
 
             StartServer();
+            __connectedAddresses = new List<string>();
 
         }
 
@@ -148,15 +149,17 @@ namespace StoryEngine
         {
 
             StopServer();
-
+            __connectedAddresses.Clear();
         }
 
         public override void OnStartServer()
         {
             Log("Started as Server.");
+            
 
             if (onStartServerDelegate != null)
                 onStartServerDelegate();
+
 
         }
 
@@ -173,6 +176,8 @@ namespace StoryEngine
         {
             Log("Remote client connected.");
 
+            GetConnectedAddresses();
+
             if (onServerConnectDelegate != null)
                 onServerConnectDelegate(connection);
 
@@ -182,27 +187,44 @@ namespace StoryEngine
         {
             Log("Remote client disconnected.");
 
+            GetConnectedAddresses();
+
             if (onServerDisconnectDelegate != null)
                 onServerDisconnectDelegate(connection);
 
         }
 
-        public List<string> ConnectedAddresses()
+        public  List<string> ConnectedAddresses
+        {
+            get
+            {
+                return __connectedAddresses;
+            }
+            set
+            {
+                Warning("Can't set connected addresses directly.");
+            }
+
+
+        }
+
+        void GetConnectedAddresses()
         {
 
             NetworkConnection[] connections = new NetworkConnection[NetworkServer.connections.Count];
             NetworkServer.connections.CopyTo(connections, 0);
 
-            List<string> addresses = new List<string>();
+            __connectedAddresses.Clear();
+        //    List<string> addresses = new List<string>();
 
             for (int c = 0; c < connections.Length; c++)
             {
                 if (connections[c] != null && connections[c].isConnected)
-                    addresses.Add(connections[c].address);
+                    __connectedAddresses.Add(connections[c].address);
 
             }
 
-            return addresses;
+        //    __connectedAddresses    = addresses;
 
         }
 

@@ -136,7 +136,9 @@ namespace StoryEngine
             serverMessage = data;
             serverAddress = fromAddress;
 
-            GENERAL.broadcastServer = fromAddress;
+            DataController.Instance.RemoteBroadcastServerAddress = fromAddress;
+
+          //  GENERAL.broadcastServer = fromAddress;
 
         }
 

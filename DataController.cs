@@ -26,9 +26,12 @@ namespace StoryEngine
         NetworkBroadcast networkBroadcast;
         ExtendedNetworkManager networkManager;
         List<string> TrackConnectedAddresses;
+     //   public string RemoteServerAddress,RemoteBroadcastServerAddress;
 #endif
 
         AssitantDirector ad;
+
+        public static DataController Instance;
 
         bool handlerWarning = false;
 
@@ -56,7 +59,10 @@ namespace StoryEngine
             StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
-
+         void Awake()
+        {
+            Instance = this; 
+        }
         void Start()
         {
             Log("Starting.");
@@ -157,7 +163,7 @@ namespace StoryEngine
 
         public List<string> ConnectedAddresses(){
 
-            return networkManager.ConnectedAddresses();
+            return networkManager.ConnectedAddresses;
 
         }
 
@@ -166,7 +172,7 @@ namespace StoryEngine
 
             // Returns if new clients connected since the last call.
 
-            List<string> NewConnectedAddresses = networkManager.ConnectedAddresses();
+            List<string> NewConnectedAddresses = networkManager.ConnectedAddresses;
 
             if (TrackConnectedAddresses == null)
             {
@@ -192,31 +198,33 @@ namespace StoryEngine
 
         }
 
-        public int serverConnections()
+        public int ConnectedClientsCount()
         {
 
             // Get a count for the number of (active) connections.
 
-            NetworkConnection[] connections = new NetworkConnection[NetworkServer.connections.Count];
+            //NetworkConnection[] connections = new NetworkConnection[NetworkServer.connections.Count];
 
-            NetworkServer.connections.CopyTo(connections, 0);
+            //NetworkServer.connections.CopyTo(connections, 0);
 
-            int c = 0;
+            //int c = 0;
 
-            foreach (NetworkConnection nc in connections)
-            {
+            //foreach (NetworkConnection nc in connections)
+            //{
 
-                //			if (nc.isConnected) {
+            //    //			if (nc.isConnected) {
 
-                if (nc != null)
-                {
+            //    if (nc != null)
+            //    {
 
-                    c++;
+            //        c++;
 
-                }
+            //    }
 
-            }
-            return c;
+            //}
+            //return c;
+
+            return networkManager.ConnectedAddresses.Count;
 
         }
 
@@ -233,8 +241,17 @@ namespace StoryEngine
         {
 
             Log("Starting broadcast server.");
-
+                      
             networkBroadcast.StartServer();
+
+        }
+
+        public void startBroadcastServer(int _key,string _message)
+        {
+
+            networkBroadcast.broadcastKey = _key;
+            networkBroadcast.broadcastData = _message;
+            startBroadcastServer();
 
         }
 
@@ -283,6 +300,20 @@ namespace StoryEngine
 
             //networkManager.isNetworkActive
             networkManager.StopNetworkServer();
+
+        }
+
+
+        public string RemoteBroadcastServerAddress
+        {
+            get
+            {
+                return networkBroadcast.serverAddress;
+            }
+            set
+            {
+                Warning("Can't set remote broadcast server address directly");
+            }
 
         }
 
