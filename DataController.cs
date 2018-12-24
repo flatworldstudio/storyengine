@@ -168,8 +168,12 @@ namespace StoryEngine
 
             List<string> NewConnectedAddresses = networkManager.ConnectedAddresses();
 
-            if (TrackConnectedAddresses==null)
-                return NewConnectedAddresses.Count>0 ? true : false;
+            if (TrackConnectedAddresses == null)
+            {
+                TrackConnectedAddresses = NewConnectedAddresses;
+                return NewConnectedAddresses.Count > 0 ? true : false;
+            }
+              
             
             bool NewClient = false;
 

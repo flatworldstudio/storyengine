@@ -115,7 +115,8 @@ namespace StoryEngine
             }
             set
             {
-                Warning("Can't set Pointer value directly.");
+                __pointer = value;
+               // Warning("Can't set Pointer value directly.");
             }
         }
 
