@@ -139,7 +139,7 @@ namespace StoryEngine
 
         public void StartNetworkServer()
         {
-            Log("Starting as Server.");
+            Log("Starting as Server");
             StartServer();
             __connectedAddresses = new List<string>();
 
