@@ -26,7 +26,7 @@ namespace StoryEngine
         NetworkBroadcast networkBroadcast;
         ExtendedNetworkManager networkManager;
         List<string> TrackConnectedAddresses;
-     //   public string RemoteServerAddress,RemoteBroadcastServerAddress;
+        //   public string RemoteServerAddress,RemoteBroadcastServerAddress;
 #endif
 
         AssitantDirector ad;
@@ -59,9 +59,9 @@ namespace StoryEngine
             StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
-         void Awake()
+        void Awake()
         {
-            Instance = this; 
+            Instance = this;
         }
         void Start()
         {
@@ -161,7 +161,8 @@ namespace StoryEngine
         // These are networking methods to be called from datahandler to establish connections.
         // Once connected, handling is done internally by the assistant directors.
 
-        public List<string> ConnectedAddresses(){
+        public List<string> ConnectedAddresses()
+        {
 
             return networkManager.ConnectedAddresses;
 
@@ -176,11 +177,14 @@ namespace StoryEngine
 
             if (TrackConnectedAddresses == null)
             {
-                TrackConnectedAddresses = NewConnectedAddresses;
+                TrackConnectedAddresses = new List<string>();
+
+                foreach (string s in NewConnectedAddresses)
+                    TrackConnectedAddresses.Add(s);
+
                 return NewConnectedAddresses.Count > 0 ? true : false;
             }
-              
-            
+
             bool NewClient = false;
 
             foreach (string address in NewConnectedAddresses)
@@ -192,7 +196,10 @@ namespace StoryEngine
                 }
             }
 
-            TrackConnectedAddresses=NewConnectedAddresses;
+            TrackConnectedAddresses.Clear();
+
+            foreach (string s in NewConnectedAddresses)
+                TrackConnectedAddresses.Add(s);
 
             return NewClient;
 
@@ -201,29 +208,6 @@ namespace StoryEngine
         public int ConnectedClientsCount()
         {
 
-            // Get a count for the number of (active) connections.
-
-            //NetworkConnection[] connections = new NetworkConnection[NetworkServer.connections.Count];
-
-            //NetworkServer.connections.CopyTo(connections, 0);
-
-            //int c = 0;
-
-            //foreach (NetworkConnection nc in connections)
-            //{
-
-            //    //			if (nc.isConnected) {
-
-            //    if (nc != null)
-            //    {
-
-            //        c++;
-
-            //    }
-
-            //}
-            //return c;
-
             return networkManager.ConnectedAddresses.Count;
 
         }
@@ -231,7 +215,7 @@ namespace StoryEngine
         public void startBroadcastClient()
         {
 
-            Log("Starting broadcast client, key: "+ networkBroadcast.broadcastKey);
+            Log("Starting broadcast client, key: " + networkBroadcast.broadcastKey);
             networkBroadcast.StartClient();
 
         }
@@ -246,13 +230,13 @@ namespace StoryEngine
         public void startBroadcastServer()
         {
 
-            Log("Starting broadcast server, key: "+networkBroadcast.broadcastKey);
-                      
+            Log("Starting broadcast server, key: " + networkBroadcast.broadcastKey);
+
             networkBroadcast.StartServer();
 
         }
 
-        public void startBroadcastServer(int _key,string _message)
+        public void startBroadcastServer(int _key, string _message)
         {
 
             networkBroadcast.broadcastKey = _key;

@@ -28,7 +28,7 @@ namespace StoryEngine
 
     public class ExtendedNetworkManager : NetworkManager
     {
-        string ID = "Network manager";
+        string ID = "NetworkManager";
 
         const short connectionMessageCode = 1001;
         List<string> __connectedAddresses;
@@ -139,7 +139,7 @@ namespace StoryEngine
 
         public void StartNetworkServer()
         {
-
+            Log("Starting as Server.");
             StartServer();
             __connectedAddresses = new List<string>();
 
@@ -147,7 +147,7 @@ namespace StoryEngine
 
         public void StopNetworkServer()
         {
-
+            Log("Stopping as Server.");
             StopServer();
             __connectedAddresses.Clear();
         }
@@ -175,6 +175,7 @@ namespace StoryEngine
         public override void OnServerConnect(NetworkConnection connection)
         {
             Log("Remote client connected.");
+      //      Debug.Log("client connecct");
 
             GetConnectedAddresses();
 
@@ -194,10 +195,11 @@ namespace StoryEngine
 
         }
 
-        public  List<string> ConnectedAddresses
+        public List<string> ConnectedAddresses
         {
             get
             {
+                GetConnectedAddresses();
                 return __connectedAddresses;
             }
             set
