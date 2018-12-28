@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 #if NETWORKED
 using UnityEngine.Networking;
-using System.Runtime.Remoting.Messaging;
+//using System.Runtime.Remoting.Messaging;
 
 #endif
 
