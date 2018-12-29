@@ -125,6 +125,10 @@ namespace StoryEngine
             networkManager.onClientDisconnectDelegate = OnClientDisconnect;
             networkManager.onStopClientDelegate = OnStopClient;
 
+            //NetworkMessage.MaxMessageSize=512*1024;
+
+            Log ("Max Message Size: "+  NetworkMessage.MaxMessageSize);
+
 #endif
 
         }
@@ -948,6 +952,8 @@ namespace StoryEngine
         void SendStoryUpdateToClients(StoryUpdate message)
         {
 
+          //  message.MaxMessageSize;
+
 
             // NetworkServer.SendUnreliableToAll(storyCode, message);
             NetworkServer.SendToAll(storyCode, message);
@@ -970,6 +976,9 @@ namespace StoryEngine
 
         void OnStoryUpdateFromServer(NetworkMessage netMsg)
         {
+
+           
+
 
             StoryUpdateStack.Add(netMsg.ReadMessage<StoryUpdate>());
 
