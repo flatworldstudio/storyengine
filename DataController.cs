@@ -41,7 +41,6 @@ namespace StoryEngine
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
-
         void Log(string message)
         {
             StoryEngine.Log.Message(message, ID);
