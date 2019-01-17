@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿//#define LOGVERBOSE
+
+using UnityEngine;
 using System;
 using System.Collections.Generic;
 
@@ -15,16 +17,20 @@ namespace StoryEngine
     public class StoryUpdate : MessageBase
     {
 
+#if LOGVERBOSE
         public string DebugLog;
+#endif
+
         public List<PointerUpdateBundled> pointerUpdates;
         public List<TaskUpdateBundled> taskUpdates;
-     //   public double frameDuration;
 
         public StoryUpdate() : base()
         {
             // Extended constructor.
 
+#if LOGVERBOSE
             DebugLog = "Created storyupdate. \n";
+#endif
 
             pointerUpdates = new List<PointerUpdateBundled>();
             taskUpdates = new List<TaskUpdateBundled>();
@@ -49,9 +55,9 @@ namespace StoryEngine
                 pointerUpdates.RemoveAt(count - 1);
                 return true;
             }
-            pointerUpdate=null;
-                return false;
-           
+            pointerUpdate = null;
+            return false;
+
         }
 
         public bool GetTaskUpdate(out TaskUpdateBundled taskUpdate)
@@ -65,16 +71,20 @@ namespace StoryEngine
                 taskUpdates.RemoveAt(count - 1);
                 return true;
             }
-            taskUpdate=null;
+
+            taskUpdate = null;
             return false;
 
         }
-   
+
         public void AddStoryPointerUpdate(PointerUpdateBundled pointerUpdateMessage)
         {
 
             pointerUpdates.Add(pointerUpdateMessage);
+
+#if LOGVERBOSE
             DebugLog += "Added pointer update. \n";
+#endif
 
         }
 
@@ -82,21 +92,17 @@ namespace StoryEngine
         {
 
             taskUpdates.Add(taskUpdateMessage);
+
+#if LOGVERBOSE
             DebugLog += "Added task update. \n";
+#endif
 
         }
 
         public override void Deserialize(NetworkReader reader)
         {
 
-            // Write their current framerate.
 
-     //       frameDuration= reader.ReadDouble();
-
-     //       DebugLog+="Their average duration: "+ frameDuration;
-
-            // Pointer updates first. First get the number of messages, then deserialise them.
-          
             Int16 count = reader.ReadInt16();
 
             //Debug.Log("pointer updates "+count);
@@ -105,7 +111,12 @@ namespace StoryEngine
             {
 
                 pointerUpdates.Add(new PointerUpdateBundled());
+
+#if LOGVERBOSE
                 DebugLog += pointerUpdates[n].Deserialize(ref reader);
+#else
+                pointerUpdates[n].Deserialize(ref reader);
+#endif
 
             }
 
@@ -119,7 +130,12 @@ namespace StoryEngine
             {
 
                 taskUpdates.Add(new TaskUpdateBundled());
+
+#if LOGVERBOSE
                 DebugLog += taskUpdates[n].Deserialize(ref reader);
+#else
+                taskUpdates[n].Deserialize(ref reader);
+#endif
 
             }
 
@@ -128,134 +144,78 @@ namespace StoryEngine
         public override void Serialize(NetworkWriter writer)
         {
 
-            // Write our current framerate.
-
-         //   writer.Write(frameDuration);
-
-        //    DebugLog+="Our average duration: "+ frameDuration;
-
             // Pointer updates first. First write the number of messages, then serialise them.
 
-            Int16 count = (Int16) pointerUpdates.Count;
-
-            writer.Write (count);
-
-            for (int i = 0; i < count; i++){
-                
-                DebugLog += pointerUpdates[i].Serialize(ref writer);
-
-            }
-            
-            // Task updates next. First write the number of messages, then serialise them.
-            count = (Int16) taskUpdates.Count;
+            Int16 count = (Int16)pointerUpdates.Count;
 
             writer.Write(count);
 
-            for (int i = 0; i < count; i++){
+            for (int i = 0; i < count; i++)
+            {
 
-                DebugLog += taskUpdates[i].Serialize(ref writer);
+#if LOGVERBOSE
+                DebugLog += pointerUpdates[i].Serialize(ref writer);
+#else
+                pointerUpdates[i].Serialize(ref writer);
+#endif
 
             }
-            
+
+            // Task updates next. First write the number of messages, then serialise them.
+            count = (Int16)taskUpdates.Count;
+
+            writer.Write(count);
+
+            for (int i = 0; i < count; i++)
+            {
+
+#if LOGVERBOSE
+                DebugLog += taskUpdates[i].Serialize(ref writer);
+#else
+                taskUpdates[i].Serialize(ref writer);
+#endif
+
+            }
+
             //Debug.Log("serialised " +DebugLog);
 
         }
 
     }
 
-
-
-
-    // bundled
-
-
-    //public class PointerUpdate : MessageBase
-    //{
-
-    //    public string storyPointID;
-    //    public bool killed = false;
-
-    //}
-
-
-    //public class PointerUpdateBundled
-    //{
-
-    //    public string storyPointID;
-    //    public bool killed = false;
-
-
-    //    public string Deserialize(ref NetworkReader reader)
-    //    {
-
-    //        string DebugLog = "Deserialising pointer update.";
-
-    //        storyPointID = reader.ReadString();
-    //        killed = reader.ReadBoolean();
-
-    //        DebugLog += "Storypoint ID: " + storyPointID;
-    //        DebugLog += "Killed: " + killed.ToString();
-
-    //        return DebugLog;
-
-    //    }
-
-    //    public string Serialize(ref NetworkWriter writer)
-    //    {
-
-    //        string DebugLog = "Serialising pointer update.";
-
-    //        DebugLog += "Storypoint ID: " + storyPointID;
-    //        DebugLog += "Killed: " + killed.ToString();
-
-    //        writer.Write(storyPointID);
-    //        writer.Write(killed);
-
-    //        return DebugLog;
-
-    //    }
-
-    //}
-
-
     public class PointerUpdateBundled
     {
 
         // only has a string, because we just telling clients kill this storyline.
 
-
-        //public string storyPointID;
-        //public bool killed = false;
-
-       public string StoryLineName;
+        public string StoryLineName;
 
         public string Deserialize(ref NetworkReader reader)
         {
 
-            string DebugLog = "Deserialising pointer update.";
-
             StoryLineName = reader.ReadString();
-            //killed = reader.ReadBoolean();
 
+#if LOGVERBOSE
+            string DebugLog = "Deserialising pointer update.";
             DebugLog += "Storyline: " + StoryLineName;
-            //DebugLog += "Killed: " + killed.ToString();
-
             return DebugLog;
+#else
+            return "";
+#endif
 
         }
 
         public string Serialize(ref NetworkWriter writer)
         {
-
-            string DebugLog = "Serialising pointer update.";
-
-            DebugLog += "Storyline: " + StoryLineName;
-            //DebugLog += "Killed: " + killed.ToString();
-
             writer.Write(StoryLineName);
-            //writer.Write(killed);
 
-            return DebugLog;
+#if LOGVERBOSE
+            string DebugLog = "Serialising pointer update.";
+            DebugLog += "Storyline: " + StoryLineName;
+ return DebugLog;
+#else
+            return "";
+#endif
 
         }
 
@@ -297,7 +257,9 @@ namespace StoryEngine
         public List<string> updatedStringArrayNames;
         public List<string[]> updatedStringArrayValues;
 
+#if LOGVERBOSE
         public string debug;
+#endif
 
         public TaskUpdateBundled() : base()
         {
@@ -336,23 +298,24 @@ namespace StoryEngine
 
         public string Deserialize(ref NetworkReader reader)
         {
-            // When deserialising we handle clearing here.
-
-            //Clear();
-
+#if LOGVERBOSE
             debug = "Task update deserialing.";
-
+#endif
             // Custom deserialisation.
 
             pointID = reader.ReadString();
 
+#if LOGVERBOSE
             debug += "/ pointid: " + pointID;
+#endif
 
             // Deserialise updated int values.
 
             int intCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated ints: " + intCount;
+#endif
 
             for (int i = 0; i < intCount; i++)
             {
@@ -369,7 +332,9 @@ namespace StoryEngine
 
             int floatCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated floats: " + floatCount;
+#endif
 
             for (int i = 0; i < floatCount; i++)
             {
@@ -386,7 +351,9 @@ namespace StoryEngine
 
             int quaternionCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated quaternions: " + quaternionCount;
+#endif
 
             for (int i = 0; i < quaternionCount; i++)
             {
@@ -403,7 +370,9 @@ namespace StoryEngine
 
             int vector3Count = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated vector3s: " + vector3Count;
+#endif
 
             for (int i = 0; i < vector3Count; i++)
             {
@@ -420,7 +389,9 @@ namespace StoryEngine
 
             int stringCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated strings: " + stringCount;
+#endif
 
             for (int i = 0; i < stringCount; i++)
             {
@@ -438,7 +409,9 @@ namespace StoryEngine
 
             int ushortCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated ushort arrays: " + ushortCount;
+#endif
 
             for (int i = 0; i < ushortCount; i++)
             {
@@ -465,7 +438,9 @@ namespace StoryEngine
 
             int byteCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated ushort arrays: " + byteCount;
+#endif
 
             for (int i = 0; i < byteCount; i++)
             {
@@ -492,7 +467,9 @@ namespace StoryEngine
 
             int vector3ArrayCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated vector3 arrays: " + vector3ArrayCount;
+#endif
 
             for (int i = 0; i < vector3ArrayCount; i++)
             {
@@ -519,7 +496,9 @@ namespace StoryEngine
 
             int boolArrayCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated bool arrays: " + boolArrayCount;
+#endif
 
             for (int i = 0; i < boolArrayCount; i++)
             {
@@ -546,7 +525,9 @@ namespace StoryEngine
 
             int stringArrayCount = reader.ReadInt32();
 
+#if LOGVERBOSE
             debug += "/ updated string arrays: " + stringArrayCount;
+#endif
 
             for (int i = 0; i < stringArrayCount; i++)
             {
@@ -569,217 +550,186 @@ namespace StoryEngine
 
             }
 
-
+#if LOGVERBOSE
             return debug;
+#else
+            return "";
+#endif
 
         }
 
         public string Serialize(ref NetworkWriter writer)
         {
-
-            debug = "Serialising: ";
-
             // Custom serialisation.
 
+#if LOGVERBOSE
+            debug = "Serialising: ";
+#endif
+
             writer.Write(pointID);
+
+#if LOGVERBOSE
             debug += "/ pointid: " + pointID;
+#endif
 
             // Serialise updated int values.
-
             writer.Write(updatedIntNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated ints: " + updatedIntNames.Count;
+#endif
 
             for (int i = 0; i < updatedIntNames.Count; i++)
             {
-
                 writer.Write(updatedIntNames[i]);
                 writer.Write(updatedIntValues[i]);
-
             }
 
             // Serialise updated float values.
-
             writer.Write(updatedFloatNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated floats: " + updatedFloatNames.Count;
+#endif
 
             for (int i = 0; i < updatedFloatNames.Count; i++)
             {
-
                 writer.Write(updatedFloatNames[i]);
                 writer.Write(updatedFloatValues[i]);
-
             }
 
             // Serialise updated quaternion values.
-
             writer.Write(updatedQuaternionNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated quaternions: " + updatedQuaternionNames.Count;
+#endif
 
             for (int i = 0; i < updatedQuaternionNames.Count; i++)
             {
-
                 writer.Write(updatedQuaternionNames[i]);
                 writer.Write(updatedQuaternionValues[i]);
-
             }
 
             // Serialise updated vector3 values.
-
             writer.Write(updatedVector3Names.Count);
 
+#if LOGVERBOSE
             debug += "/ updated vector3's: " + updatedVector3Names.Count;
+#endif
 
             for (int i = 0; i < updatedVector3Names.Count; i++)
             {
-
                 writer.Write(updatedVector3Names[i]);
                 writer.Write(updatedVector3Values[i]);
-
             }
 
             // Serialise updated string values.
-
             writer.Write(updatedStringNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated strings: " + updatedStringNames.Count;
+#endif
 
             for (int i = 0; i < updatedStringNames.Count; i++)
             {
-
                 writer.Write(updatedStringNames[i]);
                 writer.Write(updatedStringValues[i]);
-
             }
 
             // Serialise updated ushort values.
-
             writer.Write(updatedUshortNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated ushorts: " + updatedUshortNames.Count;
+#endif
 
             for (int i = 0; i < updatedUshortNames.Count; i++)
             {
-
                 writer.Write(updatedUshortNames[i]); // name
-
                 writer.Write(updatedUshortValues[i].Length); // length
 
                 for (int j = 0; j < updatedUshortValues[i].Length; j++)
-                {
-
                     writer.Write(updatedUshortValues[i][j]); // data
-
-                }
-
 
             }
 
             // Serialise updated byte values.
-
             writer.Write(updatedByteNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated bytes: " + updatedByteNames.Count;
+#endif
 
             for (int i = 0; i < updatedByteNames.Count; i++)
             {
-
                 writer.Write(updatedByteNames[i]); // name
-
                 writer.Write(updatedByteValues[i].Length); // length
 
                 for (int j = 0; j < updatedByteValues[i].Length; j++)
-                {
-
                     writer.Write(updatedByteValues[i][j]); // data
-
-                }
-
 
             }
 
-
             // Serialise updated vector3 array values.
-
             writer.Write(updatedVector3ArrayNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated vector3 arrays: " + updatedVector3ArrayNames.Count;
+#endif
 
             for (int i = 0; i < updatedVector3ArrayNames.Count; i++)
             {
-
                 writer.Write(updatedVector3ArrayNames[i]); // name
-
                 writer.Write(updatedVector3ArrayValues[i].Length); // length
 
                 for (int j = 0; j < updatedVector3ArrayValues[i].Length; j++)
-                {
-
                     writer.Write(updatedVector3ArrayValues[i][j]); // data
-
-                }
-
 
             }
 
             // Serialise updated bool array values.
-
             writer.Write(updatedBoolArrayNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated bool arrays: " + updatedBoolArrayNames.Count;
+#endif
 
             for (int i = 0; i < updatedBoolArrayNames.Count; i++)
             {
-
                 writer.Write(updatedBoolArrayNames[i]); // name
-
                 writer.Write(updatedBoolArrayValues[i].Length); // length
 
                 for (int j = 0; j < updatedBoolArrayValues[i].Length; j++)
-                {
-
                     writer.Write(updatedBoolArrayValues[i][j]); // data
-
-                }
-
 
             }
 
             // Serialise updated string array values.
-
             writer.Write(updatedStringArrayNames.Count);
 
+#if LOGVERBOSE
             debug += "/ updated string arrays: " + updatedStringArrayNames.Count;
+#endif
 
             for (int i = 0; i < updatedStringArrayNames.Count; i++)
             {
-
                 writer.Write(updatedStringArrayNames[i]); // name
-
                 writer.Write(updatedStringArrayValues[i].Length); // length
 
                 for (int j = 0; j < updatedStringArrayValues[i].Length; j++)
-                {
-
                     writer.Write(updatedStringArrayValues[i][j]); // data
-
-                }
-
 
             }
 
+#if LOGVERBOSE
             return debug;
+#else 
+            return "";
+#endif
 
         }
-
     }
-
-
-
-
-
 
     /*
     public class TaskUpdate : MessageBase
