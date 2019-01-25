@@ -1,6 +1,7 @@
 ﻿
 using StoryEngine;
 using UnityEngine;
+using StoryEngine.IO;
 
 public class DataHandlerExample : MonoBehaviour
 {
@@ -67,8 +68,7 @@ public class DataHandlerExample : MonoBehaviour
 
             case "task":
 
-                Log.Message("Executing task",me);
-
+                Log.Message("Executing task", me);
                 done = true;
                 break;
 

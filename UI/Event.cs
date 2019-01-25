@@ -32,14 +32,19 @@ namespace StoryEngine.UI
         public float tapCount;
         public string callback;
 
+        public Plane plane; // the plane (and possibly interface) that this event plays out in.
+
+        //public InterFace interFace;
+
         Vector2 __position;
 
-        public Vector2 position {
+        public Vector2 position
+        {
 
             get
             {
-                __position.x=x;
-                __position.y=y;
+                __position.x = x;
+                __position.y = y;
                 return __position;
             }
             set
@@ -48,12 +53,11 @@ namespace StoryEngine.UI
 
             }
 
-
         }
 
         public Event()
         {
-            __position=Vector2.zero;
+            __position = Vector2.zero;
 
             target2D = null;
             target3D = null;
@@ -64,6 +68,7 @@ namespace StoryEngine.UI
             action = ACTION.VOID;
             touch = TOUCH.NONE;
             direction = DIRECTION.FREE;
+            callback="";
 
             isInert = false;
             isSpringing = false;
@@ -97,6 +102,353 @@ namespace StoryEngine.UI
             return result;
         }
 
+        //void applyUserInteraction(Event ui)
+        public void GetUserActivity()
+        {
+
+            //void applyUserInteraction(Event ui, Interface theUiState)
+            //{
+
+            //cycle++;
+            //cycle = cycle % 1000;
+
+            // check user mouse/touch interaction and populate this passed-in UIEVENT accordingly
+
+#if UNITY_IOS
+                        Event storeUi = ui.clone();
+#endif
+
+            touch = TOUCH.NONE;
+
+            dd = 0;
+
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+
+            //      if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer) {
+
+            // if we're on macos .... or windows?
+
+            x = Input.mousePosition.x;
+            y = Input.mousePosition.y;
+            dx = x - px;
+            //            ui.dx = ui.dx / currentScale;
+
+            dy = y - py;
+            //         ui.dy = ui.dy / currentScale;
+
+            px = x;
+            py = y;
+
+            if (Input.GetButton("Fire1"))
+            {
+
+                //ui.x = Input.mousePosition.x;
+                //ui.y = Input.mousePosition.y;
+                //ui.dx = ui.x - ui.px;
+                //ui.dx = ui.dx / currentScale;
+
+                //dy = ui.y - ui.py;
+                //ui.dy = ui.dy / currentScale;
+
+                //ui.px = ui.x;
+                //ui.py = ui.y;
+
+                if (!firstFrame)
+                { // skip first frame because delta value will jump.
+
+                    action = ACTION.SINGLEDRAG;
+                    touch = TOUCH.TOUCHING;
+
+                    if (Input.GetKey(KeyCode.Space))
+                    {
+                        // equivalent to doubletouch dragging only
+                        action = ACTION.DOUBLEDRAG;
+                    }
+                    if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+                    {
+                        // equivalent to doubletouch pinching only
+                        action = ACTION.DOUBLEDRAG;
+                        dd = dx;
+                        dx = 0;
+                        dy = 0;
+                    }
+                }
+                else
+                {
+                    firstFrame = false;
+                    touch = TOUCH.BEGAN;
+                    dx = 0;
+                    dy = 0;
+                }
+
+                trackTap();
+            }
+
+            if (Input.GetButtonUp("Fire1"))
+            {
+
+                touch = TOUCH.ENDED;
+
+                if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+                {
+                    // equivalent to doubletouch pinching only
+                    action = ACTION.DOUBLEDRAG;
+                    dd = dx;
+                    dx = 0;
+                    dy = 0;
+                }
+
+
+                if (wasTap())
+                {
+
+                    action = ACTION.TAP;
+
+                }
+                else
+                {
+
+                }
+
+                firstFrame = true;
+
+            }
+            //      }
+
+#endif
+
+
+#if UNITY_IOS
+            
+//      if (Application.platform == RuntimePlatform.IPhonePlayer) {
+
+            // if we're on ios
+
+            if (Input.touchCount == 1) {
+                // review single touch
+                Vector2 tp = Input.GetTouch (0).position;
+
+                switch (Input.GetTouch (0).phase) {
+                case TouchPhase.Began:
+                    x = tp.x;
+                    y = tp.y;
+                    trackTap (ui);
+                    touch = TOUCH.BEGAN;
+                    break;
+
+                case TouchPhase.Moved:
+                    Vector2 touchDelta = Input.GetTouch (0).deltaPosition;
+
+//      dx = touchDelta.x / Screen.height * 720f;
+//                  dy = touchDelta.y / Screen.height * 720f;
+
+        dx = touchDelta.x /currentScale;
+        dy = touchDelta.y /currentScale;
+
+
+                    action = ACTION.SINGLEDRAG;
+                    touch = TOUCH.TOUCHING;
+                    trackTap (ui);
+                    break;
+
+                case TouchPhase.Stationary:
+                    dx = 0;
+                    dy = 0;
+                    action = ACTION.SINGLEDRAG;
+                    touch = TOUCH.TOUCHING;
+                    trackTap (ui);
+                    break;
+
+                case TouchPhase.Ended:
+
+                    touch = TOUCH.ENDED;
+
+                    if (wasTap (ui)) {
+                        action = ACTION.TAP;
+                    } else {
+
+                    }
+                    break;
+
+                default:
+                    break;
+                }
+            }
+
+            if (Input.touchCount == 2) {
+                // review double touch 
+                TouchPhase phase0 = Input.GetTouch (0).phase;
+                TouchPhase phase1 = Input.GetTouch (1).phase;
+
+                Vector2 tp0 = Input.GetTouch (0).position;
+                Vector2 tp1 = Input.GetTouch (1).position;
+
+                if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && phase1 == TouchPhase.Began) {
+                    // if one finger was touching, we leave the targets untouched, and initialise the d value
+                    d = Vector2.Distance (tp0, tp1);
+                    touch = TOUCH.TOUCHING;
+
+                } else if (phase0 == TouchPhase.Began && phase1 == TouchPhase.Began) {
+                    // if both start at the same time, aim in between to set targets and initialise the d value
+                    x = (tp0.x + tp1.x) / 2f;
+                    y = (tp0.y + tp1.y) / 2f;
+                    d = Vector2.Distance (tp0, tp1);
+                    touch = TOUCH.BEGAN;
+
+                } else if (phase0 == TouchPhase.Ended && phase1 == TouchPhase.Began) {
+                    // unlikely but could happen: flicking fingers in a single frame. catch the start of a new single touch.
+                    x = tp1.x;
+                    y = tp1.y;
+                    touch = TOUCH.BEGAN;
+
+                } else if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && (phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary)) {
+                    // dragging
+                    Vector2 touchDelta0 = Input.GetTouch (0).deltaPosition;
+                    Vector2 touchDelta1 = Input.GetTouch (1).deltaPosition;
+
+//                  dx = (touchDelta0.x + touchDelta1.x) / 2f / Screen.height * 720f; 
+//                  dy = (touchDelta0.y + touchDelta1.y) / 2f / Screen.height * 720f; 
+
+        dx = (touchDelta0.x + touchDelta1.x) / 2f /currentScale; 
+        dy = (touchDelta0.y + touchDelta1.y) / 2f /currentScale; 
+
+                    d = Vector2.Distance (tp0, tp1);
+                    dd = d - stored;
+
+                    action = ACTION.DOUBLEDRAG;
+                    touch = TOUCH.TOUCHING;
+                }
+            }
+
+//      }
+#endif
+        }
+
+        void trackTap()
+        {
+            tapCount += Time.deltaTime;
+        }
+
+        bool wasTap()
+        {
+            bool result = false;
+
+            if (dx > -10f && dx < 10f && dy > -10f && dy < 10f && tapCount > 0 && tapCount < 0.25f)
+            {
+                result = true;
+                //              Log.Message ( cycle + " tap detected");
+            }
+            tapCount = 0;
+            return result;
+        }
+
+        public void SetTargets()
+        {
+
+            if (plane == null || plane.interFace == null)
+                return;
+
+
+            // finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
+
+            RaycastHit hit;
+
+            Vector2 uiPosition = new Vector2(x, y);
+
+            Vector2 uiPositionOffset = uiPosition - plane.interFace.GetAnchorOffset();
+
+
+            // Correct for the layout of the plane, and possibly in the plane. The offset can be controlled via the plane drawing delegate.
+
+            //Vector2 anchorPos = _plane.interFace.gameObject.GetComponent<RectTransform>().anchoredPosition;
+
+            //uiPosition -= anchorPos;
+            //uiPosition -= _plane.screenOffset;
+
+            //Vector3 screenPosition =new Vector3(uiPosition.x,uiPosition.y,0); 
+
+            // cast a 3d ray from the camera we are controlling to find any 3D objects.
+
+            target3D = null;
+
+            if (plane.interFace.uiCam3D != null)
+            {
+
+                UnityEngine.Camera activeCamera = plane.interFace.uiCam3D.camera;
+
+                Ray ray = activeCamera.ScreenPointToRay(uiPositionOffset);
+
+                Debug.DrawRay(ray.origin, 10f * ray.direction, Color.red, 3f, false);
+
+                int layerMask = 1 << 8; // only check colliders in layer '8'. 
+
+                if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+                {
+
+                    target3D = hit.transform.gameObject;
+                    Debug.Log("raycast hit: " + hit.transform.gameObject.name);
+
+                }
+
+            }
+
+            // cast a 2d ray in the canvas we're controlling.
+
+            GraphicRaycaster gfxRayCaster = plane.interFace.canvasObject.GetComponent<GraphicRaycaster>();
+
+            //Create the PointerEventData with null for the EventSystem
+
+            PointerEventData pointerEventData = new PointerEventData(null);
+
+            //Set required parameters, in this case, mouse position
+
+            pointerEventData.position = uiPosition;
+
+            //uiPosition-=_plane.interFace.GetAnchorOffset();
+
+            //Create list to receive all results
+
+            List<RaycastResult> results = new List<RaycastResult>();
+
+            //Raycast it
+
+            gfxRayCaster.Raycast(pointerEventData, results);
+
+            if (results.Count > 0)
+            {
+
+                target2D = results[0].gameObject;
+
+                Debug.Log("targeting object2d " + target2D.name);
+                // find out if this 2d object is a button.
+
+                Button checkButton = null;
+                if (plane.interFace.uiButtons.TryGetValue(target2D.transform.name, out checkButton))
+                {
+                    Debug.Log("targeting button " + checkButton.name);
+                }
+
+                targetButton = checkButton;
+
+
+                // Set ui event drag target and constraint. We don't have any ortho direction as this point, so we get the 'free dragging' one.
+
+                //      ui.dragTarget = checkButton.GetDragTarget();
+                //     ui.dragConstraint = checkButton.GetDragConstraint();
+
+
+            }
+            else
+            {
+
+                target2D = null;
+
+            }
+        }
+
+
+
         public string toString()
         {
             string result = "UI event: ";
@@ -125,306 +477,12 @@ namespace StoryEngine.UI
                 result += " 2d: " + target2D.transform.name;
             }
 
-       
+
             return result;
         }
     }
 
 
 
-    public delegate void OnTap(Button theButton);
-
-
-    public class Button
-    {
-        public string name;
-        public string callback;
-        public GameObject gameObject;
-        GameObject dragTarget, dragTargetHorizontal, dragTargetVertical;
-
-      public  OnTap onTap;
-
-        Constraint constraint, constraintHorizontal, constraintVertical;
-
-        public bool orthoDragging;
-
-        public Image image;
-        public Color color;
-        public float brightness, targetBrightness, stepBrightness;
-
-        Vector2 lastPosition, deltaPosition;
-        float lastAngle, deltaAngle;
-
-        void Initialise(string _name)
-        {
-            callback = "";
-            name = _name;
-            color = new Color(1, 1, 1, 1);
-            brightness = 0f;
-            targetBrightness = 0.75f;
-            stepBrightness = 1f / 0.25f;
-
-            gameObject = GameObject.Find(_name);
-
-            if (gameObject != null)
-            {
-                image = gameObject.GetComponent<Image>();
-                if (image!=null){
-                image.color = brightness * color;
-                }
-            }
-            else
-            {
-                // catch exception
-                Log.Error("ERROR: uibutton gameobject not found: " + _name);
-            }
-
-            onTap = DefaultBlink;
-        }
-
-        void DefaultBlink(Button _button)
-        {
-
-            _button.brightness = 1f;
-            _button.targetBrightness = 0.75f;
-            _button.stepBrightness = 0.25f;
-
-        }
-
-        public void Tap()
-        {
-            if (onTap != null)
-                onTap(this);
-
-        }
-
-        public Button()
-        {
-            lastPosition = Vector2.zero;
-        }
-
-        public Button(string _name)
-        {
-            Initialise(_name);
-            constraint = new Constraint();
-            dragTarget = gameObject;
-            lastPosition = Vector2.zero;
-            orthoDragging = false;
-        }
-
-        public Button(string _name, GameObject _dragTarget)
-        {
-            Initialise(_name);
-            dragTarget = _dragTarget;
-            constraint = new Constraint();
-            lastPosition = Vector2.zero;
-            orthoDragging = false;
-        }
-
-        public Button(string _name, GameObject _dragTarget, Constraint _constraint)
-        {
-            Initialise(_name);
-            dragTarget = _dragTarget;
-            constraint = _constraint;
-            lastPosition = Vector2.zero;
-            orthoDragging = false;
-        }
-
-        public Button(string _name, GameObject _dragTargetHorizontal, Constraint _constraintHorizontal, GameObject _dragTargetVertical, Constraint _constraintVertical)
-        {
-            Initialise(_name);
-
-            // Button with differentiated constraints for horizontal and vertical dragging. Dragging will snap to initial direction.
-
-            constraint = new Constraint();
-            dragTarget = gameObject;
-
-            dragTargetHorizontal = _dragTargetHorizontal;
-            constraintHorizontal = _constraintHorizontal;
-
-            dragTargetVertical = _dragTargetVertical;
-            constraintVertical = _constraintVertical;
-
-            orthoDragging = true;
-
-            lastPosition = Vector2.zero;
-        }
-
-
-        public GameObject GetDragTarget(DIRECTION dir = DIRECTION.FREE)
-        {
-            // Retrieve drag target object based on drag direction
-
-            switch (dir)
-            {
-                case DIRECTION.HORIZONTAL:
-                    return dragTargetHorizontal;
-
-                case DIRECTION.VERTICAL:
-                    return dragTargetVertical;
-
-                case DIRECTION.FREE:
-                default:
-                    return dragTarget;
-
-            }
-        }
-
-        public bool HasDragTarget(GameObject target)
-        {
-
-            // Check if this button targets a given gameobject as its dragtargets.
-
-            if (!orthoDragging && dragTarget == target)
-                return true;
-
-            if (orthoDragging && (dragTargetHorizontal == target || dragTargetVertical == target))
-                return true;
-
-            return false;
-
-        }
-
-
-        public Constraint GetConstraint(DIRECTION dir = DIRECTION.FREE)
-        {
-            // Retrieve  constraint  based on drag direction
-
-            switch (dir)
-            {
-                case DIRECTION.HORIZONTAL:
-                    return constraintHorizontal;
-
-                case DIRECTION.VERTICAL:
-                    return constraintVertical;
-
-                case DIRECTION.FREE:
-                default:
-                    return constraint;
-
-            }
-        }
-
-
-        public float GetDeltaAngle()
-        {
-
-            Vector3 anchor = dragTarget.GetComponent<RectTransform>().anchoredPosition;
-            Vector2 relativePosition = new Vector2(anchor.x, anchor.y) - constraint.anchor;
-
-            float angle = Mathf.Atan2(relativePosition.y, relativePosition.x);
-
-            deltaAngle = lastAngle - angle;
-            lastAngle = angle;
-
-            return deltaAngle;
-        }
-
-
-        public Vector2 GetDeltaPosition()
-        {
-
-            deltaPosition.x = gameObject.transform.position.x - lastPosition.x;
-            deltaPosition.y = gameObject.transform.position.y - lastPosition.y;
-
-            lastPosition.x = gameObject.transform.position.x;
-            lastPosition.y = gameObject.transform.position.y;
-
-            return deltaPosition;
-        }
-          
-
-        public void ApplyColour()
-        {
-            if (brightness < targetBrightness)
-            {
-                brightness += stepBrightness * Time.deltaTime;
-                if (brightness >= targetBrightness)
-                {
-                    brightness = targetBrightness;
-                }
-            }
-            if (brightness > targetBrightness)
-            {
-                brightness -= stepBrightness * Time.deltaTime;
-                if (brightness <= targetBrightness)
-                {
-                    brightness = targetBrightness;
-                }
-            }
-
-            if (image!=null)
-            image.color = brightness * color;
-        }
-    }
-
-
-    public class Constraint
-    {
-        public Vector3 hardClampMin, hardClampMax;
-        public bool hardClamp;
-
-        public Vector3 edgeSpringMin, edgeSpringMax;
-        public bool edgeSprings;
-
-        public Vector2[] springPositions;
-        public bool springs;
-
-        public Vector2 anchor;
-        public float radiusClampMin, radiusClampMax;
-        public bool radiusClamp;
-
-        public bool pitchClamp;
-        public float pitchClampMin, pitchClampMax;
-        static Constraint __empty;
-
-
-        public Constraint()
-        {
-            hardClamp = false;
-            edgeSprings = false;
-            springs = false;
-            radiusClamp = false;
-            pitchClamp = false;
-        }
-
-        public void AddPitchClamp(float _min, float _max){
-
-            pitchClampMin=_min;
-            pitchClampMax=_max;
-            pitchClamp=true;
-
-        }
-
-        public void AddHardClamp(Vector3 _min, Vector3 _max){
-
-            hardClampMin=_min;
-            hardClampMax=_max;
-            hardClamp=true;
-
-        }
-
-        static public Constraint empty
-        {
-
-            get
-            {
-                if (__empty == null)
-                    __empty = new Constraint();
-
-                return __empty;
-            }
-            set
-            {
-
-            }
-
-
-        }
-
-
-
-
-    }
 
 }

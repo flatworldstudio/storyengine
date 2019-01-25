@@ -10,7 +10,7 @@ namespace StoryEngine.UI
         public static GameObject DefaultPanePrefab;
         public static float DefaultPaneMargin;
 
-        public static void AddDefaultPane(Interface _interface)
+        public static void AddDefaultPane(InterFace _interface)
         {
 
             if (_interface != null)
@@ -21,6 +21,7 @@ namespace StoryEngine.UI
                 {
                     _interface.gameObject = GameObject.Instantiate(DefaultPanePrefab);
                     _interface.gameObject.transform.SetParent(_interface.canvasObject.transform, false);
+                    _interface.gameObject.name=_interface.name;
                 }
                 else
                 {
@@ -36,6 +37,7 @@ namespace StoryEngine.UI
 
                     Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
                     _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+
                     Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
                     _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
 
@@ -61,13 +63,12 @@ namespace StoryEngine.UI
         }
 
 
-        public static void ResizeDefaultPane(Interface _interface)
+        public static void ResizeDefaultPane(InterFace _interface)
         {
 
             if (_interface != null)
 
             {
-                              
 
                 float m = DefaultPaneMargin;
                 Plane plane = _interface.plane;
@@ -105,10 +106,16 @@ namespace StoryEngine.UI
         public static void Drag2D(object sender, UIArgs uxArgs)
         {
 
-            if (uxArgs.uiEvent.targetButton == null)
+            if (uxArgs.uiEvent.targetButton == null) 
                 return;
 
-            Translate2D(uxArgs.uiEvent.targetButton.GetDragTarget(uxArgs.uiEvent.direction), uxArgs.delta, uxArgs.uiEvent.targetButton.GetConstraint(uxArgs.uiEvent.direction), uxArgs.uiEvent);
+            GameObject dragTarget = uxArgs.uiEvent.targetButton.GetDragTarget(uxArgs.uiEvent.direction);
+            Constraint constraint = uxArgs.uiEvent.targetButton.GetConstraint(uxArgs.uiEvent.direction);
+
+            if (dragTarget==null || constraint==null)
+                return; // don't drag if no target or constraint availabe.
+
+            Translate2D(dragTarget, uxArgs.delta, constraint, uxArgs.uiEvent);
 
         }
 
@@ -300,9 +307,11 @@ namespace StoryEngine.UI
 
         public static void LongitudinalCamera(object sender, UIArgs uxArgs)
         {
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
+
             GameObject cameraObject, cameraInterest;
-            cameraObject = uxArgs.activeInterface.uiCam3D.cameraObject;
-            cameraInterest = uxArgs.activeInterface.uiCam3D.cameraInterest;
+            cameraObject = interFace.uiCam3D.cameraObject;
+            cameraInterest = interFace.uiCam3D.cameraInterest;
 
             float delta = uxArgs.delta.z;
 
@@ -324,10 +333,18 @@ namespace StoryEngine.UI
         static void TranslateCamera(object sender, UIArgs uxArgs)
         {
 
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
+
+            //if (uxArgs.uiEvent.plane.interFace
+
             GameObject cameraObject;
-            cameraObject = uxArgs.activeInterface.uiCam3D.cameraObject;
+
+            cameraObject = interFace.uiCam3D.cameraObject;
+
             //cameraInterest = uxArgs.activeInterface.uiCam3D.cameraInterest;
-            Constraint constraint = uxArgs.activeInterface.uiCam3D.constraint;
+
+            Constraint constraint = interFace.uiCam3D.constraint;
+
             Vector3 delta = uxArgs.delta;
 
             //Vector3 cameraPositionIn = cameraObject.transform.position;
@@ -355,11 +372,11 @@ namespace StoryEngine.UI
 
         public static void LateralCamera(object sender, UIArgs uxArgs)
         {
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
 
-            GameObject cameraObject, cameraInterest;
-            cameraObject = uxArgs.activeInterface.uiCam3D.cameraObject;
-            cameraInterest = uxArgs.activeInterface.uiCam3D.cameraInterest;
-            Constraint constraint = uxArgs.activeInterface.uiCam3D.constraint;
+            GameObject cameraObject = interFace.uiCam3D.cameraObject;
+            GameObject cameraInterest = interFace.uiCam3D.cameraInterest;
+            Constraint constraint = interFace.uiCam3D.constraint;
             Vector3 delta = -1f * uxArgs.delta;
 
             Vector3 cameraPositionIn = cameraObject.transform.position;
@@ -393,10 +410,12 @@ namespace StoryEngine.UI
 
         static public void OrbitCamera(object sender, UIArgs uxArgs)
         {
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
 
-            GameObject cameraObject, cameraInterest;
-            cameraObject = uxArgs.activeInterface.uiCam3D.cameraObject;
-            cameraInterest = uxArgs.activeInterface.uiCam3D.cameraInterest;
+
+            GameObject cameraObject = interFace.uiCam3D.cameraObject;
+            GameObject cameraInterest = interFace.uiCam3D.cameraInterest;
+            Constraint orbitConstraint = interFace.uiCam3D.constraint;
 
             if (cameraInterest != null && cameraObject != null)
             {
@@ -410,7 +429,7 @@ namespace StoryEngine.UI
                 euler.x -= uxArgs.delta.y * degreesPerPixel;
                 euler.z = 0;
 
-                Constraint orbitConstraint = uxArgs.activeInterface.uiCam3D.constraint;
+                //Constraint orbitConstraint = interFace.uiCam3D.constraint;
 
                 if (orbitConstraint != null && orbitConstraint.pitchClamp)
                 {
@@ -435,6 +454,7 @@ namespace StoryEngine.UI
         {
 
             Log.Message("SOME ACTION TRIGGERRED");
+          //  Debug.Log
             //uxArgs.uiEvent.target2D
 
         }
@@ -552,34 +572,39 @@ void HullClamp{
 
         public static void clearSelectedObjects(object sender, UIArgs uxArgs)
         {
-            foreach (GameObject go in uxArgs.activeInterface.selectedObjects)
+
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
+
+            foreach (GameObject go in interFace.selectedObjects)
             {
 
-                go.GetComponent<MeshRenderer>().material = uxArgs.activeInterface.defaultMat;
+                go.GetComponent<MeshRenderer>().material = interFace.defaultMat;
 
             }
-            uxArgs.activeInterface.selectedObjects.Clear();
+
+            interFace.selectedObjects.Clear();
         }
 
         public static void select3dObject(object sender, UIArgs uxArgs)
         {
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
 
             Log.Message("3d target: " + uxArgs.uiEvent.target3D.transform.name);
 
-            if (uxArgs.activeInterface.selectedObjects.IndexOf(uxArgs.uiEvent.target3D) != -1)
+            if (interFace.selectedObjects.IndexOf(uxArgs.uiEvent.target3D) != -1)
             {
 
                 // object was selected, deselect
-                uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = uxArgs.activeInterface.defaultMat;
-                uxArgs.activeInterface.selectedObjects.Remove(uxArgs.uiEvent.target3D);
+                uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.defaultMat;
+                interFace.selectedObjects.Remove(uxArgs.uiEvent.target3D);
 
             }
             else
             {
 
                 // object was not selected, select
-                uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = uxArgs.activeInterface.editMat;
-                uxArgs.activeInterface.selectedObjects.Add(uxArgs.uiEvent.target3D);
+                uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.editMat;
+                interFace.selectedObjects.Add(uxArgs.uiEvent.target3D);
 
             }
 
@@ -588,7 +613,7 @@ void HullClamp{
         public static void tapNone(object sender, UIArgs uxArgs)
         {
 
-            uxArgs.uiEvent.callback = uxArgs.activeInterface.tapNoneCallback;
+            uxArgs.uiEvent.callback = uxArgs.uiEvent.plane.interFace.tapNoneCallback;
         }
 
 
@@ -620,6 +645,7 @@ void HullClamp{
 
                 uxArgs.uiEvent.targetButton.Tap();
 
+                Debug.Log("Tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callback);
             }
 
 
@@ -635,13 +661,14 @@ void HullClamp{
         {
             //      uxArgs.uiEvent.callback = "stopControls";
 
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
 
-            setTargetBrightness(uxArgs.activeInterface.getButtonNames(), 0.75f, uxArgs.activeInterface);
+            setTargetBrightness(interFace.getButtonNames(), 0.75f, interFace);
 
 
         }
 
-        static void setTargetBrightness(string name, float value, Interface activeInterface)
+        static void setTargetBrightness(string name, float value, InterFace activeInterface)
         {
             Button theButton;
             activeInterface.uiButtons.TryGetValue(name, out theButton);
@@ -649,7 +676,7 @@ void HullClamp{
             if (theButton != null)
                 theButton.targetBrightness = value;
         }
-        static void setTargetBrightness(string name, float value, float step, Interface activeInterface)
+        static void setTargetBrightness(string name, float value, float step, InterFace activeInterface)
         {
             Button theButton;
             activeInterface.uiButtons.TryGetValue(name, out theButton);
@@ -660,7 +687,7 @@ void HullClamp{
                 theButton.targetBrightness = value;
             }
         }
-        static void setBrightness(string name, float value, Interface activeInterface)
+        static void setBrightness(string name, float value, InterFace activeInterface)
         {
             Button theButton;
             activeInterface.uiButtons.TryGetValue(name, out theButton);
@@ -672,7 +699,7 @@ void HullClamp{
         }
 
 
-        static void setTargetBrightness(string[] names, float value, Interface activeInterface)
+        static void setTargetBrightness(string[] names, float value, InterFace activeInterface)
         {
             foreach (string name in names)
                 setTargetBrightness(name, value, activeInterface);
@@ -690,21 +717,23 @@ void HullClamp{
         static public void rotateCamera(object sender, UIArgs uxArgs)
         {
 
-            if (uxArgs.activeInterface.uiCam3D.control == CAMERACONTROL.ORBIT)
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
+
+            if (interFace.uiCam3D.control == CAMERACONTROL.ORBIT)
             {
 
                 OrbitCamera(sender, uxArgs);
 
             }
 
-            if (uxArgs.activeInterface.uiCam3D.control == CAMERACONTROL.TURN)
+            if (interFace.uiCam3D.control == CAMERACONTROL.TURN)
             {
 
                 turnCamera(sender, uxArgs);
 
             }
 
-            if (uxArgs.activeInterface.uiCam3D.control == CAMERACONTROL.GYRO)
+            if (interFace.uiCam3D.control == CAMERACONTROL.GYRO)
             {
 
                 gyroCamera(sender, uxArgs);
@@ -721,9 +750,11 @@ void HullClamp{
         static public void gyroCamera(object sender, UIArgs uxArgs)
         {
 
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
+
             GameObject co, ci;
-            co = uxArgs.activeInterface.uiCam3D.cameraObject;
-            ci = uxArgs.activeInterface.uiCam3D.cameraInterest;
+            co = interFace.uiCam3D.cameraObject;
+            ci = interFace.uiCam3D.cameraInterest;
 
             Vector3 startPosition = co.transform.position;
 
@@ -770,10 +801,11 @@ void HullClamp{
         {
 
             // Create direct references for ease of use.
+            InterFace interFace = uxArgs.uiEvent.plane.interFace;
 
             GameObject co, ci;
-            co = uxArgs.activeInterface.uiCam3D.cameraObject;
-            ci = uxArgs.activeInterface.uiCam3D.cameraInterest;
+            co = interFace.uiCam3D.cameraObject;
+            ci = interFace.uiCam3D.cameraInterest;
 
 
             if (ci != null && co != null)

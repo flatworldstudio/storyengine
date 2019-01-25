@@ -259,7 +259,7 @@ namespace StoryEngine.UI
         public string address;
 
         //public Canvas canvas;
-        public Interface interFace;
+        public InterFace interFace;
         //public GameObject gameObject;
         //     public Vector2 screenOffset = Vector2.zero;
 
@@ -332,7 +332,7 @@ namespace StoryEngine.UI
 
         //}
 
-        public void AddInterface(Interface _interface)
+        public void AddInterface(InterFace _interface)
         {
 
             interFace = _interface;

@@ -62,9 +62,10 @@ namespace StoryEngine
             
 #if LOGGING
 		
-            LOGLEVEL moduleLevel = LOGLEVEL.NORMAL; // normal by default.
+            LOGLEVEL moduleLevel; // normal by default.
 
-			moduleLogStatus.TryGetValue (module, out moduleLevel);
+            if (!moduleLogStatus.TryGetValue (module, out moduleLevel))
+                 moduleLevel = LOGLEVEL.NORMAL;
 				
 			if (messageLevel <= moduleLevel)
 				Debug.Log (module + ": " + message);
@@ -79,9 +80,10 @@ namespace StoryEngine
 
 			LOGLEVEL messageLevel = LOGLEVEL.WARNINGS;
 
-			LOGLEVEL moduleLevel = LOGLEVEL.NORMAL; // normal by default
+            LOGLEVEL moduleLevel; // normal by default.
 
-			moduleLogStatus.TryGetValue (module, out moduleLevel);
+            if (!moduleLogStatus.TryGetValue (module, out moduleLevel))
+                moduleLevel = LOGLEVEL.NORMAL;
 
 			if (messageLevel <= moduleLevel)
 				Debug.LogWarning (module + ": " + message);
@@ -97,9 +99,10 @@ namespace StoryEngine
 
 			LOGLEVEL messageLevel = LOGLEVEL.ERRORS;
 
-			LOGLEVEL moduleLevel = LOGLEVEL.NORMAL; // normal by default
+            LOGLEVEL moduleLevel; // normal by default.
 
-			moduleLogStatus.TryGetValue (module, out moduleLevel);
+            if (!moduleLogStatus.TryGetValue (module, out moduleLevel))
+                moduleLevel = LOGLEVEL.NORMAL;
 
 			if (messageLevel <= moduleLevel)
 				Debug.LogError (module + ": " + message);

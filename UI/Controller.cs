@@ -13,19 +13,21 @@ namespace StoryEngine.UI
         string me = "UiController";
 
         Event activeUiEvent;
-        int cycle = 0;
+
+        int cycle = 0; // for debugging
+
         List<Event> uiEventStack;
+        List<Button> AnimatingButtons;
 
-        // Scale currently not implementened, working with fixed size....
+        //   float currentScale = 1; // Not implemented right now...
 
-     //   float currentScale = 1;
-
+        public static Controller instance;
 
         public Controller()
         {
+            instance = this;
             reset();
         }
-
 
         public void reset()
         {
@@ -33,90 +35,56 @@ namespace StoryEngine.UI
             activeUiEvent = new Event();
             uiEventStack = new List<Event>();
             uiEventStack.Add(activeUiEvent);
+            AnimatingButtons = new List<Button>();
+
         }
 
-        //public UserCallBack updateUi(Interface activeInterface){
-
-        // Main UX method. Checks for user interaction and updates ux elements. Return the result of the user interaction.
-        // Set a float for the current scale applied by the canvas. We need this to convert screen pixels to ui pixels.
+        // ------------------------------------ MAIN UPDATE METHOD -------------------------------------------------------------------
+       
+        // Checks and applies user interaction. Keeps a stack of ui events to allow for inertia, springing.
+        // NOT IMPLEMENTED: Set a float for the current scale applied by the canvas. We need this to convert screen pixels to ui pixels.
 
         public UserCallBack updateUi(Layout _layout)
         {
+            cycle=(cycle+1)%1000;
 
             UserCallBack callBack = new UserCallBack();
 
-            Interface activeInterface = null;
-
-            //currentScale = activeInterface.canvasObject.GetComponent<Canvas>().scaleFactor;
-
-      //      currentScale = _layout.canvas.scaleFactor;
-
-            // log current stack count to track changes.
-            // apply this frame's user interaction to the 'active' ui event.
-
             int stackSize = uiEventStack.Count;
 
-            //applyUserInteraction(activeUiEvent, activeInterface);
+            activeUiEvent.GetUserActivity(); // get mouse movement, touches, taps
+            //activeUiEvent.plane = _layout.FindPlaneByPoint(activeUiEvent.position); // get the plane the user is active in
 
-            applyUserInteraction(activeUiEvent);
-
-            Plane activePlane = _layout.FindPlaneByPoint(activeUiEvent.position);
-
-            if (activePlane != null)
-            {
-
-                activeInterface=activePlane.interFace;
-
-
-            }
-
-
-
-
-            //if (activePlane != null)
-            //{
-            //    //Debug.Log(activeUiEvent.position + "Pointing at " + pointingAt.address);
-            // //   activeInterface = _layout.GetInterfaceByAddress(activePlane.address);
-
-            //    activeInterface=activePlane.interFace;
-
-            //    //Vector3 planeOffset = _layout.GetOffsetForPlane(pointingAt);
-
-            //}
-
-            // if a user action started, perform additional handling before processing. (If it ended we process first, then perform additional handling, see below).
+            // If a user touch/click just began, set targets and remove any old event targeting the same objects. 
 
             if (activeUiEvent.touch == TOUCH.BEGAN)
             {
+                activeUiEvent.plane = _layout.FindPlaneByPoint(activeUiEvent.position); // get the plane the user is active in
 
-                // a user action just began. find any objects and buttons the event is targeting. 
-
-                setUiTargetObjects(activeUiEvent, activePlane);
-
-                // if this new action is targeting the same object or button as an event already on the stack, the old event should be removed.
+                activeUiEvent.SetTargets();
 
                 int e = uiEventStack.Count - 1;
 
                 while (e >= 0)
                 {
 
-                    Event checkEvent = uiEventStack[e];
+                    Event oldEvent = uiEventStack[e];
 
-                    if (checkEvent != activeUiEvent)
+                    if (oldEvent != activeUiEvent)
                     {
 
-                        bool removeThis = false;
+                        bool removeOld = false;
 
                         if (activeUiEvent.targetButton != null)
                         {
 
                             //  we check all the new events button targets against the actual single target of the check event.
 
-                            if (checkEvent.targetButton != null && activeUiEvent.targetButton.HasDragTarget(checkEvent.targetButton.GetDragTarget(checkEvent.direction)))
+                            if (oldEvent.targetButton != null && activeUiEvent.targetButton.HasDragTarget(oldEvent.targetButton.GetDragTarget(oldEvent.direction)))
 
                             {
 
-                                removeThis = true;
+                                removeOld = true;
                                 //         Debug.Log("Removing ui event targeting the same dragtarget");
 
                             }
@@ -128,10 +96,10 @@ namespace StoryEngine.UI
 
                             // if same 3d target, remove old.
 
-                            if (checkEvent.target3D == activeUiEvent.target3D)
+                            if (oldEvent.target3D == activeUiEvent.target3D)
                             {
 
-                                removeThis = true;
+                                removeOld = true;
                             }
 
 
@@ -141,15 +109,15 @@ namespace StoryEngine.UI
 
                             // if both have no targets at all, remove old. 
 
-                            if (checkEvent.targetButton == null && checkEvent.target2D == null && checkEvent.target3D == null)
+                            if (oldEvent.targetButton == null && oldEvent.target2D == null && oldEvent.target3D == null)
                             {
 
-                                removeThis = true;
+                                removeOld = true;
 
                             }
 
                         }
-                        if (removeThis)
+                        if (removeOld)
                         {
 
                             uiEventStack.RemoveAt(e);
@@ -167,8 +135,6 @@ namespace StoryEngine.UI
             // create empty callback object
 
 
-
-
             int i = 0;
 
             while (i < uiEventStack.Count)
@@ -178,7 +144,7 @@ namespace StoryEngine.UI
 
                 //			Log.Message ( "handling event stack of size " + uiEventStack.Count);
 
-                processUiEvent(uiEvent, activeInterface); // note that this may not work as expected
+                processUiEvent(uiEvent);
 
                 // If an old event is no longer inert or springing, remove it.
 
@@ -203,7 +169,7 @@ namespace StoryEngine.UI
                 callBack.sender = activeUiEvent.target2D;
                 callBack.trigger = true;
 
-                //Debug.Log ("callbackResult: " + callbackResult);
+                Debug.Log ("callbackResult: " +  callBack.label);
 
             }
 
@@ -283,21 +249,39 @@ namespace StoryEngine.UI
             if (stackSizeNew > 10)
                 Log.Warning("Ui event stack exceeds 10, potential overflow.", me);
 
-            // apply brightness for all button objects
 
-            if (activeInterface != null)
-            {
 
-                Dictionary<string, Button>.ValueCollection allButtons = activePlane.interFace.uiButtons.Values;
-
-                foreach (Button button in allButtons)
-                {
-                    button.ApplyColour();
-                }
-
-            }
+            AnimateButtons();
 
             return callBack;
+
+        }
+
+
+        void AnimateButtons()
+        {
+            int i=AnimatingButtons.Count-1;
+
+            while (i>=0){
+                
+                Button button=AnimatingButtons[i];
+                button.ApplyBrightness();
+
+                i--;
+            }
+
+        }
+
+        public void AddAnimatingButton (Button _button){
+
+            if (!AnimatingButtons.Contains(_button))
+                AnimatingButtons.Add(_button);
+            
+        }
+
+        public void RemoveAnimatingButton (Button _button){
+
+                AnimatingButtons.Remove(_button);
 
         }
 
@@ -346,381 +330,43 @@ namespace StoryEngine.UI
 
         }
 
-
-        // lower level
-        void applyUserInteraction(Event ui)
-        {
-
-            //void applyUserInteraction(Event ui, Interface theUiState)
-            //{
-
-            cycle++;
-            cycle = cycle % 1000;
-
-            // check user mouse/touch interaction and populate this passed-in UIEVENT accordingly
-
-#if UNITY_IOS
-            Event storeUi = ui.clone();
-#endif
-
-            ui.touch = TOUCH.NONE;
-
-            ui.dd = 0;
-
-
-#if UNITY_EDITOR || UNITY_STANDALONE
-
-            //		if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer) {
-
-            // if we're on macos .... or windows?
-
-            ui.x = Input.mousePosition.x;
-            ui.y = Input.mousePosition.y;
-            ui.dx = ui.x - ui.px;
-//            ui.dx = ui.dx / currentScale;
-
-            ui.dy = ui.y - ui.py;
-   //         ui.dy = ui.dy / currentScale;
-
-            ui.px = ui.x;
-            ui.py = ui.y;
-
-            if (Input.GetButton("Fire1"))
-            {
-
-                //ui.x = Input.mousePosition.x;
-                //ui.y = Input.mousePosition.y;
-                //ui.dx = ui.x - ui.px;
-                //ui.dx = ui.dx / currentScale;
-
-                //ui.dy = ui.y - ui.py;
-                //ui.dy = ui.dy / currentScale;
-
-                //ui.px = ui.x;
-                //ui.py = ui.y;
-
-                if (!ui.firstFrame)
-                { // skip first frame because delta value will jump.
-
-                    ui.action = ACTION.SINGLEDRAG;
-                    ui.touch = TOUCH.TOUCHING;
-
-                    if (Input.GetKey(KeyCode.Space))
-                    {
-                        // equivalent to doubletouch dragging only
-                        ui.action = ACTION.DOUBLEDRAG;
-                    }
-                    if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
-                    {
-                        // equivalent to doubletouch pinching only
-                        ui.action = ACTION.DOUBLEDRAG;
-                        ui.dd = ui.dx;
-                        ui.dx = 0;
-                        ui.dy = 0;
-                    }
-                }
-                else
-                {
-                    ui.firstFrame = false;
-                    ui.touch = TOUCH.BEGAN;
-                    ui.dx = 0;
-                    ui.dy = 0;
-                }
-                trackTap(ui);
-            }
-
-            if (Input.GetButtonUp("Fire1"))
-            {
-
-                ui.touch = TOUCH.ENDED;
-
-                if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
-                {
-                    // equivalent to doubletouch pinching only
-                    ui.action = ACTION.DOUBLEDRAG;
-                    ui.dd = ui.dx;
-                    ui.dx = 0;
-                    ui.dy = 0;
-                }
-
-
-                if (wasTap(ui))
-                {
-
-                    ui.action = ACTION.TAP;
-
-                }
-                else
-                {
-
-                }
-
-                ui.firstFrame = true;
-
-            }
-            //		}
-
-#endif
-
-
-#if UNITY_IOS
-
-//		if (Application.platform == RuntimePlatform.IPhonePlayer) {
-
-			// if we're on ios
-
-			if (Input.touchCount == 1) {
-				// review single touch
-				Vector2 tp = Input.GetTouch (0).position;
-
-				switch (Input.GetTouch (0).phase) {
-				case TouchPhase.Began:
-					ui.x = tp.x;
-					ui.y = tp.y;
-					trackTap (ui);
-					ui.touch = TOUCH.BEGAN;
-					break;
-
-				case TouchPhase.Moved:
-					Vector2 touchDelta = Input.GetTouch (0).deltaPosition;
-
-//		ui.dx = touchDelta.x / Screen.height * 720f;
-//					ui.dy = touchDelta.y / Screen.height * 720f;
-
-		ui.dx = touchDelta.x /currentScale;
-		ui.dy = touchDelta.y /currentScale;
-
-
-					ui.action = ACTION.SINGLEDRAG;
-					ui.touch = TOUCH.TOUCHING;
-					trackTap (ui);
-					break;
-
-				case TouchPhase.Stationary:
-					ui.dx = 0;
-					ui.dy = 0;
-					ui.action = ACTION.SINGLEDRAG;
-					ui.touch = TOUCH.TOUCHING;
-					trackTap (ui);
-					break;
-
-				case TouchPhase.Ended:
-
-					ui.touch = TOUCH.ENDED;
-
-					if (wasTap (ui)) {
-						ui.action = ACTION.TAP;
-					} else {
-
-					}
-					break;
-
-				default:
-					break;
-				}
-			}
-
-			if (Input.touchCount == 2) {
-				// review double touch 
-				TouchPhase phase0 = Input.GetTouch (0).phase;
-				TouchPhase phase1 = Input.GetTouch (1).phase;
-
-				Vector2 tp0 = Input.GetTouch (0).position;
-				Vector2 tp1 = Input.GetTouch (1).position;
-
-				if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && phase1 == TouchPhase.Began) {
-					// if one finger was touching, we leave the targets untouched, and initialise the d value
-					ui.d = Vector2.Distance (tp0, tp1);
-					ui.touch = TOUCH.TOUCHING;
-
-				} else if (phase0 == TouchPhase.Began && phase1 == TouchPhase.Began) {
-					// if both start at the same time, aim in between to set targets and initialise the d value
-					ui.x = (tp0.x + tp1.x) / 2f;
-					ui.y = (tp0.y + tp1.y) / 2f;
-					ui.d = Vector2.Distance (tp0, tp1);
-					ui.touch = TOUCH.BEGAN;
-
-				} else if (phase0 == TouchPhase.Ended && phase1 == TouchPhase.Began) {
-					// unlikely but could happen: flicking fingers in a single frame. catch the start of a new single touch.
-					ui.x = tp1.x;
-					ui.y = tp1.y;
-					ui.touch = TOUCH.BEGAN;
-
-				} else if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && (phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary)) {
-					// dragging
-					Vector2 touchDelta0 = Input.GetTouch (0).deltaPosition;
-					Vector2 touchDelta1 = Input.GetTouch (1).deltaPosition;
-
-//					ui.dx = (touchDelta0.x + touchDelta1.x) / 2f / Screen.height * 720f; 
-//					ui.dy = (touchDelta0.y + touchDelta1.y) / 2f / Screen.height * 720f; 
-
-		ui.dx = (touchDelta0.x + touchDelta1.x) / 2f /currentScale; 
-		ui.dy = (touchDelta0.y + touchDelta1.y) / 2f /currentScale; 
-
-					ui.d = Vector2.Distance (tp0, tp1);
-					ui.dd = ui.d - storeUi.d;
-
-					ui.action = ACTION.DOUBLEDRAG;
-					ui.touch = TOUCH.TOUCHING;
-				}
-			}
-
-//		}
-#endif
-        }
-
-        void trackTap(Event ui)
-        {
-            ui.tapCount += Time.deltaTime;
-        }
-
-        bool wasTap(Event ui)
-        {
-            bool result = false;
-
-            if (ui.dx > -10f && ui.dx < 10f && ui.dy > -10f && ui.dy < 10f && ui.tapCount > 0 && ui.tapCount < 0.25f)
-            {
-                result = true;
-                //				Log.Message ( cycle + " tap detected");
-            }
-            ui.tapCount = 0;
-            return result;
-        }
-
-
-        void setUiTargetObjects(Event _uiEvent, Plane _plane)
-        {
-
-            if (_plane.interFace == null)
-                return;
-
-
-            // finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
-
-            RaycastHit hit;
-
-            Vector2 uiPosition = new Vector2(_uiEvent.x, _uiEvent.y);
-
-            uiPosition-=_plane.interFace.GetAnchorOffset();
-
-
-            // Correct for the layout of the plane, and possibly in the plane. The offset can be controlled via the plane drawing delegate.
-
-            //Vector2 anchorPos = _plane.interFace.gameObject.GetComponent<RectTransform>().anchoredPosition;
-
-            //uiPosition -= anchorPos;
-            //uiPosition -= _plane.screenOffset;
-
-            //Vector3 screenPosition =new Vector3(uiPosition.x,uiPosition.y,0); 
-
-            // cast a 3d ray from the camera we are controlling to find any 3D objects.
-
-            _uiEvent.target3D = null;
-
-            if (_plane.interFace.uiCam3D != null)
-            {
-
-                UnityEngine.Camera activeCamera = _plane.interFace.uiCam3D.camera;
-
-                Ray ray = activeCamera.ScreenPointToRay(uiPosition);
-
-                //Debug.DrawRay(ray.origin, 10f * ray.direction, Color.red, 3f, false);
-
-                int layerMask = 1 << 8; // only check colliders in layer '8'. 
-
-                if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
-                {
-
-                    _uiEvent.target3D = hit.transform.gameObject;
-                    Debug.Log("raycast hit: " + hit.transform.gameObject.name);
-
-                }
-
-            }
-
-            // cast a 2d ray in the canvas we're controlling.
-
-            GraphicRaycaster gfxRayCaster = _plane.interFace.canvasObject.GetComponent<GraphicRaycaster>();
-
-            //Create the PointerEventData with null for the EventSystem
-
-            PointerEventData pointerEventData = new PointerEventData(null);
-
-            //Set required parameters, in this case, mouse position
-
-            pointerEventData.position = uiPosition;
-
-            //Create list to receive all results
-
-            List<RaycastResult> results = new List<RaycastResult>();
-
-            //Raycast it
-
-            gfxRayCaster.Raycast(pointerEventData, results);
-
-            if (results.Count > 0)
-            {
-
-                _uiEvent.target2D = results[0].gameObject;
-
-                // find out if this 2d object is a button.
-
-                Button checkButton = null;
-                _plane.interFace.uiButtons.TryGetValue(_uiEvent.target2D.transform.name, out checkButton);
-
-                _uiEvent.targetButton = checkButton;
-
-                // Set ui event drag target and constraint. We don't have any ortho direction as this point, so we get the 'free dragging' one.
-
-                //      ui.dragTarget = checkButton.GetDragTarget();
-                //     ui.dragConstraint = checkButton.GetDragConstraint();
-
-
-            }
-            else
-            {
-
-                _uiEvent.target2D = null;
-
-            }
-        }
-
-
-
         // ------------------------------------------------------------------------------------------------------------------------------------------
 
-
-        void processUiEvent(Event ui, Interface activeInterface)
+        void processUiEvent(Event ui)
         {
 
-            // this handles the result of user interaction, taking the info in the active UIEVENT and taking action by checking it against the UISTATE
+            //ui.callback = "";
+
+            if (ui.plane == null || ui.plane.interFace == null)
+                return;
 
             ui.callback = "";
-
+           
             UIArgs args = new UIArgs();
 
-            args.activeInterface = activeInterface;
+            //args.activeInterface = activeInterface;
+
             args.delta = Vector3.zero;
             args.uiEvent = ui;
 
+            InterFace interFace = ui.plane.interFace;
+
             switch (ui.action)
             {
-
-
 
                 case ACTION.TAP:
 
                     ui.action = ACTION.SINGLEDRAG;
 
-                    if (activeInterface == null)
-                        break;
+                    //if (interFace == null)
+                    //break;
 
                     if (ui.target2D != null)
-                        activeInterface.tap_2d(this, args);
+                        interFace.tap_2d(this, args);
                     else if (ui.target3D != null)
-                        activeInterface.tap_3d(this, args);
+                        interFace.tap_3d(this, args);
                     else
-                        activeInterface.tap_none(this, args);
+                        interFace.tap_none(this, args);
 
                     break;
 
@@ -754,45 +400,47 @@ namespace StoryEngine.UI
                     //			Debug.Log ("single drag");
 
 
-                    if (activeInterface == null)
-                        break;
+                    //if (activeInterface == null)
+                    //break;
 
                     args.delta = new Vector3(ui.dx, ui.dy, 0);
 
                     if (ui.target2D != null)
-                        activeInterface.single_2d(this, args);
+                        interFace.single_2d(this, args);
                     else if (ui.target3D != null)
-                        activeInterface.single_3d(this, args);
+                        interFace.single_3d(this, args);
                     else
-                        activeInterface.single_none(this, args);
+                        interFace.single_none(this, args);
 
                     break;
 
                 case ACTION.DOUBLEDRAG:
 
-                    if (activeInterface == null)
-                        break;
+                    //if (activeInterface == null)
+                    //break;
 
                     args.delta = new Vector3(ui.dx, ui.dy, ui.dd);
 
                     if (ui.target2D != null)
-                        activeInterface.double_2d(this, args);
+                        interFace.double_2d(this, args);
                     else if (ui.target3D != null)
-                        activeInterface.double_3d(this, args);
+                        interFace.double_3d(this, args);
                     else
-                        activeInterface.double_none(this, args);
+                        interFace.double_none(this, args);
 
                     break;
 
                 default:
 
-                    if (activeInterface == null)
-                        break;
+                    //if (activeInterface == null)
+                    //break;
 
-                    activeInterface.none(this, args);
+                    interFace.none(this, args);
 
                     break;
             }
+
+
 
             if (ui.isInert)
             {
@@ -842,7 +490,7 @@ namespace StoryEngine.UI
         // execution of ui events
 
 
-        void setRaycastActive(string name, bool value, Interface activeInterface)
+        void setRaycastActive(string name, bool value, InterFace activeInterface)
         {
             Button theButton;
             activeInterface.uiButtons.TryGetValue(name, out theButton);
@@ -852,7 +500,7 @@ namespace StoryEngine.UI
 
         }
 
-        bool brightnessIsChanging(string name, Interface activeInterface)
+        bool brightnessIsChanging(string name, InterFace activeInterface)
         {
             bool result = false;
             Button theButton;
@@ -869,14 +517,6 @@ namespace StoryEngine.UI
 
             return result;
         }
-
-
-
-
-
-
-
-
 
     }
 
