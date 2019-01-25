@@ -7,227 +7,292 @@ using UnityEngine.Networking.NetworkSystem;
 namespace StoryEngine
 {
 
-	public delegate void OnClientMessageHandler (NetworkMessage netMessage);
-	public delegate void messageHandler (NetworkMessage netMessage);
+    public delegate void OnClientMessageHandler(NetworkMessage netMessage);
+    public delegate void messageHandler(NetworkMessage netMessage);
 
-	// Client delegates.
+    // Client delegates.
 
-	public delegate void OnStartClientDelegate (NetworkClient theClient);
-	public delegate void OnStopClientDelegate ();
-	public delegate void OnClientConnectDelegate (NetworkConnection connection);
-	public delegate void OnClientDisconnectDelegate (NetworkConnection connection);
+    public delegate void OnStartClientDelegate(NetworkClient theClient);
+    public delegate void OnStopClientDelegate();
+    public delegate void OnClientConnectDelegate(NetworkConnection connection);
+    public delegate void OnClientDisconnectDelegate(NetworkConnection connection);
 
-	// Server delegates
+    // Server delegates
 
-	public delegate void OnStartServerDelegate ();
-	public delegate void OnStopServerDelegate ();
-	public delegate void OnServerConnectDelegate (NetworkConnection connection);
-	public delegate void OnServerDisconnectDelegate (NetworkConnection connection);
-	
-	public class ExtendedNetworkManager : NetworkManager
-	{
-		string me = "Network manager";
+    public delegate void OnStartServerDelegate();
+    public delegate void OnStopServerDelegate();
+    public delegate void OnServerConnectDelegate(NetworkConnection connection);
+    public delegate void OnServerDisconnectDelegate(NetworkConnection connection);
 
-		const short connectionMessageCode = 1001;
 
-		//
 
-		void OnApplicationQuit ()
-		{
-			if (client != null)
-				StopNetworkClient ();
+    public class ExtendedNetworkManager : NetworkManager
+    {
+        string ID = "NetworkManager";
 
-			if (NetworkServer.active)
-				StopNetworkServer ();
-		
-		}
+        const short connectionMessageCode = 1001;
+        List<string> __connectedAddresses;
 
-		// Client methods.
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
-		public OnStartClientDelegate onStartClientDelegate;
-		public OnStopClientDelegate onStopClientDelegate;
 
-		public OnClientConnectDelegate onClientConnectDelegate;
-		public OnClientDisconnectDelegate onClientDisconnectDelegate;
+        void Log(string message)
+        {
+            StoryEngine.Log.Message(message, ID);
+        }
+        void Warning(string message)
+        {
+            StoryEngine.Log.Warning(message, ID);
+        }
+        void Error(string message)
+        {
+            StoryEngine.Log.Error(message, ID);
+        }
+        void Verbose(string message)
+        {
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+        }
 
-		public void StartNetworkClient (string server)
-		{
-		
-			networkAddress = server;
 
-			StartClient ();
+        void OnApplicationQuit()
+        {
+            if (client != null)
+                StopNetworkClient();
 
-		}
+            if (NetworkServer.active)
+                StopNetworkServer();
 
-		public override void OnStartClient (NetworkClient theClient)
-		{
-			Log.Message ("Client has started.", me);
+        }
 
-			if (onStartClientDelegate != null)
-				onStartClientDelegate (theClient);
+        // Client methods.
 
-		}
+        public OnStartClientDelegate onStartClientDelegate;
+        public OnStopClientDelegate onStopClientDelegate;
 
-		public override void OnClientConnect (NetworkConnection conn)
-		{
-		
-			Log.Message ("Client connected to server.", me);
+        public OnClientConnectDelegate onClientConnectDelegate;
+        public OnClientDisconnectDelegate onClientDisconnectDelegate;
 
-			if (onClientConnectDelegate != null)
-				onClientConnectDelegate (conn);
+        public void StartNetworkClient(string server)
+        {
 
-		}
+            networkAddress = server;
+            StartClient();
 
-		public override void OnClientDisconnect (NetworkConnection connection)
-		{
+        }
 
-			Log.Message ("Client disconnected from server.", me);
+        public override void OnStartClient(NetworkClient theClient)
+        {
+            Log("Started as Client.");
 
-			if (onClientDisconnectDelegate != null)
-				onClientDisconnectDelegate (connection);
+            if (onStartClientDelegate != null)
+                onStartClientDelegate(theClient);
 
-		}
+        }
 
-		public void StopNetworkClient ()
-		{
+        public void StopNetworkClient()
+        {
 
-			StopClient ();
+            StopClient();
 
-		}
+        }
 
-		public override void OnStopClient ()
-		{
+        public override void OnStopClient()
+        {
 
-			Log.Message ("Client has stopped.", me);
+            Log("Stopped as Client.");
 
-			if (onStopClientDelegate != null)
-				onStopClientDelegate ();
+            if (onStopClientDelegate != null)
+                onStopClientDelegate();
 
-		}
+        }
 
-		// Server methods.
+        public override void OnClientConnect(NetworkConnection conn)
+        {
 
-		public OnStartServerDelegate onStartServerDelegate;
-		public OnStopServerDelegate onStopServerDelegate;
+            Log("Connected to remote Server as Client.");
 
-		public OnServerConnectDelegate onServerConnectDelegate;
-		public OnServerDisconnectDelegate onServerDisconnectDelegate;
+            if (onClientConnectDelegate != null)
+                onClientConnectDelegate(conn);
 
+        }
 
-		public void StartNetworkServer ()
-		{
-		
-			StartServer ();
+        public override void OnClientDisconnect(NetworkConnection connection)
+        {
 
-		}
+            Log("Disconnected from remote Server as Client");
 
-		public void StopNetworkServer ()
-		{
+            if (onClientDisconnectDelegate != null)
+                onClientDisconnectDelegate(connection);
 
-			StopServer ();
+        }
 
-		}
 
-		public override void OnStartServer ()
-		{
-			Log.Message ("Server started.", me);
 
-			if (onStartServerDelegate != null)
-				onStartServerDelegate ();
+        // Server methods.
 
-		}
+        public OnStartServerDelegate onStartServerDelegate;
+        public OnStopServerDelegate onStopServerDelegate;
 
-		public override void OnStopServer ()
-		{
-			Log.Message ("Server stopped.", me);
+        public OnServerConnectDelegate onServerConnectDelegate;
+        public OnServerDisconnectDelegate onServerDisconnectDelegate;
 
-			if (onStopServerDelegate != null)
-				onStopServerDelegate ();
 
-		}
+        public void StartNetworkServer()
+        {
+            Log("Starting as Server");
+            StartServer();
+            __connectedAddresses = new List<string>();
 
-		public override void OnServerConnect (NetworkConnection connection)
-		{
-			Log.Message ("Remote client connected.", me);
+        }
 
-			if (onServerConnectDelegate != null)
-				onServerConnectDelegate (connection);
-		
-		}
+        public void StopNetworkServer()
+        {
+            Log("Stopping as Server.");
+            StopServer();
+            __connectedAddresses.Clear();
+        }
 
-		public override void OnServerDisconnect (NetworkConnection connection)
-		{
-			Log.Message ("Remote client disconnected.", me);
+        public override void OnStartServer()
+        {
+            Log("Started as Server.");
+            
 
-			if (onServerDisconnectDelegate != null)
-				onServerDisconnectDelegate (connection);
+            if (onStartServerDelegate != null)
+                onStartServerDelegate();
 
-		}
 
+        }
 
-		/*
-//	public void 
+        public override void OnStopServer()
+        {
+            Log("Stopped as Server");
 
-	public void InformServerOnDisconnect (){
+            if (onStopServerDelegate != null)
+                onStopServerDelegate();
 
-		connectionMessageToServer ("disconnecting");
+        }
 
-	}
+        public override void OnServerConnect(NetworkConnection connection)
+        {
+            Log("Remote client connected.");
+      //      Debug.Log("client connecct");
 
+            GetConnectedAddresses();
 
-	public void connectionMessageToServer (string value)
-	{
-		var msg = new StringMessage (value);
-		client.Send (connectionMessageCode, msg);
-		Log.Message ("Sending connection message to server: " + value);
-	}
+            if (onServerConnectDelegate != null)
+                onServerConnectDelegate(connection);
 
-	public void connectionMessageToClients (string value)
-	{
-		var msg = new StringMessage (value);
-		NetworkServer.SendToAll (connectionMessageCode, msg);
-		Log.Message ("Sending connection message to all clients: " + value);
-	}
+        }
 
+        public override void OnServerDisconnect(NetworkConnection connection)
+        {
+            Log("Remote client disconnected.");
 
-	void onClientConnectionMessage (NetworkMessage netMsg)
-	{
-		var message = netMsg.ReadMessage<StringMessage> ();
-		Log.Message ("Connection message from server: " + message.value);
-	}
+            GetConnectedAddresses();
 
+            if (onServerDisconnectDelegate != null)
+                onServerDisconnectDelegate(connection);
 
-	void onServerConnectionMessage (NetworkMessage netMsg)
-	{
-		var message = netMsg.ReadMessage<StringMessage> ();
-		Log.Message ("Connection message from client: " + message.value);
+        }
 
-		switch (message.value) {
+        public List<string> ConnectedAddresses
+        {
+            get
+            {
+                GetConnectedAddresses();
+                return __connectedAddresses;
+            }
+            set
+            {
+                Warning("Can't set connected addresses directly.");
+            }
 
-		case "hello":
 
-			connectionMessageToClients ("A new client was added.");
+        }
 
-			break;
+        void GetConnectedAddresses()
+        {
 
-		case "disconnecting":
+            NetworkConnection[] connections = new NetworkConnection[NetworkServer.connections.Count];
+            NetworkServer.connections.CopyTo(connections, 0);
 
-			Log.Message ("Client is disconnecting, dropping their connection." + message.value);
+            __connectedAddresses.Clear();
+        //    List<string> addresses = new List<string>();
 
-//			Network.CloseConnection(netMsg.conn, true);
+            for (int c = 0; c < connections.Length; c++)
+            {
+                if (connections[c] != null && connections[c].isConnected)
+                    __connectedAddresses.Add(connections[c].address);
 
-			break;
+            }
 
-		default:
-			
-			break;
+        //    __connectedAddresses    = addresses;
 
-		}
+        }
 
-	}
-	*/
+        /*
+    //	public void 
 
+        public void InformServerOnDisconnect (){
 
+            connectionMessageToServer ("disconnecting");
 
-	}
+        }
+
+
+        public void connectionMessageToServer (string value)
+        {
+            var msg = new StringMessage (value);
+            client.Send (connectionMessageCode, msg);
+            Log.Message ("Sending connection message to server: " + value);
+        }
+
+        public void connectionMessageToClients (string value)
+        {
+            var msg = new StringMessage (value);
+            NetworkServer.SendToAll (connectionMessageCode, msg);
+            Log.Message ("Sending connection message to all clients: " + value);
+        }
+
+
+        void onClientConnectionMessage (NetworkMessage netMsg)
+        {
+            var message = netMsg.ReadMessage<StringMessage> ();
+            Log.Message ("Connection message from server: " + message.value);
+        }
+
+
+        void onServerConnectionMessage (NetworkMessage netMsg)
+        {
+            var message = netMsg.ReadMessage<StringMessage> ();
+            Log.Message ("Connection message from client: " + message.value);
+
+            switch (message.value) {
+
+            case "hello":
+
+                connectionMessageToClients ("A new client was added.");
+
+                break;
+
+            case "disconnecting":
+
+                Log.Message ("Client is disconnecting, dropping their connection." + message.value);
+
+    //			Network.CloseConnection(netMsg.conn, true);
+
+                break;
+
+            default:
+
+                break;
+
+            }
+
+        }
+        */
+
+
+
+    }
 }

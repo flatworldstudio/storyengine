@@ -43,7 +43,8 @@ public class DataHandlerExample : MonoBehaviour
               
         Log.SetModuleLevel("Network manager", LOGLEVEL.WARNINGS);
         Log.SetModuleLevel("Networkbroadcast", LOGLEVEL.WARNINGS);
-        GENERAL.connectionKey = "key";
+
+        //GENERAL.connectionKey = "key";
 
         #endif
     }
@@ -63,7 +64,7 @@ public class DataHandlerExample : MonoBehaviour
 
         bool done = false;
 
-        switch (task.description)
+        switch (task.Instruction)
         {
 
             case "task":

@@ -7,257 +7,235 @@ using UnityEngine.UI;
 
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
+//using Amazon.S3.Model;
 
 #endif
 
 namespace StoryEngine
 {
 
-	#if NETWORKED
 
-	public class PointerUpdate : MessageBase
-	{
 
-		public string pointerUuid;
-		public string storyPoint;
-		public bool killed;
-		//	public int pointerStatus;
 
-	}
-	#endif
+    public enum POINTERSTATUS
+    {
+        EVALUATE,
+        NEWTASK,
+        TASKUPDATED,
+        KILLED,
+        PAUSED
+    }
 
+    public class StoryPointer
+    {
 
-	public enum POINTERSTATUS
-	{
-		EVALUATE,
-		NEWTASK,
-		TASKUPDATED,
-		KILLED,
-		PAUSED
-	}
+        public StoryPoint currentPoint;
+        public StoryTask currentTask;
+        public SCOPE scope;
 
-	public class StoryPointer
-	{
-		public string ID;
-		public StoryPoint currentPoint;
+        POINTERSTATUS status;
+        public string persistantData;
 
-		public SCOPE scope;
+        public Text deusText;
+        public Text deusTextSuper;
+        public GameObject pointerObject, pointerTextObject;
+        public int position;
 
-		POINTERSTATUS status;
+        //public bool modified;
 
-		public StoryTask currentTask;
+//#if NETWORKED
+//        public bool modified;
+//#endif
 
-		//	public StoryTask persistantData; // can hold generic data which will be passed onto new task.... WIP
-		public string persistantData;
+        string ID = "Storypointer";
 
-		public	Text deusText;
-		public	Text deusTextSuper;
-		public	GameObject pointerObject, pointerTextObject;
-		public int position;
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
-		#if NETWORKED
-		public bool modified;
 
-	#endif
+        void Log(string message)
+        {
+            StoryEngine.Log.Message(message, ID);
+        }
+        void Warning(string message)
+        {
+            StoryEngine.Log.Warning(message, ID);
+        }
+        void Error(string message)
+        {
+            StoryEngine.Log.Error(message, ID);
+        }
+        void Verbose(string message)
+        {
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+        }
 
-		string me = "Storypointer";
+        public StoryPointer()
+        {
 
-		public StoryPointer ()
-		{
+            // Empty pointer, set to pause just to be safe. To be populated from task.
 
+            status = POINTERSTATUS.PAUSED;
+           GENERAL.ALLPOINTERS.Add(this);
 
-		}
+        //    updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
 
 
-		public StoryPointer (StoryPoint startingPoint)
-		{
+        }
 
-			currentPoint = startingPoint;
-			status = POINTERSTATUS.EVALUATE;
-			ID = UUID.getGlobalID ();
-			scope = SCOPE.LOCAL;
-			GENERAL.ALLPOINTERS.Add (this);
+        public StoryPointer(string pointID, SCOPE setScope)
+        {
 
-//		persistantData = new StoryTask ();
+            // Create a pointer from a given point. Task to be added later.
 
-		}
+            currentPoint = GENERAL.GetStoryPointByID(pointID);
+         
+            currentTask = null;
+            status = POINTERSTATUS.EVALUATE;
+            scope = setScope;
 
-		public StoryPointer (StoryPoint startingPoint, string setID)
-		{
+         //   GENERAL.AddPointer(this);
 
-			currentPoint = startingPoint;
-			status = POINTERSTATUS.EVALUATE;
-			ID = setID;
-			scope = SCOPE.GLOBAL;
-			GENERAL.ALLPOINTERS.Add (this);
+            GENERAL.ALLPOINTERS.Add(this);
 
-//		persistantData = new StoryTask ();
+          //  updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
 
-		}
 
-        #if NETWORKED
-		public PointerUpdate getUpdateMessage ()
-		{
+        }
 
-			PointerUpdate r = new PointerUpdate ();
-			r.pointerUuid = ID;
-			r.storyPoint = currentPoint.ID;
+        public void PopulateWithTask(StoryTask task)
+        {
 
-			if (status == POINTERSTATUS.KILLED) {
+            // Filling an empty pointer with task info. Used for network task and pointer creation.
 
-				r.killed = true;
+            currentPoint = GENERAL.GetStoryPointByID(task.PointID);
+            currentTask = task;
+            task.Pointer = this;
+            scope = task.scope;
 
-			} else {
+        }
 
-				r.killed = false;
+        public void LoadPersistantData()
+        {
 
-			}
+            // load carry over value from task into pointer.
 
-//		r.pointerStatus = (int)status;
+            if (currentTask != null)
+                currentTask.GetStringValue("persistantData", out persistantData);
 
-			return r;
+        }
 
-		}
+        //public PointerUpdate GetUpdateMessage()
+        //{
 
-        #endif
+//    // Generate a network update message for this pointer. (In effect: if it was killed.)
 
-		public void loadPersistantData ()
-		{
+//    PointerUpdate message = new PointerUpdate();
 
-			// load carry over value from task into pointer.
+//    message.storyPointID = currentPoint.ID;
 
-			if (currentTask != null)
-				currentTask.getStringValue ("persistantData", out persistantData);
+//    if (status == POINTERSTATUS.KILLED)
+//    {
+//        message.killed = true;
+//    }
 
-		}
+//    return message;
 
-		//	public void applyUpdateMessage (string pointerUuid, string pointName, int pointerStatus)
-		//	{
-		//
-		//		// get the story point
-		//
-		//		StoryPoint point = GENERAL.getStoryPointByID (pointName);
-		//
-		//		// see if the pointer exists, update or create new
-		//
-		//		StoryPointer sp = GENERAL.getPointer (pointerUuid);
-		//
-		//		if (sp == null) {
-		//
-		//			sp = new StoryPointer (point, pointerUuid);
-		//
-		//			Log.Message ("Created a new (remotely owned) pointer with ID: " + sp.ID);
-		//
-		//		}
-		//
-		//		sp.currentPoint = point;
-		//
-		//		//		sp.setStatus ((POINTERSTATUS)pointerStatus);
-		//
-		//		//		sp.setStatus (POINTERSTATUS.PAUSED); // overrule the status sent over the network, since global pointers aren't updated locally.
-		//
-		//	}
-		public void killPointerOnly ()
-		{
+//}
+#if NETWORKED
 
-			setStatus (POINTERSTATUS.KILLED);
+        public PointerUpdateBundled GetUpdate()
 
-		}
+        {
+            // bundled approach.
+            // Generate a network update message for this pointer. Only case is KILL.
 
 
-		/*
+            PointerUpdateBundled updateMessageSend=new PointerUpdateBundled();
+            updateMessageSend.StoryLineName=currentPoint.StoryLine;
 
-	public void killPointerAndTask ()
-	{
 
-		// Ending the pointer. Set status to killed so it gets cleaned up.
+        //updateMessageSend =;
 
-		setStatus (POINTERSTATUS.KILLED);
+        //updateMessageSend.storyPointID= currentPoint.ID;
 
-//		modified = true;
+            /*
+            updateMessageSend.storyPointID = currentPoint.ID;
 
-		// If there was an active task, mark as completed so it gets cleaned up.
+            if (status == POINTERSTATUS.KILLED)
+            {
+                updateMessageSend.killed = true;
 
-		if (currentTask!=null)
-			currentTask.setStatus (TASKSTATUS.COMPLETE);
+            } else{
+                
+                updateMessageSend.killed = false;
 
-	}
-	*/
+            }
+*/
+            return updateMessageSend;
 
-		public POINTERSTATUS getStatus ()
-		{
-			return status;
-		}
+        }
 
+#endif
 
+        public void SetLocal (){
+            scope = SCOPE.LOCAL;
+            status=POINTERSTATUS.EVALUATE;
+        }
 
+        public void Kill()
+        {
 
+            SetStatus(POINTERSTATUS.KILLED);
 
-		public void setStatus (POINTERSTATUS theStatus)
-		{
-			//		if (scope == SCOPE.GLOBAL && GENERAL.SCOPE!=SCOPE.GLOBAL) {
-			//
-			//			Debug.LogWarning (me + "Setting status on a global pointer without global scope.");
-			//
-			//		}
+        }
 
-			if (status != POINTERSTATUS.KILLED) {
+        public POINTERSTATUS GetStatus()
+        {
+            return status;
+        }
 
-				// The end task sets pointerstatus to killed, then calls this method when the end task is complete. If it was killed, keep it killed for removal. 
+        public void SetStatus(POINTERSTATUS theStatus)
+        {
 
-				//					setStatus (POINTERSTATUS.TASKUPDATED);
+            if (status != POINTERSTATUS.KILLED)
+            {
 
-				status = theStatus;
-			}
+                status = theStatus;
+            }
 
-			#if NETWORKED
+//#if NETWORKED
 
-			//		if (GENERAL.SCOPE == SCOPE.GLOBAL && scope==SCOPE.GLOBAL) {
+            //modified = true;
 
-			// Only mark as changed (triggering network distribution) if our scope is global
+//#endif
 
-			modified = true;
+        }
 
+        public Boolean ProgressToNextPoint()
+        {
 
-			//		}
-			#endif
+            Boolean r = false;
 
-		}
+            if (currentPoint.getNextStoryPoint() == null)
+            {
 
-		//	public void taskStatusChanged ()
-		//
-		//	{
-		//
-		//		if (status != POINTERSTATUS.KILLED) {
-		//
-		//			// The end task sets pointerstatus to killed, then calls this method when the end task is complete. If it was killed, keep it killed for removal.
-		//
-		//			setStatus (POINTERSTATUS.TASKUPDATED);
-		//
-		//		}
-		//	}
+                Log("No next point");
 
-		public Boolean moveToNextPoint ()
-		{
+            }
+            else
+            {
 
-			Boolean r = false;
+                currentPoint = currentPoint.getNextStoryPoint();
 
-			if (currentPoint.getNextStoryPoint () == null) {
+                r = true;
+            }
 
-				Log.Message ("No next point", me);
+            return r;
 
-			} else {
+        }
 
-				currentPoint = currentPoint.getNextStoryPoint ();
+    }
 
-				r = true;
-			}
 
-			return r;
-
-		}
-
-	}
 
 }
-

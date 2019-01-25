@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+
 
 #if NETWORKED
 using UnityEngine.Networking;
@@ -11,208 +13,271 @@ using UnityEngine.Networking.NetworkSystem;
 
 namespace StoryEngine
 {
-	
-	public enum SCOPE
-	{
-		LOCAL,
-		GLOBAL
 
-	}
+    public enum SCOPE
+    {
+        LOCAL,
+        GLOBAL
 
-	public enum AUTHORITY
-	{
-		LOCAL,
-		GLOBAL
+    }
 
-	}
+    public enum AUTHORITY
+    {
+        LOCAL,
+        GLOBAL
 
-	public class UserCallBack
-	{
+    }
 
-		public bool trigger = false;
-		public  string label = "";
-		public  GameObject sender;
+    public class UserCallBack
+    {
 
-		public UserCallBack ()
-		{
-		}
+        public bool trigger = false;
+        public string label = "";
+        public GameObject sender;
 
-	}
+        public UserCallBack()
 
-	public static class GENERAL
-	{
+        {
+        }
 
-		public static AUTHORITY AUTHORITY = AUTHORITY.LOCAL;
+    }
 
-		public static float pointerScreenScalar = -0.5f;
-		public static float pointerRectScalar = 0.5f;
 
-		public static int SIGNOFFS;
-		public static Dictionary <string,StoryPoint> storyPoints;
-		public static List <StoryPointer> ALLPOINTERS;
-		public static List <StoryTask> ALLTASKS;
+    public static class GENERAL
+    {
+  
+        public static AUTHORITY AUTHORITY = AUTHORITY.LOCAL;
 
-		public static bool isPauzed = false;
-		public static bool hasFocus = true;
+        public static float pointerScreenScalar = -0.5f;
+        public static float pointerRectScalar = 0.5f;
 
-		public static bool wasConnected = false;
+        public static int SIGNOFFS;
 
-		public static string broadcastServer, networkServer,receivedMessage;
+        public static Dictionary<string, StoryPoint> storyPoints;
+        public static List<StoryPointer> ALLPOINTERS;
+        public static List<StoryTask> ALLTASKS;
+        
+     //   public static string connectionKey;
 
-        public static string connectionKey = "HELLO";
 
+        public static bool isPauzed = false;
+        public static bool hasFocus = true;
 
-        public static string me = "General";
+    //    public static bool wasConnected = false;
 
-		public static StoryPoint getStoryPointByID (string pointID)
-		{
-			StoryPoint r;
+        public static string broadcastServer, networkServer;
 
-			if (!storyPoints.TryGetValue (pointID, out r)) {
-				Log.Warning ("Storypoint " + pointID + " not found.", me);
-			}
+        public static string ID = "General";
 
-			return r;
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
-		}
 
-		static void flagPointerOverflow ()
-		{
+       static  void Log(string message)
+        {
+            StoryEngine.Log.Message(message, ID);
+        }
+        static void Warning(string message)
+        {
+            StoryEngine.Log.Warning(message, ID);
+        }
+        static void Error(string message)
+        {
+            StoryEngine.Log.Error(message, ID);
+        }
+        static void Verbose(string message)
+        {
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+        }
 
-			if (ALLPOINTERS.Count > 10) {
-				Log.Warning ("Potential pointer overflow.", me);
-			}
+        public static void AddPointer(StoryPointer pointer)
+        {
 
-		}
+            if (pointer != null)
+                ALLPOINTERS.Add(pointer);
 
-		static void flagTaskOverflow ()
-		{
+        }
 
-			if (ALLTASKS.Count > 10) {
-				Log.Warning ("Potential task overflow.", me);
+        public static StoryPoint GetStoryPointByID(string pointID)
+        {
+            StoryPoint r;
 
+            if (!storyPoints.TryGetValue(pointID, out r))
+            {
+                Warning("Storypoint " + pointID + " not found.");
+            }
 
-				//			foreach (Task t in ALLTASKS) {
-				//				Debug.Log (t.pointer.ID + " " + t.description);
-				//
-				//			}
+            return r;
 
-			}
+        }
 
-		}
+        static void flagPointerOverflow()
+        {
 
-		public static StoryPointer getPointerOnStoryline (string theStoryLine)
-		{
+            if (ALLPOINTERS.Count > 25)
+            {
+                Warning("Potential pointer overflow.");
+            }
 
-			flagPointerOverflow ();
+        }
 
-			StoryPointer r = null;
+        static void flagTaskOverflow()
+        {
 
-			foreach (StoryPointer p in GENERAL.ALLPOINTERS) {
+            if (ALLTASKS.Count > 25)
+            {
+                Warning("Potential task overflow.");
 
-				if (p.currentPoint.storyLineName == theStoryLine) {
-					r = p;
-					break;
-				}
 
-			}
+                //			foreach (Task t in ALLTASKS) {
+                //				Debug.Log (t.pointer.ID + " " + t.description);
+                //
+                //			}
 
-			return r;
-		}
+            }
 
-		public static StoryPointer getPointer (string pointerUuid)
-		{
+        }
 
-			flagPointerOverflow ();
+        public static StoryPointer GetStorylinePointerForPointID(string pointID)
+        {
 
-			for (int i = 0; i < ALLPOINTERS.Count; i++) {
+            string storyline = GetStoryPointByID(pointID).StoryLine;
 
-				if (ALLPOINTERS [i].ID.Equals (pointerUuid)) {
-					//				Debug.Log ("found storypoint with id " + storyPointerUid);
-					return ALLPOINTERS [i];
-				}
+            flagPointerOverflow();
 
-			}
+            StoryPointer r = null;
 
-			return null;
+            foreach (StoryPointer p in GENERAL.ALLPOINTERS)
+            {
 
-		}
+                if (p.currentPoint.StoryLine == storyline)
+                {
+                    r = p;
+                    break;
+                }
 
-		public static StoryTask getTask (string taskID)
-		{
+            }
 
-			flagTaskOverflow ();
+            return r;
+        }
 
-			for (int t = 0; t < ALLTASKS.Count; t++) {
 
-				if (ALLTASKS [t].ID == taskID) {
 
-					return ALLTASKS [t];
+        public static StoryPointer GetPointerForStoryline(string theStoryLine)
+        {
 
-				}
+            flagPointerOverflow();
 
-			}
+            StoryPointer r = null;
 
-			return null;
+            foreach (StoryPointer p in GENERAL.ALLPOINTERS)
+            {
 
-		}
+                if (p.currentPoint.StoryLine == theStoryLine)
+                {
+                    r = p;
+                    break;
+                }
 
-		public static int CONNECTIONINDEX;
+            }
 
-		static int NEWCONNECTION;
+            return r;
+        }
 
-		//	public static bool LOSTCONNECTION;
+        public static StoryPointer GetPointerForPoint(string pointID)
+        {
 
-		public static void SETNEWCONNECTION (int value)
-		{
-			NEWCONNECTION = value;
+            flagPointerOverflow();
 
-		}
+            for (int i = 0; i < ALLPOINTERS.Count; i++)
+            {
 
-		public static int GETNEWCONNECTION ()
-		{
+                if (ALLPOINTERS[i].currentPoint.ID.Equals(pointID))
+                {
 
-			int r = NEWCONNECTION;
-			NEWCONNECTION = -1;
-			return r;
+                    return ALLPOINTERS[i];
+                }
 
-		}
+            }
 
-	}
+            return null;
 
-	public static class UUID
-	{
-		static int uid { get; set; }
+        }
 
-		public static string identity;
+        public static StoryTask GetTaskForPoint(string pointID)
+        {
 
-		public static string getGlobalID ()
-		{
+            flagTaskOverflow();
 
-			uid++;
+            for (int t = 0; t < ALLTASKS.Count; t++)
+            {
 
-			return identity + uid.ToString ("x8");
+                if (ALLTASKS[t].PointID == pointID)
+                {
 
-		}
+                    return ALLTASKS[t];
 
-		public static string getID ()
-		{
+                }
 
-			uid++;
+            }
 
-			return uid.ToString ("x8");
+            return null;
 
-		}
+        }
 
-		public static void setIdentity ()
-		{
+        //public static int CONNECTIONINDEX;
 
-			string stamp = System.DateTime.UtcNow.ToString ("yyyyMMddhhmmss");
+        //static int NEWCONNECTION;
 
-			Int64 num = Int64.Parse (stamp);
-			identity = num.ToString ("x8");
 
-		}
-	}
+        //public static void SETNEWCONNECTION(int value)
+        //{
+        //    NEWCONNECTION = value;
 
+        //}
+
+        //public static int GETNEWCONNECTION()
+        //{
+
+        //    int r = NEWCONNECTION;
+        //    NEWCONNECTION = -1;
+        //    return r;
+
+        //}
+
+    }
+
+    public static class UUID
+    {
+        static int uid { get; set; }
+
+        public static string identity;
+
+        public static string getGlobalID()
+        {
+
+            uid++;
+
+            return identity + uid.ToString("x8");
+
+        }
+
+        public static string getID()
+        {
+
+            uid++;
+
+            return uid.ToString("x8");
+
+        }
+
+        public static void setIdentity()
+        {
+
+            string stamp = System.DateTime.UtcNow.ToString("yyyyMMddhhmmss");
+
+            Int64 num = Int64.Parse(stamp);
+            identity = num.ToString("x8");
+
+        }
+    }
 }

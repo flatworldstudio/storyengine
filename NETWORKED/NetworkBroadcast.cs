@@ -3,118 +3,144 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
+
 namespace StoryEngine
 {
-	
-	public class NetworkBroadcast : NetworkDiscovery
-	{
-	
-		public string serverAddress, serverMessage;
 
-		string me = "Networkbroadcast";
+    public class NetworkBroadcast : NetworkDiscovery
+    {
 
-		bool resumeClient = false;
-		bool resumeServer = false;
+        public string serverAddress, serverMessage;
 
-		public void ResetMessage ()
-		{
+        string ID = "Networkbroadcast";
 
-			serverAddress = "";
-			serverMessage = "";
+        bool resumeClient = false;
+        bool resumeServer = false;
 
-		}
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
-		public void StartClient ()
-		{
 
-			Initialize ();
-			ResetMessage (); // just to be sure.
-			StartAsClient ();
+        void Log(string message)
+        {
+            StoryEngine.Log.Message(message, ID);
+        }
+        void Warning(string message)
+        {
+            StoryEngine.Log.Warning(message, ID);
+        }
+        void Error(string message)
+        {
+            StoryEngine.Log.Error(message, ID);
+        }
+        void Verbose(string message)
+        {
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+        }
 
-		}
+        public void ResetMessage()
+        {
 
-		void OnApplicationPause (bool paused)
-		{
+            serverAddress = "";
+            serverMessage = "";
 
-			if (paused) {
-			
-				if (isClient) {
+        }
 
-					resumeClient = true;
-					Stop ();
+        public void StartClient()
+        {
 
-					Log.Message ("Pausing broadcast client.", me);
+            Initialize();
+            ResetMessage(); // just to be sure.
+            StartAsClient();
 
-				}
+        }
 
-				if (isServer) {
+        void OnApplicationPause(bool paused)
+        {
 
-					resumeServer = true;
-					Stop ();
+            if (paused)
+            {
 
-					Log.Message ("Pausing broadcast server.", me);
+                if (isClient)
+                {
 
-				}
+                    resumeClient = true;
+                    Stop();
 
-			} else {
-			
-				if (resumeClient) {
-				
-					resumeClient = false;
-					StartClient ();
+                    Log("Pausing broadcast client.");
 
-					Log.Message ("Resuming broadcast client.", me);
+                }
 
-				}
+                if (isServer)
+                {
 
-				if (resumeServer) {
+                    resumeServer = true;
+                    Stop();
 
-					resumeServer = false;
-					StartServer ();
+                    Log("Pausing broadcast server.");
 
-					Log.Message ("Resuming broadcast server.", me);
+                }
 
-				}
-							
-			}
+            }
+            else
+            {
 
-		}
+                if (resumeClient)
+                {
 
-		public void StartServer ()
-		{
+                    resumeClient = false;
+                    StartClient();
 
-            broadcastData = GENERAL.connectionKey; // get message string. default is HELLO.
-            
-			Initialize ();
-			ResetMessage (); // just to be sure.
-			StartAsServer ();
+                    Log("Resuming broadcast client.");
 
-		}
+                }
 
-		public void Stop ()
-		{
-		
-			StopBroadcast ();
-			ResetMessage ();
+                if (resumeServer)
+                {
 
-		}
+                    resumeServer = false;
+                    StartServer();
 
-		public override void OnReceivedBroadcast (string fromAddress, string data)
-		{
+                    Log("Resuming broadcast server.");
 
-			// Handler to respond to received broadcast message event.
-			// Since our engine is loop based, we just store the info for the loop to pick up on.
+                }
 
-			Log.Message ("Received broadcast: " + data + " from " + fromAddress, me);
+            }
 
-			serverMessage = data;
-			serverAddress = fromAddress;
+        }
 
-			GENERAL.broadcastServer = fromAddress;
-            GENERAL.receivedMessage = data; // store message string. allow for comparing messages, eg for different versions or environments.
+        public void StartServer()
+        {
 
-		}
+            Initialize();
+            ResetMessage(); // just to be sure.
+            StartAsServer();
 
-	}
+        }
 
+        public void Stop()
+        {
+
+            StopBroadcast();
+            //ResetMessage();
+
+        }
+
+        public override void OnReceivedBroadcast(string fromAddress, string data)
+        {
+
+            // Handler to respond to received broadcast message event.
+            // Since our engine is loop based, we just store the info for the loop to pick up on.
+
+            Log("Received broadcast: " + data + " from " + fromAddress);
+
+            serverMessage = data;
+            serverAddress = fromAddress;
+
+       //     DataController.Instance.RemoteBroadcastServerAddress = fromAddress;
+
+          //  GENERAL.broadcastServer = fromAddress;
+
+        }
+
+    }
 }

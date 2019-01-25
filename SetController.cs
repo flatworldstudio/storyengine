@@ -12,15 +12,36 @@ namespace StoryEngine
 
         GameObject StoryEngineObject;
         SetTaskHandler setTaskHandler;
+
         AssitantDirector ad;
         bool handlerWarning = false;
-        public List<StoryTask> taskList;
-        string me = "SetController";
 
+        public List<StoryTask> taskList;
+
+        string ID = "SetController";
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+
+        void Log(string message)
+        {
+            StoryEngine.Log.Message(message, ID);
+        }
+        void Warning(string message)
+        {
+            StoryEngine.Log.Warning(message, ID);
+        }
+        void Error(string message)
+        {
+            StoryEngine.Log.Error(message, ID);
+        }
+        void Verbose(string message)
+        {
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+        }
 
         void Start()
         {
-            Log.Message("Starting.", me);
+            Log("Starting.");
 
             taskList = new List<StoryTask>();
 
@@ -29,7 +50,7 @@ namespace StoryEngine
             if (StoryEngineObject == null)
             {
 
-                Log.Warning("StoryEngineObject not found.", me);
+                Warning("StoryEngineObject not found.");
 
             }
             else
@@ -39,6 +60,13 @@ namespace StoryEngine
                 ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
 
             }
+
+        }
+
+        public void addTaskHandler(SetTaskHandler theHandler)
+        {
+            setTaskHandler = theHandler;
+            Log("Handler added.");
         }
 
 
@@ -57,7 +85,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
 
-                    Log.Message("Removing task:" + task.description, me);
+                    Log("Removing task:" + task.Instruction);
 
                     taskList.RemoveAt(t);
 
@@ -71,7 +99,7 @@ namespace StoryEngine
                         if (setTaskHandler(task))
                         {
 
-                            task.signOff(me);
+                            task.signOff(ID);
                             taskList.RemoveAt(t);
 
                         }
@@ -85,18 +113,14 @@ namespace StoryEngine
                     else
                     {
 
-                        task.signOff(me);
-                        taskList.RemoveAt(t);
-
                         if (!handlerWarning)
                         {
-
-                            Log.Warning("No handler available, blocking task while waiting.", me);
-
+                            Warning("No handler available, blocking task while waiting.");
                             handlerWarning = true;
-
+                           
                         }
 
+                        t++;
                     }
 
                 }
@@ -104,14 +128,6 @@ namespace StoryEngine
             }
 
         }
-
-
-        public void addTaskHandler(SetTaskHandler _handler)
-        {
-            setTaskHandler = _handler;
-            Log.Message("Handler added.", me);
-        }
-
 
         void newTasksHandler(object sender, TaskArgs e)
         {
@@ -125,5 +141,7 @@ namespace StoryEngine
         }
 
     }
-
 }
+
+
+

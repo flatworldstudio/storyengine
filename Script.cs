@@ -7,460 +7,543 @@ using UnityEngine;
 
 namespace StoryEngine
 {
-	
-	public class Script
-	{
 
-		// COULD BE MADE STATIC??
+    public class Script
+    {
 
+        // COULD BE MADE STATIC, we don't have multiple scripts...?
 
-		List <String> manuscript;
-		public Boolean isReady;
-		string me = "Script";
+        List<String> manuscript;
+        public Boolean isReady;
+        string ID = "Script";
 
-		public Script (string fileName)
-		{
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
-			GENERAL.storyPoints = new Dictionary <string,StoryPoint> ();
+        void Log(string message)
+        {
+            StoryEngine.Log.Message(message, ID);
+        }
+        void Warning(string message)
+        {
+            StoryEngine.Log.Warning(message, ID);
+        }
+        void Error(string message)
+        {
+            StoryEngine.Log.Error(message, ID);
+        }
+        void Verbose(string message)
+        {
+            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+        }
 
-			GENERAL.storyPoints.Add ("end", new StoryPoint ("end")); // we use this storypoint for ending things, because it'll work over the network as well.
+        public Script(string fileName)
+        {
 
-			isReady = false;
+            GENERAL.storyPoints = new Dictionary<string, StoryPoint>();
 
-			if (Load (fileName)) {
+            //GENERAL.storyPoints.Add ("end", new StoryPoint ("end")); // we use this storypoint for ending things, because it'll work over the network as well.
 
-				parse ();
+            isReady = false;
 
-			} else {
-			
-				Log.Warning ("Script file didn't load.", me);
+            if (Load(fileName))
+            {
 
-			}
+                parse();
 
-			isReady = true;
-			
-		}
+            }
+            else
+            {
 
+                Warning("Script file didn't load.");
 
-		void parse ()
-		{
-		
-			Dictionary <string,StoryPoint> storyLines = new Dictionary <string,StoryPoint> ();
+            }
 
-			StoryPoint point, previousPoint;
+            isReady = true;
 
-			string currentStoryline = "default";
-			previousPoint = new StoryPoint ("");
+        }
 
-			int l = 0;
 
-			string storyLine, storyLabel, storyPoint;
+        void parse()
+        {
 
-			while (l < manuscript.Count) {
-			
-				storyLine = isStoryLine (l);
-		
-				if (storyLine != null) {
-					l++;
+            Dictionary<string, StoryPoint> storyLines = new Dictionary<string, StoryPoint>();
 
-					storyPoint = isStoryPoint (l);
+            StoryPoint point, previousPoint;
 
-					if (storyPoint != null) {
-					
-//					Log.Message ("new storyline: " + storyLine);
+            string currentStoryline = "default";
 
-						string[] task = getTask (manuscript [l]);
-//					Log.Message ("task: " + task[0]);
+            previousPoint = null;
 
-						point = new StoryPoint (storyLine, storyLine, task);
+            int l = 0;
 
-//					point.name = storyLine;
-										
-						storyLines.Add (storyLine, point);
-						GENERAL.storyPoints.Add (storyLine, point);
+            string storyLine, storyLabel, storyPoint;
 
-						currentStoryline = storyLine;
+            while (l < manuscript.Count)
+            {
 
-						previousPoint = point;
+                storyLine = isStoryLine(l);
 
+                if (storyLine != null)
+                {
+                    l++;
 
-					} else {
+                    storyPoint = isStoryPoint(l);
 
-						Log.Warning ("#storyline should be followed by storypoint", me);
+                    if (storyPoint != null)
+                    {
 
-					}
+                        //					Log.Message ("new storyline: " + storyLine);
 
-				} 
+                        string[] task = getTask(manuscript[l]);
+                        //					Log.Message ("task: " + task[0]);
 
-				storyLabel = isStoryLabel (l);
+                        point = new StoryPoint(storyLine, storyLine, task);
 
-				if (storyLabel != null) {
-					l++;
+                        //					point.name = storyLine;
 
-					storyPoint = isStoryPoint (l);
+                        storyLines.Add(storyLine, point);
+                        GENERAL.storyPoints.Add(storyLine, point);
 
-					if (storyPoint != null) {
+                        currentStoryline = storyLine;
 
-//					Log.Message ("new storylabel: " + storyLabel);
+                        previousPoint = point;
 
-						string[] task = getTask (manuscript [l]);
-//					Log.Message ("task: " + task[0]);
 
-						point = new StoryPoint (storyLabel, currentStoryline, task);
+                    }
+                    else
+                    {
 
+                        Warning("#storyline should be followed by storypoint");
 
-//					point.name = storyLabel;
-//					if (point.taskType != TASKTYPE.BASIC)
-//						storyPoint = getUniqueName ();
-					
-//					storyLabels.Add (storyLabel, point);
-						GENERAL.storyPoints.Add (storyLabel, point);
+                    }
 
-						previousPoint.setNextStoryPoint (point);
-						previousPoint = point;
+                }
 
-					} else {
+                storyLabel = isStoryLabel(l);
 
-						Log.Warning ("@storylabel should be followed by storypoint", me);
+                if (storyLabel != null)
+                {
+                    l++;
 
-					}
+                    storyPoint = isStoryPoint(l);
 
-				} 
+                    if (storyPoint != null)
+                    {
 
-				storyPoint = isStoryPoint (l);
+                        //					Log.Message ("new storylabel: " + storyLabel);
 
-				if (storyLine == null && storyLabel == null && storyPoint != null) {
-//				Log.Message ("storyPoint: "+l+" " + storyPoint);
-					string[] task = getTask (manuscript [l]);
-//				Log.Message ("task: " + task[0]);
+                        string[] task = getTask(manuscript[l]);
+                        //					Log.Message ("task: " + task[0]);
 
-//				point = new StoryPoint (storyPoint, currentStoryline, task);
-					point = new StoryPoint (UUID.getID (), currentStoryline, task);
+                        point = new StoryPoint(storyLabel, currentStoryline, task);
 
-//				if (point.taskType != TASKTYPE.BASIC) {
-//					storyPoint = UUID.getId ();
-//					point.ID = storyPoint;
-//				}
 
+                        //					point.name = storyLabel;
+                        //					if (point.taskType != TASKTYPE.BASIC)
+                        //						storyPoint = getUniqueName ();
 
-//				storyPoints.Add (storyPoint, point);
-					GENERAL.storyPoints.Add (point.ID, point);
+                        //					storyLabels.Add (storyLabel, point);
 
+                        StoryPoint exists;
 
-					previousPoint.setNextStoryPoint (point);
-					previousPoint = point;
-			
-				}
+                        if (GENERAL.storyPoints.TryGetValue(storyLabel, out exists))
+                        {
 
+                            Debug.LogError("Storylabel exists: " + storyLabel + ". Adding as a non functional duplicate.");
+                            storyLabel = storyLabel + "_DUPLICATE";
+                        }
 
+                        GENERAL.storyPoints.Add(storyLabel, point);
 
+                        if (previousPoint != null)
+                            previousPoint.setNextStoryPoint(point);
 
-				l++;
+                        previousPoint = point;
 
-			}
-//		string[] keys = storyLines.Keys.Select(x => x.ToString()).ToArray();
+                    }
+                    else
+                    {
 
-//		Enumerable storyLineKeys = storyLines.Keys;
+                        Warning("@storylabel should be followed by storypoint");
 
+                    }
 
-			string[] keys = storyLines.Keys.ToArray ();
+                }
 
+                storyPoint = isStoryPoint(l);
 
-			for (int sl = 0; sl < keys.Count (); sl++) {
+                if (storyLine == null && storyLabel == null && storyPoint != null)
+                {
+                    //				Log.Message ("storyPoint: "+l+" " + storyPoint);
+                    string[] task = getTask(manuscript[l]);
+                    //				Log.Message ("task: " + task[0]);
 
-				string key = keys [sl];
-//			Debug.Log ("Storyline key: " + key);
+                    //				point = new StoryPoint (storyPoint, currentStoryline, task);
+                    point = new StoryPoint(UUID.getID(), currentStoryline, task);
 
+                    //				if (point.taskType != TASKTYPE.BASIC) {
+                    //					storyPoint = UUID.getId ();
+                    //					point.ID = storyPoint;
+                    //				}
 
-				StoryPoint thePoint;
 
-				if (!storyLines.TryGetValue (key, out thePoint)) {
-//				Log.Message ("Can't find point");
-				} else {
+                    //				storyPoints.Add (storyPoint, point);
+                    GENERAL.storyPoints.Add(point.ID, point);
 
-					while (thePoint.getNextStoryPoint () != null) {
+                    if (previousPoint != null)
+                        previousPoint.setNextStoryPoint(point);
 
-//					Debug.Log (thePoint.ID + " | " + string.Join (" ", thePoint.task));
-						thePoint = thePoint.getNextStoryPoint ();
-					}
+                    previousPoint = point;
 
-//				Debug.Log (thePoint.ID + " | " + string.Join (" ", thePoint.task));
+                }
 
 
 
 
-				}
+                l++;
 
+            }
+            //		string[] keys = storyLines.Keys.Select(x => x.ToString()).ToArray();
 
+            //		Enumerable storyLineKeys = storyLines.Keys;
 
 
-//			storyPoint point = storyLines[keys[sl]];
+            string[] keys = storyLines.Keys.ToArray();
 
 
+            for (int sl = 0; sl < keys.Count(); sl++)
+            {
 
-//			getNextStoryPointName
-		
+                string key = keys[sl];
+                //			Debug.Log ("Storyline key: " + key);
 
 
+                StoryPoint thePoint;
 
+                if (!storyLines.TryGetValue(key, out thePoint))
+                {
+                    //				Log.Message ("Can't find point");
+                }
+                else
+                {
 
-			}
+                    while (thePoint.getNextStoryPoint() != null)
+                    {
 
+                        //					Debug.Log (thePoint.ID + " | " + string.Join (" ", thePoint.task));
+                        thePoint = thePoint.getNextStoryPoint();
+                    }
 
+                    //				Debug.Log (thePoint.ID + " | " + string.Join (" ", thePoint.task));
 
 
 
-//		string s = string.Join(";", storyLines.Select(x => x.Key + " : " + x.Value.task[0]+ " -> " + x.Value.getNextStoryPointName()).ToArray());
-//
-//		Debug.Log (s);
-//
-//		s = string.Join(";", storyLabels.Select(x => x.Key + " : " + x.Value.task[0]+ " -> " + x.Value.getNextStoryPointName()).ToArray());
-//
-//		Debug.Log (s);
-//
-//		s = string.Join(";", storyPoints.Select(x => x.Key + " : " + x.Value.task[0]+ " -> " + x.Value.getNextStoryPointName()).ToArray());
-//
-//		Debug.Log (s);
 
-		}
+                }
 
-		string l;
 
-		string isStoryLine (int i)
-		{
-			l = manuscript [i];
 
-			if (isComment(l))
-				return null;
-			
-			string r = null;
 
-			Char delimiter = '#';
-			string[] s = manuscript [i].Split (delimiter);
+                //			storyPoint point = storyLines[keys[sl]];
 
-			if (s.Length > 1) {
-				r = s [1];
-			}
 
-			return r;
-		
-		}
 
-		string isStoryLabel (int i)
-		{
-			
-			l = manuscript [i];
-		
+                //			getNextStoryPointName
 
-			if (isComment(l))
-				return null;
-			
-			string r = null;
 
-			Char delimiter = '@';
-			string[] s = manuscript [i].Split (delimiter);
 
-			if (s.Length > 1) {
-				r = s [1];
-			}
 
-			return r;
 
-		}
+            }
 
-		string isStoryPoint (int i)
-		{
-			 l = manuscript [i];
 
-			if (isComment(l))
-				return null;
 
-			Char space = ' ';
-//			string comment = "//";
-//
-//			if (l.IndexOf (comment) != -1) {
-//				return null;
-//			}
-			string r = null;
 
-			string[] s = l.Split (space);
 
-			r = s [0];
+            //		string s = string.Join(";", storyLines.Select(x => x.Key + " : " + x.Value.task[0]+ " -> " + x.Value.getNextStoryPointName()).ToArray());
+            //
+            //		Debug.Log (s);
+            //
+            //		s = string.Join(";", storyLabels.Select(x => x.Key + " : " + x.Value.task[0]+ " -> " + x.Value.getNextStoryPointName()).ToArray());
+            //
+            //		Debug.Log (s);
+            //
+            //		s = string.Join(";", storyPoints.Select(x => x.Key + " : " + x.Value.task[0]+ " -> " + x.Value.getNextStoryPointName()).ToArray());
+            //
+            //		Debug.Log (s);
 
-			if (r.Equals ("")) {
-				r = null;
-//			Debug.Log ("empty!!");
-			}
+        }
 
-			return r;
+        string l;
 
+        string isStoryLine(int i)
+        {
+            l = manuscript[i];
 
-		}
+            //if (isComment(l))
+            //return null;
 
-		private bool isComment(string line){
-			
-			string comment = "//";
+            string r = null;
 
-			if (line.IndexOf (comment) == -1) {
-				return false;
-			}
+            Char delimiter = '#';
+            string[] s = manuscript[i].Split(delimiter);
 
-			return true;
-		}
+            if (s.Length > 1)
+            {
+                r = s[1];
+            }
 
+            return r;
 
+        }
 
-		private string getElementFromLine (string line, int i)
-		{
-			string[] split = splitLine (line);
-			if (split.Length > i) {
-				return split [i];
-			} else {
-				//				Debug.Log ("Empty line");
-				return "null";
-			}
-		}
+        string isStoryLabel(int i)
+        {
 
-		private string[] getTask (string line)
-		{
-			string[] s;
+            l = manuscript[i];
 
-			s = splitLine (line);
 
-			//			Debug.Log (s [1]);
-//		if (s.Length > 1) {
-//			r = new string[s.Length - 1];
-//
-//			Array.Copy (s, 1, r, 0, s.Length - 1);
-//			//				Debug.Log (r [0]);
-//			return r;
-//		} else {
-//			r = new string[0];
-//			return r;
-//		}
+            //if (isComment(l))
+            //return null;
 
-			return s;
-		}
+            string r = null;
 
+            Char delimiter = '@';
+            string[] s = manuscript[i].Split(delimiter);
 
+            if (s.Length > 1)
+            {
+                r = s[1];
+            }
 
+            return r;
 
+        }
 
-		private string[] splitLine (string line)
-		{
-			Char delimiter = ' ';
-			string[] r = line.Split (delimiter);
-			return r;
-		}
+        string isStoryPoint(int i)
+        {
+            l = manuscript[i];
 
-		private bool Load (string fileName)
-		{
-			manuscript = new List<string> ();
+            //if (isComment(l))
+            //return null;
 
-			TextAsset mytxtData = (TextAsset)Resources.Load (fileName);
+            Char space = ' ';
+            //			string comment = "//";
+            //
+            //			if (l.IndexOf (comment) != -1) {
+            //				return null;
+            //			}
+            string r = null;
 
-			if (mytxtData != null) {
-				string txt = mytxtData.text;
-				string[] lines = txt.Split (new string[] { "\r\n", "\n" }, StringSplitOptions.None);
-				manuscript.AddRange (lines);
-				return true;
-			} else {
+            string[] s = l.Split(space);
 
-				return false;
-			}
+            r = s[0];
 
-		}
+            if (r.Equals(""))
+            {
+                r = null;
+                //			Debug.Log ("empty!!");
+            }
 
-	}
+            return r;
 
-	public class StoryPoint
-	{
-		public string ID;
-		public string storyLineName;
-		public string[] task;
 
-		public TASKTYPE taskType;
-		StoryPoint nextStoryPoint;
+        }
 
-		public StoryPoint (string myName)
-		{
-			ID = myName;
-			storyLineName = "...";
+        private bool isComment(string line)
+        {
 
-			if (ID.Equals ("end")) {
-			
-				task = new string[] { "end" };
-				taskType = TASKTYPE.END;
+            string comment = "//";
 
-			} else {
-			
-				task = new string[] { "none" };
-				taskType = TASKTYPE.BASIC;
-			}
+            if (line.IndexOf(comment) == -1)
+            {
+                return false;
+            }
 
-		}
+            return true;
+        }
 
-		public StoryPoint (string myName, string myStoryLine, string[] myTask)
-		{
-			ID = myName;
-			storyLineName = myStoryLine;
 
-			task = myTask;
 
-			switch (task [0]) {
+        private string getElementFromLine(string line, int i)
+        {
+            string[] split = splitLine(line);
+            if (split.Length > i)
+            {
+                return split[i];
+            }
+            else
+            {
+                //				Debug.Log ("Empty line");
+                return "null";
+            }
+        }
 
-			case "start":
-			case "stop":
-			case "tell":
-			case "goto":
-//		case "end":
-			case "hold":
-			
-				taskType = TASKTYPE.ROUTING;
-				break;
+        private string[] getTask(string line)
+        {
+            string[] s;
 
-			case "end":
+            s = splitLine(line);
 
-				taskType = TASKTYPE.END;
-				break;
-			default:
-			
-				taskType = TASKTYPE.BASIC;
-				break;
+            //			Debug.Log (s [1]);
+            //		if (s.Length > 1) {
+            //			r = new string[s.Length - 1];
+            //
+            //			Array.Copy (s, 1, r, 0, s.Length - 1);
+            //			//				Debug.Log (r [0]);
+            //			return r;
+            //		} else {
+            //			r = new string[0];
+            //			return r;
+            //		}
 
-			}
+            return s;
+        }
 
-		}
 
-		public void setNextStoryPoint (StoryPoint myNextStoryPoint)
-		{
-	
-			nextStoryPoint = myNextStoryPoint;
 
-		}
 
-		public StoryPoint getNextStoryPoint ()
-		{
 
-			return  nextStoryPoint;
+        private string[] splitLine(string line)
+        {
+            Char delimiter = ' ';
+            string[] r = line.Split(delimiter);
+            return r;
+        }
 
-		}
+        private bool Load(string fileName)
+        {
+            manuscript = new List<string>();
 
-		public string getNextStoryPointName ()
-		{
-	
-			if (nextStoryPoint != null) {
+            TextAsset mytxtData = (TextAsset)Resources.Load(fileName);
 
-				return nextStoryPoint.ID;
-		
-			} else {
-		
-				return ("no next point");
+            if (mytxtData != null)
+            {
+                string txt = mytxtData.text;
+                string[] lines = txt.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
 
-			}
+                for (int l = 0; l < lines.Length; l++)
+                {
+                    if (!isComment(lines[l]))
+                    {
 
-		}
+                        manuscript.Add(lines[l]);
 
-	}
+                    }
+
+
+                }
+
+
+
+                //manuscript.AddRange (lines);
+
+
+
+                return true;
+            }
+            else
+            {
+
+                return false;
+            }
+
+        }
+
+    }
+
+    public class StoryPoint
+    {
+        public string ID;
+        public string StoryLine;
+        public string[] Instructions;
+
+        public TASKTYPE taskType;
+        StoryPoint nextStoryPoint;
+
+        //public StoryPoint (string myName)
+        //{
+        //	ID = myName;
+        //	storyLineName = "...";
+
+        //	//if (ID.Equals ("end")) {
+
+        //	//	task = new string[] { "end" };
+        //	//	taskType = TASKTYPE.END;
+
+        //	//} else {
+
+        //		task = new string[] { "none" };
+        //		taskType = TASKTYPE.BASIC;
+        //	//}
+
+        //}
+
+        public StoryPoint(string myName, string myStoryLine, string[] myTask)
+        {
+            ID = myName;
+            StoryLine = myStoryLine;
+
+            Instructions = myTask;
+
+            switch (Instructions[0])
+            {
+
+                case "start":
+                case "stop":
+                case "tell":
+                case "goto":
+                //		case "end":
+                case "hold":
+
+                    taskType = TASKTYPE.ROUTING;
+                    break;
+
+                //case "end":
+
+                //	taskType = TASKTYPE.END;
+                //	break;
+                default:
+
+                    taskType = TASKTYPE.BASIC;
+                    break;
+
+            }
+
+        }
+
+        public void setNextStoryPoint(StoryPoint myNextStoryPoint)
+        {
+
+            nextStoryPoint = myNextStoryPoint;
+
+        }
+
+        public StoryPoint getNextStoryPoint()
+        {
+
+            return nextStoryPoint;
+
+        }
+
+        public string getNextStoryPointName()
+        {
+
+            if (nextStoryPoint != null)
+            {
+
+                return nextStoryPoint.ID;
+
+            }
+            else
+            {
+
+                return ("no next point");
+
+            }
+
+        }
+
+    }
 
 }

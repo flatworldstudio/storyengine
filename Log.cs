@@ -7,7 +7,6 @@ namespace StoryEngine
     public enum LOGLEVEL
     {
 
-        OFF,
         ERRORS,
         WARNINGS,
         NORMAL,
@@ -15,43 +14,54 @@ namespace StoryEngine
 
     }
 
+    public delegate void Echo(string message, string module);
 
     public static class Log
     {
 
+        static Echo errorEcho;
+
         static Dictionary<string, LOGLEVEL> moduleLogStatus;
 
-        public static void AddModule(string module, LOGLEVEL status)
+         static void AddModule(string module, LOGLEVEL status)
         {
 
             Init();
+
             moduleLogStatus.Add(module, status);
 
         }
 
-
-        public static void Init()
+         static void Init()
         {
-
             if (moduleLogStatus == null)
                 moduleLogStatus = new Dictionary<string, LOGLEVEL>();
 
         }
 
+        public static void AddErrorEcho(Echo _echo)
+        {
+            errorEcho = _echo;
+        }
 
         public static void SetModuleLevel(string module, LOGLEVEL level)
         {
 
             LOGLEVEL current;
+
             Init();
 
             if (moduleLogStatus.TryGetValue(module, out current))
             {
+
                 moduleLogStatus[module] = level;
+
             }
             else
             {
+
                 AddModule(module, level);
+
             }
 
         }
@@ -59,15 +69,16 @@ namespace StoryEngine
 
         public static void Message(string message, string module = "Unkown", LOGLEVEL messageLevel = LOGLEVEL.NORMAL)
         {
-            
+
 #if LOGGING
-		
-            LOGLEVEL moduleLevel; // normal by default.
+            Init();
+
+            LOGLEVEL moduleLevel ; 
 
             if (!moduleLogStatus.TryGetValue (module, out moduleLevel))
-                 moduleLevel = LOGLEVEL.NORMAL;
-				
-			if (messageLevel <= moduleLevel)
+                moduleLevel = LOGLEVEL.NORMAL;
+
+            if (messageLevel <= moduleLevel)
 				Debug.Log (module + ": " + message);
 
 #endif
@@ -75,42 +86,45 @@ namespace StoryEngine
 
         public static void Warning(string message, string module = "Unkown")
         {
-            
 #if LOGGING
+            Init();
 
-			LOGLEVEL messageLevel = LOGLEVEL.WARNINGS;
+            LOGLEVEL messageLevel = LOGLEVEL.WARNINGS;
 
-            LOGLEVEL moduleLevel; // normal by default.
+            LOGLEVEL moduleLevel;
 
-            if (!moduleLogStatus.TryGetValue (module, out moduleLevel))
+            if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
                 moduleLevel = LOGLEVEL.NORMAL;
 
-			if (messageLevel <= moduleLevel)
-				Debug.LogWarning (module + ": " + message);
-		
+            if (messageLevel <= moduleLevel)
+                Debug.LogWarning(module + ": " + message);
+
 #endif
 
         }
 
         public static void Error(string message, string module = "Unkown")
         {
+            Init();
 
-#if LOGGING
+            LOGLEVEL messageLevel = LOGLEVEL.ERRORS;
 
-			LOGLEVEL messageLevel = LOGLEVEL.ERRORS;
+            LOGLEVEL moduleLevel;
 
-            LOGLEVEL moduleLevel; // normal by default.
-
-            if (!moduleLogStatus.TryGetValue (module, out moduleLevel))
+            if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
                 moduleLevel = LOGLEVEL.NORMAL;
 
-			if (messageLevel <= moduleLevel)
-				Debug.LogError (module + ": " + message);
+            if (messageLevel <= moduleLevel)
+            {
+                Debug.LogError(module + ": " + message);
+                if (errorEcho != null)
+                    errorEcho(message, module);
 
-#endif
+            }
 
         }
 
     }
+
 
 }
