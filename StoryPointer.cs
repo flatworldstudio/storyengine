@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 //using Amazon.S3.Model;
-
+using StoryEngine.Network;
 #endif
 
 namespace StoryEngine

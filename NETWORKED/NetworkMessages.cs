@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using UnityEngine.Networking;
 #endif
 
-namespace StoryEngine
+namespace StoryEngine.Network
 {
 #if NETWORKED
 

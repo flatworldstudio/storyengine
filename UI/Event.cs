@@ -103,6 +103,7 @@ namespace StoryEngine.UI
         }
 
         //void applyUserInteraction(Event ui)
+
         public void GetUserActivity()
         {
 
@@ -114,9 +115,11 @@ namespace StoryEngine.UI
 
             // check user mouse/touch interaction and populate this passed-in UIEVENT accordingly
 
-#if UNITY_IOS
-                        Event storeUi = ui.clone();
-#endif
+            //#if UNITY_IOS
+            //                        Event storeUi = ui.clone();
+            //#endif
+
+            float lastdd = dd;
 
             touch = TOUCH.NONE;
 
@@ -233,7 +236,7 @@ namespace StoryEngine.UI
                 case TouchPhase.Began:
                     x = tp.x;
                     y = tp.y;
-                    trackTap (ui);
+                    trackTap ();
                     touch = TOUCH.BEGAN;
                     break;
 
@@ -243,13 +246,16 @@ namespace StoryEngine.UI
 //      dx = touchDelta.x / Screen.height * 720f;
 //                  dy = touchDelta.y / Screen.height * 720f;
 
-        dx = touchDelta.x /currentScale;
-        dy = touchDelta.y /currentScale;
+        //dx = touchDelta.x /currentScale;
+        //dy = touchDelta.y /currentScale;
 
 
-                    action = ACTION.SINGLEDRAG;
+                        dx = touchDelta.x;
+                        dy = touchDelta.y;
+
+                        action = ACTION.SINGLEDRAG;
                     touch = TOUCH.TOUCHING;
-                    trackTap (ui);
+                    trackTap ();
                     break;
 
                 case TouchPhase.Stationary:
@@ -257,14 +263,14 @@ namespace StoryEngine.UI
                     dy = 0;
                     action = ACTION.SINGLEDRAG;
                     touch = TOUCH.TOUCHING;
-                    trackTap (ui);
+                    trackTap ();
                     break;
 
                 case TouchPhase.Ended:
 
                     touch = TOUCH.ENDED;
 
-                    if (wasTap (ui)) {
+                    if (wasTap ()) {
                         action = ACTION.TAP;
                     } else {
 
@@ -310,11 +316,14 @@ namespace StoryEngine.UI
 //                  dx = (touchDelta0.x + touchDelta1.x) / 2f / Screen.height * 720f; 
 //                  dy = (touchDelta0.y + touchDelta1.y) / 2f / Screen.height * 720f; 
 
-        dx = (touchDelta0.x + touchDelta1.x) / 2f /currentScale; 
-        dy = (touchDelta0.y + touchDelta1.y) / 2f /currentScale; 
+        //dx = (touchDelta0.x + touchDelta1.x) / 2f /currentScale; 
+        //dy = (touchDelta0.y + touchDelta1.y) / 2f /currentScale;
+
+                    dx = (touchDelta0.x + touchDelta1.x) / 2f ;
+                    dy = (touchDelta0.y + touchDelta1.y) / 2f ;
 
                     d = Vector2.Distance (tp0, tp1);
-                    dd = d - stored;
+                    dd = d - lastdd;
 
                     action = ACTION.DOUBLEDRAG;
                     touch = TOUCH.TOUCHING;

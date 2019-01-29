@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 
-namespace StoryEngine
+namespace StoryEngine.Network
 {
 
     public class NetworkBroadcast : NetworkDiscovery

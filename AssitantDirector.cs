@@ -10,6 +10,7 @@ using Random = UnityEngine.Random;
 #if NETWORKED
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
+using StoryEngine.Network;
 #endif
 
 
@@ -17,6 +18,13 @@ namespace StoryEngine
 {
 
     public delegate void NewTasksEvent(object sender, TaskArgs e);
+
+    /*!
+     * \brief
+     * Class to generate, distribute and synchronise StoryTask objects
+     * 
+     * # Goes over all StoryPointer objects to check for changes made by the Director 
+     */    
 
     public class AssitantDirector : MonoBehaviour
     {
@@ -29,7 +37,7 @@ namespace StoryEngine
 
         public event NewTasksEvent newTasksEvent;
         Director theDirector;
-        string launchOnStoryline;
+        string launchStoryline;
 
 
 #if NETWORKED
@@ -44,26 +52,13 @@ namespace StoryEngine
 
 #endif
 
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+        // Copy these into every class for easy debugging.
+        void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
-        void Log(string message)
-        {
-            StoryEngine.Log.Message(message, ID);
-        }
-        void Warning(string message)
-        {
-            StoryEngine.Log.Warning(message, ID);
-        }
-        void Error(string message)
-        {
-            StoryEngine.Log.Error(message, ID);
-        }
-        void Verbose(string message)
-        {
-            StoryEngine.Log.Message(message, ID,LOGLEVEL.VERBOSE);
-        }
-
-		 void Awake()
+        void Awake()
 		{
             Instance=this; 
 		}
@@ -89,7 +84,7 @@ namespace StoryEngine
 
             Log("Running on OSX platform.");
 
-            launchOnStoryline = launchOSX;
+            launchStoryline = launchOSX;
 
 #endif
 
@@ -106,7 +101,7 @@ namespace StoryEngine
 
 		Log ("Running on IOS platform. ");
 
-		launchOnStoryline = launchIOS;
+		launchStoryline = launchIOS;
 
 #endif
 
@@ -262,7 +257,7 @@ namespace StoryEngine
 
                     }
 
-                    theDirector.evaluatePointers();
+                    theDirector.EvaluatePointers();
 
                     List<StoryTask> newTasks = new List<StoryTask>();
 
@@ -354,9 +349,9 @@ namespace StoryEngine
 
                         Verbose("" + GENERAL.SIGNOFFS + " handlers registred.");
 
-                        Log("Starting storyline " + launchOnStoryline);
+                        Log("Starting storyline " + launchStoryline);
 
-                        theDirector.beginStoryLine(launchOnStoryline);
+                        theDirector.NewStoryLine(launchStoryline);
                         theDirector.status = DIRECTORSTATUS.ACTIVE;
 
                     }

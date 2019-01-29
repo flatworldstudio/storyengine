@@ -44,6 +44,9 @@ namespace StoryEngine.UI
         // Checks and applies user interaction. Keeps a stack of ui events to allow for inertia, springing.
         // NOT IMPLEMENTED: Set a float for the current scale applied by the canvas. We need this to convert screen pixels to ui pixels.
 
+     
+
+
         public UserCallBack updateUi(Layout _layout)
         {
             cycle=(cycle+1)%1000;
@@ -53,6 +56,7 @@ namespace StoryEngine.UI
             int stackSize = uiEventStack.Count;
 
             activeUiEvent.GetUserActivity(); // get mouse movement, touches, taps
+
             //activeUiEvent.plane = _layout.FindPlaneByPoint(activeUiEvent.position); // get the plane the user is active in
 
             // If a user touch/click just began, set targets and remove any old event targeting the same objects. 

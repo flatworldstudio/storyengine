@@ -8,6 +8,7 @@ using System.Linq;
 
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
+using StoryEngine.Network;
 
 #endif
 
@@ -30,6 +31,13 @@ namespace StoryEngine
         COMPLETE,
 
     }
+
+    /*!
+* \brief
+* Class to hold a task and variables associated with that task.
+* 
+* # Task variables are updated across the network.
+*/
 
     public class StoryTask
     {
@@ -74,25 +82,11 @@ namespace StoryEngine
 
 #endif
 
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
-
-
-        void Log(string message)
-        {
-            StoryEngine.Log.Message(message, ID);
-        }
-        void Warning(string message)
-        {
-            StoryEngine.Log.Warning(message, ID);
-        }
-        void Error(string message)
-        {
-            StoryEngine.Log.Error(message, ID);
-        }
-        void Verbose(string message)
-        {
-            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
-        }
+        // Copy these into every class for easy debugging.
+        void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
         // ----------------
 

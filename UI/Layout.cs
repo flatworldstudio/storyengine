@@ -7,38 +7,39 @@ using System.Linq;
 namespace StoryEngine.UI
 {
 
-    // A layout contains planes.
-    // A plane can contain an interface.
-    // An interface holds references to objects in the scene.
+    /*!
+    * \brief 
+    * Class to manage a (binairy tree) layout of Planes. 
+    * 
+    * # Detailed description
+    *    
+    */
 
-   public delegate void InitialiseLayout(Plane root); // called on init to create the layout
+    public delegate void InitialiseLayout(Plane root); // called on init to create the layout
     public delegate void ResizeLayout(Plane root); // called when layout is resized
+
 
     public class Layout
     {
-
-        // Class to manage a (binairy tree) layout of Planes. 
 
         InitialiseLayout initialiseLayout;
         ResizeLayout resizeLayout;
 
         Plane rootPlane;
 
-        //public Layout(float _width, float _height, InitialiseLayout _initialiseLayout)
-        //{
+        public Layout()
+        {
 
-        //    initialiseLayout = _initialiseLayout;
-        //    Initialise(_width, _height);
+            rootPlane = new Plane();
 
-        //}
+        }
 
-        public Layout(float _width, float _height,InitialiseLayout _initialiseLayout=null,ResizeLayout _resizeLayout=null)
+        public Layout(float _width, float _height, InitialiseLayout _initialiseLayout = null, ResizeLayout _resizeLayout = null)
 
         {
 
-
             initialiseLayout = _initialiseLayout;
-            resizeLayout=_resizeLayout;
+            resizeLayout = _resizeLayout;
 
             Initialise(_width, _height);
 
@@ -53,12 +54,14 @@ namespace StoryEngine.UI
                 initialiseLayout(rootPlane);
 
         }
+        public Plane GetRootPlane()
+        {
+            return rootPlane;
+        }
 
         public Plane GetPlaneByAddress(string _planeAddress)
         {
-
             return (rootPlane.SearchAddress(_planeAddress));
-
         }
 
         public Plane FindPlaneByPoint(Vector2 _point)
@@ -127,7 +130,8 @@ namespace StoryEngine.UI
 
         }
 
-        public void ResizePlaneRecursive(Plane _plane){
+        public void ResizePlaneRecursive(Plane _plane)
+        {
 
             if (_plane.children != null)
             {
@@ -287,9 +291,10 @@ namespace StoryEngine.UI
 
         }
 
-        public void Resize(){
+        public void Resize()
+        {
 
-            if (interFace!=null)
+            if (interFace != null)
                 interFace.Resize();
 
         }
@@ -357,6 +362,10 @@ namespace StoryEngine.UI
 
         public bool PointInPlane(Vector2 _point)
         {
+            // If the plane doesn't have dimensions, always return true.
+
+            if (x0==0 &&x1==0&&y0==0&&y1==0 )
+                return true;
 
             if (_point.x >= x0 && _point.x < x1 && _point.y >= y0 && _point.y < y1)
                 return true;

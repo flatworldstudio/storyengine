@@ -7,61 +7,46 @@ using UnityEngine;
 
 namespace StoryEngine
 {
+    /*!
+* \brief
+* Class to hold a text based script.
+* 
+* # Parses into a chain of storypoints and routing.
+*/
 
     public class Script
     {
+        string ID = "Script";
 
-        // COULD BE MADE STATIC, we don't have multiple scripts...?
 
         List<String> manuscript;
         public Boolean isReady;
-        string ID = "Script";
 
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
-
-        void Log(string message)
-        {
-            StoryEngine.Log.Message(message, ID);
-        }
-        void Warning(string message)
-        {
-            StoryEngine.Log.Warning(message, ID);
-        }
-        void Error(string message)
-        {
-            StoryEngine.Log.Error(message, ID);
-        }
-        void Verbose(string message)
-        {
-            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
-        }
+        // Copy these into every class for easy debugging.
+        void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
         public Script(string fileName)
         {
 
             GENERAL.storyPoints = new Dictionary<string, StoryPoint>();
 
-            //GENERAL.storyPoints.Add ("end", new StoryPoint ("end")); // we use this storypoint for ending things, because it'll work over the network as well.
-
             isReady = false;
 
             if (Load(fileName))
             {
-
                 parse();
-
             }
             else
             {
-
                 Warning("Script file didn't load.");
-
             }
 
             isReady = true;
 
         }
-
 
         void parse()
         {

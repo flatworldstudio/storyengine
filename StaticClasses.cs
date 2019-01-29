@@ -1,15 +1,15 @@
 ﻿
 using UnityEngine;
-using System.Collections;
+//using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.Linq;
+//using System.Linq;
 
 
-#if NETWORKED
-using UnityEngine.Networking;
-using UnityEngine.Networking.NetworkSystem;
-#endif
+//#if NETWORKED
+//using UnityEngine.Networking;
+//using UnityEngine.Networking.NetworkSystem;
+//#endif
 
 namespace StoryEngine
 {
@@ -56,38 +56,19 @@ namespace StoryEngine
         public static Dictionary<string, StoryPoint> storyPoints;
         public static List<StoryPointer> ALLPOINTERS;
         public static List<StoryTask> ALLTASKS;
-        
-     //   public static string connectionKey;
-
 
         public static bool isPauzed = false;
         public static bool hasFocus = true;
-
-    //    public static bool wasConnected = false;
 
         public static string broadcastServer, networkServer;
 
         public static string ID = "General";
 
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
-
-
-       static  void Log(string message)
-        {
-            StoryEngine.Log.Message(message, ID);
-        }
-        static void Warning(string message)
-        {
-            StoryEngine.Log.Warning(message, ID);
-        }
-        static void Error(string message)
-        {
-            StoryEngine.Log.Error(message, ID);
-        }
-        static void Verbose(string message)
-        {
-            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
-        }
+        // Copy these into every class for easy debugging.
+        static void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        static void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        static void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        static void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
         public static void AddPointer(StoryPointer pointer)
         {

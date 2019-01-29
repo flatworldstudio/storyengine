@@ -16,6 +16,14 @@ namespace StoryEngine
 
     public delegate void Echo(string message, string module);
 
+    /*!
+   * \brief
+   * Class to log messages using modules and log levels.
+   * 
+   * # By setting a loglevel for a module, logging can be set to verbose, normal, warnings or errors.
+   * An echo method can be added to errors, ie. for logging them to a server.  
+   */
+    
     public static class Log
     {
 

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 
-namespace StoryEngine
+namespace StoryEngine.Network
 {
 
     public delegate void OnClientMessageHandler(NetworkMessage netMessage);

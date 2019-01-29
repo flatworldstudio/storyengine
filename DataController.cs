@@ -5,7 +5,7 @@ using System.Collections.Generic;
 #if NETWORKED
 using UnityEngine.Networking;
 //using System.Runtime.Remoting.Messaging;
-
+using StoryEngine.Network;
 #endif
 
 

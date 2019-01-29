@@ -22,33 +22,27 @@ namespace StoryEngine
         PAUSED
     }
 
+    /*!
+   * \brief
+   * Class to progress a script.
+   * 
+   * # Assistant director generates tasks from the updated storypointers.
+   */
+    
     public class Director
     {
-
-        List<StoryPointer> pointerStack;
-        public DIRECTORSTATUS status;
-
         string ID = "Director";
 
+        public DIRECTORSTATUS status;
         static public Director Instance;
 
-        void Log(string message)
-        {
-            StoryEngine.Log.Message(message, ID);
-        }
-        void Warning(string message)
-        {
-            StoryEngine.Log.Warning(message, ID);
-        }
-        void Error(string message)
-        {
-            StoryEngine.Log.Error(message, ID);
-        }
-        void Verbose(string message)
-        {
-            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
-        }
+        List<StoryPointer> pointerStack;
 
+        // Copy these into every class for easy debugging.
+        void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
         public Director()
         {
@@ -57,27 +51,35 @@ namespace StoryEngine
             status = DIRECTORSTATUS.NOTREADY;
 
         }
-  //      new StoryPointer(beginName, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
+        //      new StoryPointer(beginName, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
+
+        //public void beginStoryLine(string beginName)
+        //{
+
+        //    new StoryPointer(beginName, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
+
+        //}
 
 
-        public void NewStoryLine(string _name, SCOPE _scope)
+
+        /*! Creates a new storypointer with a given scope and adds it to the pointerstack. */
+
+        public void NewStoryLine(string _name, SCOPE _scope=SCOPE.LOCAL)
         {
-            // Creates a new storypointer, sets its scope and adds it to the pointerstack.
-
-            StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
-            pointer.scope = _scope;
+StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+            //pointer.scope = _scope;
         }
       
 
-        public void NewStoryLine(string _name)
-        {
-            // Creates a new LOCAL storypointer and adds it to the pointerstack.
+        //public void NewStoryLine(string _name)
+        //{
+        //    // Creates a new LOCAL storypointer and adds it to the pointerstack.
 
-            new StoryPointer(_name, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
+        //    new StoryPointer(_name, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
 
-        }
+        //}
 
-        public void evaluatePointers()
+        public void EvaluatePointers()
         {
 
             // Create a stack of pointers for processing.
@@ -513,12 +515,7 @@ namespace StoryEngine
 
         }
 
-        public void beginStoryLine(string beginName)
-        {
-
-            new StoryPointer(beginName, SCOPE.LOCAL); // constructor adds pointer to GENERAL.allpointers
-
-        }
+    
 
         void moveToNextPoint(StoryPointer thePointer)
         {
