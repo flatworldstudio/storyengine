@@ -7,6 +7,12 @@ using UnityEngine.Networking;
 namespace StoryEngine.Network
 {
 
+    /*!
+* \brief
+* Extention of Unity NetworkDiscovery to handle broadcast messages for server discovery.
+* 
+*/
+
     public class NetworkBroadcast : NetworkDiscovery
     {
 

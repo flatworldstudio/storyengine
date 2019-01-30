@@ -4,7 +4,14 @@ using UnityEngine.Serialization;
 
 namespace StoryEngine.UI
 {
-    
+
+    /*!
+* \brief 
+* Collection of common interaction uses.  
+* 
+* Eg. dragging a button including inertia, constraints and springing.
+* Might want to split this, it's very general right now.
+*/
     public static class Methods
     {
         public static GameObject DefaultPanePrefab;

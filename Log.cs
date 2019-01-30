@@ -18,9 +18,9 @@ namespace StoryEngine
 
     /*!
    * \brief
-   * Class to log messages using modules and log levels.
+   * Log messages supporting different log levels for different modules.
    * 
-   * # By setting a loglevel for a module, logging can be set to verbose, normal, warnings or errors.
+   * By setting a loglevel for a module, logging can be set to verbose, normal, warnings or errors.
    * An echo method can be added to errors, ie. for logging them to a server.  
    */
     

@@ -24,9 +24,9 @@ namespace StoryEngine
 
     /*!
    * \brief
-   * Class to progress a script.
+   * Progresses storylines from a script.
    * 
-   * # Assistant director generates tasks from the updated storypointers.
+   * AssistantDirector generates StoryTask objects from the updated StoryPointer objects.
    */
     
     public class Director
@@ -501,15 +501,27 @@ StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds poin
 
         }
 
+        public void loadScript(TextAsset _asset)
+        {
+            Script theScript = new Script(_asset);
+
+            //while (!theScript.isReady)
+            //{
+
+            //}
+
+            status = DIRECTORSTATUS.READY;
+
+        }
 
         public void loadScript(string fileName)
         {
             Script theScript = new Script(fileName);
 
-            while (!theScript.isReady)
-            {
+            //while (!theScript.isReady)
+            //{
 
-            }
+            //}
 
             status = DIRECTORSTATUS.READY;
 

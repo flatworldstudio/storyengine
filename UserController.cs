@@ -7,13 +7,20 @@ namespace StoryEngine
 
     public delegate bool UserTaskHandler(StoryTask theTask);
 
+    /*!
+* \brief
+* Controls user operations and interactions.
+* 
+* Use addTaskHandler to attach your custom handler.
+*/
+
     public class UserController : MonoBehaviour
     {
 
         GameObject StoryEngineObject;
         UserTaskHandler userTaskHandler;
 
-        AssitantDirector ad;
+        //AssitantDirector ad;
         bool handlerWarning = false;
 
         public List<StoryTask> taskList;
@@ -46,21 +53,33 @@ namespace StoryEngine
 
             taskList = new List<StoryTask>();
 
-            StoryEngineObject = GameObject.Find("StoryEngineObject");
-
-            if (StoryEngineObject == null)
+            if (AssitantDirector.Instance == null)
             {
-
-                Warning("StoryEngineObject not found.");
-
+                Error("No Assistant Director instance.");
             }
             else
             {
+                AssitantDirector.Instance.newTasksEvent += newTasksHandler;
+                }
 
-                ad = StoryEngineObject.GetComponent<AssitantDirector>();
-                ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+            //StoryEngineObject = GameObject.Find("StoryEngineObject");
 
-            }
+            //if (StoryEngineObject == null)
+            //{
+
+            //    Warning("StoryEngineObject not found.");
+
+            //}
+            //else
+            //{
+
+            //    AssitantDirector.Instance.newTasksEvent += newTasksHandler;
+
+
+            //    //ad = StoryEngineObject.GetComponent<AssitantDirector>();
+            //    //ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+
+            //}
 
         }
 
@@ -115,14 +134,23 @@ namespace StoryEngine
                     else
                     {
 
+                        task.signOff(ID);
+                        taskList.RemoveAt(t);
+
                         if (!handlerWarning)
                         {
-                            Debug.LogWarning(ID + "No handler available, blocking task while waiting.");
+                            Warning("No handler registered.");
                             handlerWarning = true;
-                           
                         }
 
-                        t++;
+                        //if (!handlerWarning)
+                        //{
+                        //    Debug.LogWarning(ID + "No handler available, blocking task while waiting.");
+                        //    handlerWarning = true;
+
+                        //}
+
+                        //t++;
 
                     }
 

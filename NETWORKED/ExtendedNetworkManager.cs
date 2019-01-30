@@ -25,6 +25,11 @@ namespace StoryEngine.Network
     public delegate void OnServerDisconnectDelegate(NetworkConnection connection);
 
 
+    /*!
+* \brief
+* Extention of Unity Networkmanager to handle client-server connections.
+* 
+*/
 
     public class ExtendedNetworkManager : NetworkManager
     {

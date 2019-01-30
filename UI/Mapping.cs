@@ -1,8 +1,16 @@
 ﻿namespace StoryEngine.UI
 {
+    /*!
+* \brief 
+* Used to create different sets of eventhandlers for user events.
+* 
+* Ie. zoom for two-finger drag in 2D, rotate for one-finger drag in 3D, etc.
+*/
 
     public class Mapping
     {
+
+
 
         public event UIEventHandler ux_none, ux_tap_2d, ux_tap_3d, ux_tap_none, ux_single_2d, ux_single_3d, ux_single_none, ux_double_2d, ux_double_3d, ux_double_none;
 

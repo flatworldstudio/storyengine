@@ -13,20 +13,24 @@ using System;
 
 namespace StoryEngine
 {
-
+    /*! \brief Global StoryTask and StoryPointer objects are synchronised over lan.*/
     public enum SCOPE
     {
         LOCAL,
         GLOBAL
+        }
 
-    }
-
+    /*! \brief Only 1 device has global authority which affects how the Director and AssistantDirector operate.*/
     public enum AUTHORITY
     {
         LOCAL,
         GLOBAL
 
     }
+
+    /*! \brief Describes a callback event, which is manually used to set a callback in a StoryTask 
+     * \todo Shouldn't this object be passed to a StoryTask and synchronised over lan, rather than manually setting StoryTask variables?   
+        */
 
     public class UserCallBack
     {
@@ -41,7 +45,12 @@ namespace StoryEngine
         }
 
     }
-
+    /*!
+* \brief
+* Holds variables that are used across the engine.
+* 
+* \todo It makes sense to have a settings struct, but a lot of this should move. 
+*/
 
     public static class GENERAL
     {
@@ -226,6 +235,13 @@ namespace StoryEngine
         //}
 
     }
+
+    /*!
+* \brief
+* Generates globally unique ID's to identify StoryTask and StoryPointer objects.
+* 
+* \todo This currently works but could be more elegant.
+*/
 
     public static class UUID
     {

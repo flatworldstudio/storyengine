@@ -12,7 +12,10 @@ namespace StoryEngine.Network
 {
 #if NETWORKED
 
-    // Combined single message class.
+    /*!
+* \brief
+* Holds update data for changes in StoryPointer and StoryTask objects.
+*/
 
     public class StoryUpdate : MessageBase
     {
@@ -183,6 +186,13 @@ namespace StoryEngine.Network
 
     }
 
+    /*!
+* \brief
+* Holds update data for changes in StoryPointer object
+* 
+* # Effectively, updates are only sent to kill a pointer.
+*/
+
     public class PointerUpdateBundled
     {
 
@@ -221,6 +231,11 @@ namespace StoryEngine.Network
 
     }
 
+
+    /*!
+* \brief
+* Holds update data for changes in StoryTask object
+*/
 
     public class TaskUpdateBundled
     {

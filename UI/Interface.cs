@@ -14,9 +14,9 @@ namespace StoryEngine.UI
 
     /*!
      * \brief 
-     * Describes a collection of interactive objects and how it is interacted with.
+     * Describes a collection of interactive objects and how they are interacted with.
      * 
-     * # Detailed description
+     * To use, add buttons, optionally add delegates for layout initialisation and resizing.
      */
 
     public class InterFace
@@ -248,22 +248,21 @@ namespace StoryEngine.UI
 
     public delegate void UIEventHandler(object sender, UIArgs args);
 
-
+    /*!
+* \brief
+* Holds ui info to pass onto handlers.
+* 
+*/
     public class UIArgs : EventArgs
     {
 
         public Event uiEvent;
-        //public InterFace activeInterface;
         public Vector3 delta;
-        // also in uievent
-
-        public UIArgs() : base() // extend the constructor 
+ 
+ public UIArgs() : base() // extend the constructor 
         {
 
         }
-
-
-
 
     }
 

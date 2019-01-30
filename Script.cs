@@ -9,9 +9,9 @@ namespace StoryEngine
 {
     /*!
 * \brief
-* Class to hold a text based script.
+* Holds chains of StoryPoint objects and routing between them.
 * 
-* # Parses into a chain of storypoints and routing.
+* Takes a text document and parses it into connected StoryPoint objects.
 */
 
     public class Script
@@ -28,31 +28,43 @@ namespace StoryEngine
         void Error(string _m) => StoryEngine.Log.Error(_m, ID);
         void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
-        public Script(string fileName)
+
+        public Script(TextAsset _asset)
         {
 
-            GENERAL.storyPoints = new Dictionary<string, StoryPoint>();
-
-            isReady = false;
-
-            if (Load(fileName))
-            {
-                parse();
-            }
-            else
-            {
-                Warning("Script file didn't load.");
-            }
-
-            isReady = true;
+            //isReady = false;
+            parse(_asset.text);
+            //isReady = true;
 
         }
 
-        void parse()
+        public Script(string fileName)
         {
 
-            Dictionary<string, StoryPoint> storyLines = new Dictionary<string, StoryPoint>();
+            //isReady = false;
+            string text = Load(fileName);
+            parse(text);
+            //isReady = true;
 
+        }
+
+        void parse(string _text)
+        {
+
+            manuscript = new List<string>();
+            string[] lines = _text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (!isComment(lines[i]))
+                    manuscript.Add(lines[i]);
+            }
+
+            if (manuscript.Count == 0)
+                Error("Script has no lines.");
+
+            GENERAL.storyPoints = new Dictionary<string, StoryPoint>();
+            Dictionary<string, StoryPoint> storyLines = new Dictionary<string, StoryPoint>();
             StoryPoint point, previousPoint;
 
             string currentStoryline = "default";
@@ -396,139 +408,23 @@ namespace StoryEngine
             return r;
         }
 
-        private bool Load(string fileName)
+
+        private string Load(string fileName)
         {
-            manuscript = new List<string>();
 
             TextAsset mytxtData = (TextAsset)Resources.Load(fileName);
 
             if (mytxtData != null)
             {
-                string txt = mytxtData.text;
-                string[] lines = txt.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
-
-                for (int l = 0; l < lines.Length; l++)
-                {
-                    if (!isComment(lines[l]))
-                    {
-
-                        manuscript.Add(lines[l]);
-
-                    }
-
-
-                }
-
-
-
-                //manuscript.AddRange (lines);
-
-
-
-                return true;
+                return mytxtData.text;
             }
             else
             {
-
-                return false;
+                return "";
             }
-
         }
-
     }
 
-    public class StoryPoint
-    {
-        public string ID;
-        public string StoryLine;
-        public string[] Instructions;
-
-        public TASKTYPE taskType;
-        StoryPoint nextStoryPoint;
-
-        //public StoryPoint (string myName)
-        //{
-        //	ID = myName;
-        //	storyLineName = "...";
-
-        //	//if (ID.Equals ("end")) {
-
-        //	//	task = new string[] { "end" };
-        //	//	taskType = TASKTYPE.END;
-
-        //	//} else {
-
-        //		task = new string[] { "none" };
-        //		taskType = TASKTYPE.BASIC;
-        //	//}
-
-        //}
-
-        public StoryPoint(string myName, string myStoryLine, string[] myTask)
-        {
-            ID = myName;
-            StoryLine = myStoryLine;
-
-            Instructions = myTask;
-
-            switch (Instructions[0])
-            {
-
-                case "start":
-                case "stop":
-                case "tell":
-                case "goto":
-                //		case "end":
-                case "hold":
-
-                    taskType = TASKTYPE.ROUTING;
-                    break;
-
-                //case "end":
-
-                //	taskType = TASKTYPE.END;
-                //	break;
-                default:
-
-                    taskType = TASKTYPE.BASIC;
-                    break;
-
-            }
-
-        }
-
-        public void setNextStoryPoint(StoryPoint myNextStoryPoint)
-        {
-
-            nextStoryPoint = myNextStoryPoint;
-
-        }
-
-        public StoryPoint getNextStoryPoint()
-        {
-
-            return nextStoryPoint;
-
-        }
-
-        public string getNextStoryPointName()
-        {
-
-            if (nextStoryPoint != null)
-            {
-
-                return nextStoryPoint.ID;
-
-            }
-            else
-            {
-
-                return ("no next point");
-
-            }
-
-        }
-
-    }
+   
 
 }

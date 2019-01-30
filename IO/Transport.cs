@@ -6,14 +6,18 @@ using System.Net.NetworkInformation;
 namespace StoryEngine.IO
 {
 
-
+    /*!
+  * \brief
+  * Provides local storage functionality.
+  * 
+  * Currently text to file and vice versa. To be expanded.
+  */
 
     public static class Transport {
 
-        static string me = "FileHandler";
+        static string me = "Transport";
 
         static string[] emptyList = new string[0];
-
 
         public static string[] FileList(string _path){
 
@@ -32,7 +36,7 @@ namespace StoryEngine.IO
             File.WriteAllText(_path, _content);
             }catch (Exception e)
             {
-
+                Log.Error("File failed writing: " + e.Message, me);
             }
         }
 

@@ -5,7 +5,14 @@ using UnityEngine.UI;
 
 namespace StoryEngine.UI
 {
-    
+
+    /*!
+* \brief 
+* Behaviour to trigger Layout update on window resize. 
+* 
+* Calls the resize delegate on a layout if Unity screen size changed.
+*/
+
     public class Responsive : MonoBehaviour
 
     {

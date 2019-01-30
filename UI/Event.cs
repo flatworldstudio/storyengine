@@ -9,7 +9,15 @@ using System;
 namespace StoryEngine.UI
 {
 
-
+    /*!
+   * \brief 
+   * Contains a single interaction event and updates it depending on the platform.
+   * 
+   * Multiple events can occur simultaneously, eg when an event is still inert and another begins.
+   * The Controller maintains a stack of events.
+   *   
+   */
+    
     public class Event
     {
         // holds user interaction description. note that x and y are NOT continuously updated for touch.

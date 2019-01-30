@@ -4,7 +4,15 @@ using UnityEngine.UI;
 
 namespace StoryEngine.UI
 {
-
+    /*!
+  * \brief
+  * Holds an interactable object, including contraints, dragtarget, callback on click.
+  * 
+  * Draggable by default, use constraints to limit dragging in different ways.
+  * Dragtarget can be different, ie a higher level so user drags a group of objects.
+  * Callback is the storyline to be launched on click.
+  * Basic brightness and animation for user feedback - can be expanded to be more versatile.
+  */
     public class Button
     {
         public string name;

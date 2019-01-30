@@ -4,6 +4,15 @@
 namespace StoryEngine.UI
 {
 
+    /*!
+  * \brief
+  * Describes drag constraints for a Button. 
+  * 
+  * Includes hardclamp, edge springs and springs for box constraint.
+  * Includes hardclamp for circular constraint.
+  * Includes hardclamp for 3D camera constraint.
+  */
+
     public class Constraint
     {
         public Vector3 hardClampMin, hardClampMax;

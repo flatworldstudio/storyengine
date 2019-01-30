@@ -7,13 +7,20 @@ namespace StoryEngine
 
     public delegate bool SetTaskHandler(StoryTask theTask);
 
+    /*!
+* \brief
+* Controls set (eg. scenery, content) operations.
+* 
+* Use addTaskHandler to attach your custom handler.
+*/
+
     public class SetController : MonoBehaviour
     {
 
         GameObject StoryEngineObject;
         SetTaskHandler setTaskHandler;
 
-        AssitantDirector ad;
+        //AssitantDirector ad;
         bool handlerWarning = false;
 
         public List<StoryTask> taskList;
@@ -45,21 +52,30 @@ namespace StoryEngine
 
             taskList = new List<StoryTask>();
 
-            StoryEngineObject = GameObject.Find("StoryEngineObject");
-
-            if (StoryEngineObject == null)
+            if (AssitantDirector.Instance == null)
             {
-
-                Warning("StoryEngineObject not found.");
-
+                Error("No Assistant Director instance.");
             }
             else
             {
-
-                ad = StoryEngineObject.GetComponent<AssitantDirector>();
-                ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
-
+                AssitantDirector.Instance.newTasksEvent += newTasksHandler;
             }
+
+            //StoryEngineObject = GameObject.Find("StoryEngineObject");
+
+            //if (StoryEngineObject == null)
+            //{
+
+            //    Warning("StoryEngineObject not found.");
+
+            //}
+            //else
+            //{
+
+            //    ad = StoryEngineObject.GetComponent<AssitantDirector>();
+            //    ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+
+            //}
 
         }
 
@@ -112,15 +128,23 @@ namespace StoryEngine
                     }
                     else
                     {
+                        task.signOff(ID);
+                        taskList.RemoveAt(t);
 
                         if (!handlerWarning)
                         {
-                            Warning("No handler available, blocking task while waiting.");
+                            Warning("No handler registered.");
                             handlerWarning = true;
-                           
                         }
 
-                        t++;
+                        //if (!handlerWarning)
+                        //{
+                        //    Warning("No handler available, blocking task while waiting.");
+                        //    handlerWarning = true;
+
+                        //}
+
+                        //t++;
                     }
 
                 }

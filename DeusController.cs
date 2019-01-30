@@ -5,13 +5,20 @@ using UnityEngine.UI;
 
 namespace StoryEngine
 {
+    /*!
+* \brief
+* Controls superuser operations, including debugging and storyboarding.
+* 
+* Use debugon and debugoff in your script to visualise StoryPointer status.
+*/
+
     public class DeusController : MonoBehaviour
     {
 
         public GameObject DeusCanvas, PointerBlock;
         public int Width;
          GameObject StoryEngineObject;
-       AssitantDirector ad;
+       //AssitantDirector ad;
 
         string ID = "DeusController";
 
@@ -55,28 +62,36 @@ namespace StoryEngine
             //		smoothMouseY = 0;
 
             //       StoryEngineObject = GameObject.Find("StoryEngineObject");
-            StoryEngineObject = this.transform.gameObject;
-
-            if (StoryEngineObject == null)
+            if (AssitantDirector.Instance == null)
             {
-
-                Warning("StoryEngineObject with central command script not found.");
-
+                Error("No Assistant Director instance.");
             }
             else
             {
-                ad = StoryEngineObject.GetComponent<AssitantDirector>();
-                ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+                AssitantDirector.Instance.newTasksEvent += newTasksHandler;
             }
+            //StoryEngineObject = this.transform.gameObject;
 
-      //      DeusCanvas = GameObject.Find("DeusCanvas");
+            //if (StoryEngineObject == null)
+            //{
+
+            //    Warning("StoryEngineObject with central command script not found.");
+
+            //}
+            //else
+            //{
+            //    ad = StoryEngineObject.GetComponent<AssitantDirector>();
+            //    ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+            //}
+
+            //      DeusCanvas = GameObject.Find("DeusCanvas");
 
             //if (DeusCanvas == null)
             //{
             //    Warning("DeusCanvas not found.");
             //}
 
-     //       DeusCanvas = GameObject.Find("DeusCanvas");
+            //       DeusCanvas = GameObject.Find("DeusCanvas");
 
             if (DeusCanvas == null)
             {

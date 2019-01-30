@@ -21,21 +21,28 @@ namespace StoryEngine
 
     /*!
      * \brief
-     * Class to generate, distribute and synchronise StoryTask objects
+     * Generates, distributes and synchronises StoryTask objects.
      * 
-     * # Goes over all StoryPointer objects to check for changes made by the Director 
+     * On Update the AssistantDirector first processes incoming lan StoryUpdate objects.
+     * Secondly it goes over all StoryPointers to generate new StoryTask objects and distributes these locally.  
+     * On LateUpdate it goes over all tasks and sends StoryUpdate objects over lan. These will have executed their first frame by then.
+     * 
      */    
 
     public class AssitantDirector : MonoBehaviour
     {
-        public string scriptName;
-        public string launchOSX, launchWIN, launchIOS, launchAndroid;
+
+        public TextAsset script;/*!< \brief Set this value in Unity Editor */
+
+        public string scriptName;/*!< \brief Set this value in Unity Editor, will be deprecated. */
+        public string launchOSX, launchWIN, launchIOS, launchAndroid;/*!< \brief Set this value in Unity Editor */
 
         public static AssitantDirector Instance;
 
         string ID = "AD";
 
         public event NewTasksEvent newTasksEvent;
+
         Director theDirector;
         string launchStoryline;
 
@@ -62,6 +69,8 @@ namespace StoryEngine
 		{
             Instance=this; 
 		}
+
+
 
 		void Start()
         {
@@ -117,17 +126,17 @@ namespace StoryEngine
 #if NETWORKED
 
             // get the networkmanager to call network event methods on the assistant director.
+            if (networkManager != null)
+            {
+                networkManager.onStartServerDelegate = onStartServer;
+                networkManager.onStartClientDelegate = onStartClient;
+                networkManager.onServerConnectDelegate = OnServerConnect;
+                networkManager.onClientConnectDelegate = OnClientConnect;
+                networkManager.onClientDisconnectDelegate = OnClientDisconnect;
+                networkManager.onStopClientDelegate = OnStopClient;
 
-            networkManager.onStartServerDelegate = onStartServer;
-            networkManager.onStartClientDelegate = onStartClient;
-            networkManager.onServerConnectDelegate = OnServerConnect;
-            networkManager.onClientConnectDelegate = OnClientConnect;
-            networkManager.onClientDisconnectDelegate = OnClientDisconnect;
-            networkManager.onStopClientDelegate = OnStopClient;
-
-            //NetworkMessage.MaxMessageSize=512*1024;
-
-            Log ("Max Message Size: "+  NetworkMessage.MaxMessageSize);
+                Log("Max Message Size: " + NetworkMessage.MaxMessageSize);
+                }
 
 #endif
 
@@ -360,8 +369,21 @@ namespace StoryEngine
 
                 case DIRECTORSTATUS.NOTREADY:
 
-                    theDirector.loadScript(scriptName);
+                    if (script != null)
+                    {
+                        theDirector.loadScript(script);
+                        break;
+                    }
 
+                    if (scriptName != "")
+                    {
+                        Warning("Please use the TextAsset field for your script.");
+                        theDirector.loadScript(scriptName);
+                        break;
+                    }
+                   
+
+                    Error("No script reference found.");
                     // create globals by default.
 
                     //    GENERAL.storyPoints.Add("GLOBALS", new StoryPoint("GLOBALS", "none", new string[] { "GLOBALS" }));
@@ -1036,6 +1058,12 @@ namespace StoryEngine
         }
 
     }
+
+    /*!
+* \brief
+* Holds task info to pass onto handlers.
+* 
+*/
 
     public class TaskArgs : EventArgs
     {

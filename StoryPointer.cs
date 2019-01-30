@@ -25,6 +25,12 @@ namespace StoryEngine
         KILLED,
         PAUSED
     }
+    /*!
+* \brief
+* Holds a pointer which progresses along a Script 
+* 
+* The Director progresses the pointer, AssistantDirector generates StoryTask objects from the pointer.
+*/
 
     public class StoryPointer
     {

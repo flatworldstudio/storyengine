@@ -34,9 +34,9 @@ namespace StoryEngine
 
     /*!
 * \brief
-* Class to hold a task and variables associated with that task.
+* Holds a task and variables associated with that task.
 * 
-* # Task variables are updated across the network.
+* Task variables are updated across the network by the AssistantDirector.
 */
 
     public class StoryTask

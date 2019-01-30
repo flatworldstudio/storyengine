@@ -7,6 +7,15 @@ using UnityEngine.EventSystems;
 namespace StoryEngine.UI
 {
 
+    /*!
+* \brief
+* Handles user interaction, to be called every frame.
+* 
+* Returns a callback if user clicked on a button.
+* Takes a Layout as argument, which can be divided into Plane objects which can each hold an Interface.
+* Maintains a stack of Event objects.
+*/
+
     public class Controller
     {
 

@@ -14,6 +14,13 @@ namespace StoryEngine
 
     public delegate bool DataTaskHandler(StoryTask theTask);
 
+    /*!
+ * \brief
+ * Controls data and network operations.
+ * 
+ * Use addTaskHandler to attach your custom handler.
+ */
+
     public class DataController : MonoBehaviour
     {
 
@@ -29,7 +36,7 @@ namespace StoryEngine
         //   public string RemoteServerAddress,RemoteBroadcastServerAddress;
 #endif
 
-        AssitantDirector ad;
+        //AssitantDirector ad;
 
         public static DataController Instance;
 
@@ -88,21 +95,32 @@ namespace StoryEngine
 
 #endif
 
-            StoryEngineObject = GameObject.Find("StoryEngineObject");
-
-            if (StoryEngineObject == null)
+            if (AssitantDirector.Instance == null)
             {
-
-                Warning("StoryEngineObject not found.");
-
+                Error("No Assistant Director instance.");
             }
             else
             {
-
-                ad = StoryEngineObject.GetComponent<AssitantDirector>();
-                ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
-
+                AssitantDirector.Instance.newTasksEvent += newTasksHandler;
             }
+            //StoryEngineObject = GameObject.Find("StoryEngineObject");
+
+            //if (StoryEngineObject == null)
+            //{
+
+            //    Warning("StoryEngineObject not found.");
+
+            //}
+            //else
+            //{
+            //    //AssitantDirector.Instance.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+
+            //    AssitantDirector.Instance.newTasksEvent += newTasksHandler;
+
+            //    //ad = StoryEngineObject.GetComponent<AssitantDirector>();
+            //    //ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
+
+            //}
 
         }
 
@@ -121,7 +139,7 @@ namespace StoryEngine
                 Log("Disconnecting client ...");
 
 
-                if (networkManager.client != null)
+                if (networkManager!=null && networkManager.client != null)
                 {
 
                     StopNetworkClient();
@@ -397,17 +415,17 @@ namespace StoryEngine
                     }
                     else
                     {
+                        // If no handler available we just sign off, but issue a warning once.
+
+                        task.signOff(ID);
+                        taskList.RemoveAt(t);
 
                         if (!handlerWarning)
                         {
-
-                            Warning("No handler available, blocking task while waiting.");
-
+                            Warning("No handler registered.");
                             handlerWarning = true;
-
-
-                        }
-                        t++;
+                            }
+                        //t++;
                     }
 
                 }
