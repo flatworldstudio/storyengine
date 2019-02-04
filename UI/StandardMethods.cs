@@ -624,6 +624,13 @@ void HullClamp{
         }
 
 
+        public static void blinkButton(object sender,UIArgs uxArgs)
+        {
+            if (uxArgs.uiEvent.targetButton != null)
+            uxArgs.uiEvent.targetButton.DefaultBlink();
+
+        }
+
         public static void tapButton2D(object sender, UIArgs uxArgs)
         {
 
@@ -652,7 +659,7 @@ void HullClamp{
 
                 uxArgs.uiEvent.targetButton.Tap();
 
-                Debug.Log("Tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callback);
+               //Verbose("Tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callback);
             }
 
 
@@ -681,7 +688,7 @@ void HullClamp{
             activeInterface.uiButtons.TryGetValue(name, out theButton);
 
             if (theButton != null)
-                theButton.targetBrightness = value;
+                theButton.SetTargetBrightness(value);
         }
         static void setTargetBrightness(string name, float value, float step, InterFace activeInterface)
         {
@@ -690,8 +697,8 @@ void HullClamp{
 
             if (theButton != null)
             {
-                theButton.stepBrightness = step;
-                theButton.targetBrightness = value;
+                theButton.SetTargetBrightness(value,step);
+                //theButton.targetBrightness = value;
             }
         }
         static void setBrightness(string name, float value, InterFace activeInterface)
@@ -701,7 +708,7 @@ void HullClamp{
 
             if (theButton != null)
             {
-                theButton.brightness = value;
+                theButton.SetBrightness(value);
             }
         }
 

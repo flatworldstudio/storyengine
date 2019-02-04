@@ -148,9 +148,9 @@ namespace StoryEngine
             // IOS: first app leaves focus, then it pauzes. on return app enteres focus and then resumes
 
             if (paused)
-                Warning("pauzing ...");
+                Verbose("pauzing ...");
             else
-                Warning("resuming ...");
+                Verbose("resuming ...");
 
         }
 
@@ -158,9 +158,9 @@ namespace StoryEngine
         {
 
             if (focus)
-                Warning("entering focus ...");
+                Verbose("entering focus ...");
             else
-                Warning("leaving focus ...");
+                Verbose("leaving focus ...");
 
         }
 

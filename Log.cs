@@ -84,7 +84,7 @@ namespace StoryEngine
             LOGLEVEL moduleLevel ; 
 
             if (!moduleLogStatus.TryGetValue (module, out moduleLevel))
-                moduleLevel = LOGLEVEL.NORMAL;
+                moduleLevel = LOGLEVEL.WARNINGS;
 
             if (messageLevel <= moduleLevel)
 				Debug.Log (module + ": " + message);
@@ -102,7 +102,7 @@ namespace StoryEngine
             LOGLEVEL moduleLevel;
 
             if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
-                moduleLevel = LOGLEVEL.NORMAL;
+                moduleLevel = LOGLEVEL.WARNINGS;
 
             if (messageLevel <= moduleLevel)
                 Debug.LogWarning(module + ": " + message);
@@ -120,7 +120,7 @@ namespace StoryEngine
             LOGLEVEL moduleLevel;
 
             if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
-                moduleLevel = LOGLEVEL.NORMAL;
+                moduleLevel = LOGLEVEL.WARNINGS;
 
             if (messageLevel <= moduleLevel)
             {

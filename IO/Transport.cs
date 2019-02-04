@@ -15,9 +15,15 @@ namespace StoryEngine.IO
 
     public static class Transport {
 
-        static string me = "Transport";
+        static string ID = "Transport";
 
         static string[] emptyList = new string[0];
+
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+    static    void Log(string message) => StoryEngine.Log.Message(message, ID);
+        static void Warning(string message) => StoryEngine.Log.Warning(message, ID);
+        static void Error(string message) => StoryEngine.Log.Error(message, ID);
+        static void Verbose(string message) => StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
 
         public static string[] FileList(string _path){
 
@@ -32,11 +38,20 @@ namespace StoryEngine.IO
 
         public static void TextToFile (string _content, string _path){
 
-            try{
+            //   Path path = new Path(_path);
+            //GetDirectoryName(String)
+
+            if (!Directory.Exists(Path.GetDirectoryName(_path))){
+                Directory.CreateDirectory(Path.GetDirectoryName(_path));
+                Log("Created directory: " + Path.GetDirectoryName(_path));
+            }
+
+            try
+            {
             File.WriteAllText(_path, _content);
             }catch (Exception e)
             {
-                Log.Error("File failed writing: " + e.Message, me);
+                Error("File "+_path+" failed writing: " + e.Message);
             }
         }
 
@@ -53,7 +68,7 @@ namespace StoryEngine.IO
                     StreamReader reader = new StreamReader(_path);
 
                      result = reader.ReadToEnd();
-                    Log.Message(result,me);
+                    Log(result);
                     reader.Close();
 
 
@@ -61,7 +76,7 @@ namespace StoryEngine.IO
                 catch (Exception e)
                 {
 
-                    Log.Error("File failed loading: " + e.Message,me);
+                    Error("File "+_path+" failed loading: " + e.Message);
                     result="";
                 }
 
@@ -70,7 +85,7 @@ namespace StoryEngine.IO
             else
             {
 
-                Log.Error("File missing");
+                Warning("File not found: "+_path);
                 result="";
 
             }

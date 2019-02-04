@@ -13,8 +13,11 @@ namespace StoryEngine.UI
   * Callback is the storyline to be launched on click.
   * Basic brightness and animation for user feedback - can be expanded to be more versatile.
   */
+    public delegate void OnTap();
+
     public class Button
     {
+        string ID = "Button";
         public string name;
         public string callback;
         public GameObject gameObject;
@@ -27,12 +30,17 @@ namespace StoryEngine.UI
         public bool orthoDragging;
 
         public Image image;
-        public Color color;
-        public float brightness, targetBrightness, stepBrightness;
+         Color color;
+         float brightness, targetBrightness, stepBrightness;
 
         Vector2 lastPosition, deltaPosition;
         float lastAngle, deltaAngle;
 
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+        void Log(string message) => StoryEngine.Log.Message(message, ID);
+        void Warning(string message) => StoryEngine.Log.Warning(message, ID);
+        void Error(string message) => StoryEngine.Log.Error(message, ID);
+        void Verbose(string message) => StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
 
         public Button()
         {
@@ -97,9 +105,16 @@ namespace StoryEngine.UI
 
             gameObject = GameObject.Find(_name);
 
+
+            //image = gameObject.GetComponent<Image>();
+
+
             if (gameObject != null)
             {
-                //image = gameObject.GetComponent<Image>();
+              
+                image = gameObject.GetComponent<Image>();
+                ApplyBrightness();
+
                 //if (image != null)
                 //{
                 //    image.color = brightness * color;
@@ -108,7 +123,7 @@ namespace StoryEngine.UI
             else
             {
                 // catch exception
-                Log.Error("ERROR: uibutton gameobject not found: " + _name);
+                Error("Gameobject not found: " + _name);
             }
 
             //   onTap = DefaultBlink;
@@ -127,14 +142,39 @@ namespace StoryEngine.UI
             onTap = DefaultBlink;
         }
 
-
-
-        void DefaultBlink(Button _button)
+        public void SetTargetBrightness (float _value)
         {
-            //Debug.Log("blink");
-            _button.brightness = 1f;
-            _button.targetBrightness = 0.75f;
-            _button.stepBrightness = 0.25f;
+            targetBrightness = _value;
+            Controller.instance.AddAnimatingButton(this);
+        }
+
+        public void SetTargetBrightness(float _value, float _step)
+        {
+            targetBrightness = _value;
+            stepBrightness = _step;
+
+            Controller.instance.AddAnimatingButton(this);
+        }
+
+        public void SetBrightness(float _value)
+        {
+            brightness = _value;
+            targetBrightness = _value;
+            Controller.instance.AddAnimatingButton(this);
+            //ApplyBrightness();
+        }
+
+        public bool BrightnessChanging()
+        {
+            return !Mathf.Approximately(brightness, targetBrightness);
+        }
+
+        public void DefaultBlink()
+        {
+           
+            brightness = 1f;
+            targetBrightness = 0.75f;
+            stepBrightness = 0.25f;
 
             Controller.instance.AddAnimatingButton(this); // list the button for animation
 
@@ -143,8 +183,8 @@ namespace StoryEngine.UI
         public void Tap()
         {
             //Debug.Log("tapped");
-            if (onTap != null)
-                onTap(this);
+
+            onTap?.Invoke();
 
         }
 
@@ -235,11 +275,7 @@ namespace StoryEngine.UI
         public void ApplyBrightness()
         {
 
-            if (brightness == targetBrightness)
-            {
-                Controller.instance.RemoveAnimatingButton(this);
-                return;
-            }
+         
 
             if (brightness < targetBrightness)
             {
@@ -248,7 +284,7 @@ namespace StoryEngine.UI
                 if (brightness >= targetBrightness)
                 {
                     brightness = targetBrightness;
-                    Controller.instance.RemoveAnimatingButton(this);
+                    //Controller.instance.RemoveAnimatingButton(this);
                 }
             }
 
@@ -258,12 +294,20 @@ namespace StoryEngine.UI
                 if (brightness <= targetBrightness)
                 {
                     brightness = targetBrightness;
-                    Controller.instance.RemoveAnimatingButton(this);
+                    //Controller.instance.RemoveAnimatingButton(this);
                 }
+            }
+
+            if (Mathf.Approximately(brightness,targetBrightness))
+            {
+                Controller.instance.RemoveAnimatingButton(this);
+               
             }
 
             if (image != null)
                 image.color = brightness * color;
+            //else
+                //Log("no image");
         }
     }
 }

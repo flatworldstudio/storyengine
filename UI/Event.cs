@@ -21,6 +21,7 @@ namespace StoryEngine.UI
     public class Event
     {
         // holds user interaction description. note that x and y are NOT continuously updated for touch.
+        string ID = "Event";
 
         public float dx, dy, dd, x, y, d, px, py;
         public bool firstFrame;
@@ -46,6 +47,12 @@ namespace StoryEngine.UI
 
         Vector2 __position;
 
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+        void Log(string message) => StoryEngine.Log.Message(message, ID);
+        void Warning(string message) => StoryEngine.Log.Warning(message, ID);
+        void Error(string message) => StoryEngine.Log.Error(message, ID);
+        void Verbose(string message) => StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+
         public Vector2 position
         {
 
@@ -57,7 +64,7 @@ namespace StoryEngine.UI
             }
             set
             {
-                Debug.LogWarning("Can't set this value.");
+                Warning("Can't set this value.");
 
             }
 
@@ -404,7 +411,7 @@ namespace StoryEngine.UI
                 {
 
                     target3D = hit.transform.gameObject;
-                    Debug.Log("raycast hit: " + hit.transform.gameObject.name);
+                    Verbose("raycast hit: " + hit.transform.gameObject.name);
 
                 }
 
@@ -437,13 +444,13 @@ namespace StoryEngine.UI
 
                 target2D = results[0].gameObject;
 
-                Debug.Log("targeting object2d " + target2D.name);
+                Verbose("Targeting object2d " + target2D.name);
                 // find out if this 2d object is a button.
 
                 Button checkButton = null;
                 if (plane.interFace.uiButtons.TryGetValue(target2D.transform.name, out checkButton))
                 {
-                    Debug.Log("targeting button " + checkButton.name);
+                    Verbose("targeting button " + checkButton.name);
                 }
 
                 targetButton = checkButton;

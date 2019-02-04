@@ -230,7 +230,7 @@ namespace StoryEngine.UI
 
 
 
-    public delegate void OnTap(Button theButton);
+   
 
 
    

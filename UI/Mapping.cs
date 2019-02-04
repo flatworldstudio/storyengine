@@ -10,8 +10,6 @@
     public class Mapping
     {
 
-
-
         public event UIEventHandler ux_none, ux_tap_2d, ux_tap_3d, ux_tap_none, ux_single_2d, ux_single_3d, ux_single_none, ux_double_2d, ux_double_3d, ux_double_none;
 
 
@@ -20,79 +18,74 @@
 
         }
 
-        public void none(object sender, UIArgs args)
+        public Mapping Clone()
         {
-            if (ux_none != null)
-                ux_none(sender, args);
+            Mapping clone = new Mapping();
 
+            Log.Warning("clone is untested");
+
+            clone.ux_none += this.ux_none;
+            clone.ux_tap_2d += this.ux_tap_2d;
+            clone.ux_tap_3d += this.ux_tap_3d;
+            clone.ux_tap_none += this.ux_tap_none;
+            clone.ux_single_2d += this.ux_single_2d;
+            clone.ux_single_3d += this.ux_single_3d;
+            clone.ux_single_none += this.ux_single_none;
+            clone.ux_double_2d += this.ux_double_2d;
+            clone.ux_double_3d += this.ux_double_3d;
+            clone.ux_double_none += this.ux_double_none;
+
+            return clone;
         }
 
+        public void none(object sender, UIArgs args)
+        {
+            ux_none?.Invoke(sender, args);
+        }
 
         public void tap_2d(object sender, UIArgs args)
         {
-            if (ux_tap_2d != null)
-                ux_tap_2d(sender, args);
-
+            ux_tap_2d?.Invoke(sender, args);
         }
 
         public void tap_3d(object sender, UIArgs args)
         {
-            if (ux_tap_3d != null)
-                ux_tap_3d(sender, args);
-
+            ux_tap_3d?.Invoke(sender, args);
         }
 
         public void tap_none(object sender, UIArgs args)
         {
-
-            if (ux_tap_none != null)
-                ux_tap_none(sender, args);
-
+            ux_tap_none?.Invoke(sender, args);
         }
 
         public void single_2d(object sender, UIArgs args)
         {
-            if (ux_single_2d != null)
-                ux_single_2d(sender, args);
-
+            ux_single_2d?.Invoke(sender, args);
         }
 
         public void single_3d(object sender, UIArgs args)
         {
-            if (ux_single_3d != null)
-                ux_single_3d(sender, args);
-
+            ux_single_3d?.Invoke(sender, args);
         }
 
         public void single_none(object sender, UIArgs args)
         {
-            if (ux_single_none != null)
-                ux_single_none(sender, args);
-
+            ux_single_none?.Invoke(sender, args);
         }
 
         public void double_2d(object sender, UIArgs args)
         {
-            if (ux_double_2d != null)
-                ux_double_2d(sender, args);
-
+            ux_double_2d?.Invoke(sender, args);
         }
 
         public void double_3d(object sender, UIArgs args)
         {
-            if (ux_double_3d != null)
-                ux_double_3d(sender, args);
-
+            ux_double_3d?.Invoke(sender, args);
         }
 
         public void double_none(object sender, UIArgs args)
         {
-            if (ux_double_none != null)
-                ux_double_none(sender, args);
-
+            ux_double_none?.Invoke(sender, args);
         }
-
-
-
     }
 }

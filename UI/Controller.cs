@@ -182,7 +182,7 @@ namespace StoryEngine.UI
                 callBack.sender = activeUiEvent.target2D;
                 callBack.trigger = true;
 
-                Debug.Log ("callbackResult: " +  callBack.label);
+                //Debug.Log ("callbackResult: " +  callBack.label);
 
             }
 
@@ -515,20 +515,23 @@ namespace StoryEngine.UI
 
         bool brightnessIsChanging(string name, InterFace activeInterface)
         {
-            bool result = false;
+            //bool result = false;
             Button theButton;
             activeInterface.uiButtons.TryGetValue(name, out theButton);
 
             if (theButton != null)
             {
-                if (theButton.brightness != theButton.targetBrightness)
-                {
-                    result = true;
+                return theButton.BrightnessChanging();
 
-                }
+                //if (theButton.brightness != theButton.targetBrightness)
+                //{
+                //    result = true;
+
+                //}
+                //if (activeInterface.a)
             }
 
-            return result;
+            return false;
         }
 
     }
