@@ -102,7 +102,7 @@ namespace StoryEngine
 
             Log("Running on WINDOWS platform.");
 
-            launchOnStoryline = launchWIN;
+            launchStoryline = launchWIN;
 
 #endif
 
