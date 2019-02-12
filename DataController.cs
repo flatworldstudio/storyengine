@@ -30,7 +30,7 @@ namespace StoryEngine
         GameObject NetworkObject;
         NetworkBroadcast networkBroadcast;
         ExtendedNetworkManager networkManager;
-        List<string> TrackConnectedAddresses;
+        List<string> TrackedAddresses,NewAddresses;
         public GameObject NetworkStatusObject;
         GameObject BufferStatusIn, BufferStatusOut;
 
@@ -139,56 +139,109 @@ namespace StoryEngine
         // These are networking methods to be called from datahandler to establish connections.
         // Once connected, handling is done internally by the assistant directors.
 
-        public List<string> ConnectedAddresses()
+        //public List<string> ConnectedAddresses()
+        //{
+
+        //    return networkManager.ConnectedAddresses;
+
+        //}
+
+        public List<string> TrackedConnectedAddresses()
         {
-
-            return networkManager.ConnectedAddresses;
-
+            return TrackedAddresses;
         }
 
-        public bool NewClientsConnected()
+        public List<string> NewConnectedAddresses()
         {
+            return NewAddresses;
+        }
 
-            // Returns if new clients connected since the last call.
 
-            List<string> NewConnectedAddresses = networkManager.ConnectedAddresses;
 
-            if (TrackConnectedAddresses == null)
+        public bool NewTrackedAddresses()
+        {
+           
+
+            if (NewAddresses == null)
+                NewAddresses = new List<string>();
+
+            NewAddresses.Clear();
+
+            if (TrackedAddresses == null)
+                TrackedAddresses = new List<string>();
+
+            foreach (string address in networkManager.ConnectedAddresses)
             {
-                TrackConnectedAddresses = new List<string>();
-
-                foreach (string s in NewConnectedAddresses)
-                    TrackConnectedAddresses.Add(s);
-
-                return NewConnectedAddresses.Count > 0 ? true : false;
-            }
-
-            bool NewClient = false;
-
-            foreach (string address in NewConnectedAddresses)
-            {
-                if (!TrackConnectedAddresses.Contains(address))
+                if (!TrackedAddresses.Contains(address))
                 {
-                    NewClient = true;
-                    break;
+                    TrackedAddresses.Add(address);
+                    NewAddresses.Add(address);
+                    
                 }
             }
 
-            TrackConnectedAddresses.Clear();
+           int i=TrackedAddresses.Count-1;
+                
+            while (i >= 0)
+            {
+                if (!networkManager.ConnectedAddresses.Contains(TrackedAddresses[i]))
+                {
+                    TrackedAddresses.RemoveAt(i);
 
-            foreach (string s in NewConnectedAddresses)
-                TrackConnectedAddresses.Add(s);
+                }
+                i--;
+            }
 
-            return NewClient;
+          
+
+            return NewAddresses.Count>0;
+
 
         }
 
-        public int ConnectedClientsCount()
-        {
+        //public bool NewClientsConnected()
+        //{
 
-            return networkManager.ConnectedAddresses.Count;
+        //    // Returns if new clients connected since the last call.
 
-        }
+        //    List<string> NewConnectedAddresses = networkManager.ConnectedAddresses;
+
+        //    if (TrackConnectedAddresses == null)
+        //    {
+        //        TrackConnectedAddresses = new List<string>();
+
+        //        foreach (string s in NewConnectedAddresses)
+        //            TrackConnectedAddresses.Add(s);
+
+        //        return NewConnectedAddresses.Count > 0 ? true : false;
+        //    }
+
+        //    bool NewClient = false;
+
+        //    foreach (string address in NewConnectedAddresses)
+        //    {
+        //        if (!TrackConnectedAddresses.Contains(address))
+        //        {
+        //            NewClient = true;
+        //            break;
+        //        }
+        //    }
+
+        //    TrackConnectedAddresses.Clear();
+
+        //    foreach (string s in NewConnectedAddresses)
+        //        TrackConnectedAddresses.Add(s);
+
+        //    return NewClient;
+
+        //}
+
+        //public int ConnectedClientsCount()
+        //{
+
+        //    return networkManager.ConnectedAddresses.Count;
+
+        //}
 
         public void startBroadcastClient()
         {
@@ -417,20 +470,23 @@ namespace StoryEngine
                         case "monitorclients":
 
                             // Watch for new clients. Stays live indefinitely.
+                          //  List<string new;
 
-                            if (NewClientsConnected())
+                            if (NewTrackedAddresses())
                             {
-                                // new clients or are we getting all clients???
+                                // new addresses connected since last call
 
-                                foreach (string add in ConnectedAddresses())
+                                foreach (string add in NewConnectedAddresses())
                                 {
                                     Log("New client at " + add);
                                 }
 
-                                task.SetStringValue("debug", "clients: " + ConnectedAddresses().Count);
+                              
                                 task.setCallBack("addclient");
 
                             }
+
+                            task.SetStringValue("debug", "clients: " + TrackedConnectedAddresses().Count);
 
                             break;
 
@@ -528,7 +584,7 @@ namespace StoryEngine
 
                                     StopNetworkClient();
                                     WasConnected = false;
-                                    task.setCallBack("serversearch");
+                                    task.setCallBack("client");
 
                                     done = true;
 
