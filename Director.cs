@@ -66,7 +66,13 @@ namespace StoryEngine
 
         public void NewStoryLine(string _name, SCOPE _scope=SCOPE.LOCAL)
         {
-StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+            if (_name == "")
+            {
+                Warning("New storyline name is empty.");
+                return;
+            }
+
+            StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
             //pointer.scope = _scope;
         }
       
