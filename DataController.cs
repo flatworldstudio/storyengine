@@ -487,7 +487,7 @@ namespace StoryEngine
                             }
 
                             task.SetStringValue("debug", "clients: " + TrackedConnectedAddresses().Count);
-
+                            WasConnected = TrackedConnectedAddresses().Count > 0;
                             break;
 
                         case "pushglobaltasks":
