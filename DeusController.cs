@@ -14,13 +14,13 @@ namespace StoryEngine
 
     public class DeusController : MonoBehaviour
     {
+        string ID = "DeusController";
+        public static DeusController Instance;
 
         public GameObject DeusCanvas, PointerBlock;
-        public int Width;
-         GameObject StoryEngineObject;
-       //AssitantDirector ad;
 
-        string ID = "DeusController";
+         int Width;
+         //GameObject StoryEngineObject;
 
         List<StoryTask> taskList;
         List<StoryPointer> pointerList;
@@ -30,29 +30,21 @@ namespace StoryEngine
         int PointerdisplayBuffer = 24;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+        void Log(string message) => StoryEngine.Log.Message(message, ID);
+        void Warning(string message) => StoryEngine.Log.Warning(message, ID);
+        void Error(string message) => StoryEngine.Log.Error(message, ID);
+        void Verbose(string message) => StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
 
 
-        void Log(string message)
+        private void Awake()
         {
-            StoryEngine.Log.Message(message, ID);
-        }
-        void Warning(string message)
-        {
-            StoryEngine.Log.Warning(message, ID);
-        }
-        void Error(string message)
-        {
-            StoryEngine.Log.Error(message, ID);
-        }
-        void Verbose(string message)
-        {
-            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+            Instance = this;
         }
 
         void Start()
         {
 
-            Log("Starting...");
+            Verbose("Starting...");
 
             taskList = new List<StoryTask>();
             pointerList = new List<StoryPointer>();
@@ -70,28 +62,7 @@ namespace StoryEngine
             {
                 AssitantDirector.Instance.newTasksEvent += newTasksHandler;
             }
-            //StoryEngineObject = this.transform.gameObject;
 
-            //if (StoryEngineObject == null)
-            //{
-
-            //    Warning("StoryEngineObject with central command script not found.");
-
-            //}
-            //else
-            //{
-            //    ad = StoryEngineObject.GetComponent<AssitantDirector>();
-            //    ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
-            //}
-
-            //      DeusCanvas = GameObject.Find("DeusCanvas");
-
-            //if (DeusCanvas == null)
-            //{
-            //    Warning("DeusCanvas not found.");
-            //}
-
-            //       DeusCanvas = GameObject.Find("DeusCanvas");
 
             if (DeusCanvas == null)
             {
@@ -99,11 +70,10 @@ namespace StoryEngine
             }
             else
             {
-               DeusCanvas.SetActive(false);
+
+                DeusCanvas.SetActive(false);
+
             }
-
-        //    PointerBlock = GameObject.Find("PointerBlock");
-
 
             if (PointerBlock == null)
             {
@@ -111,7 +81,7 @@ namespace StoryEngine
             }
             else
             {
-                //			PointerBlock.SetActive (false);
+                //
             }
 
 
@@ -252,7 +222,7 @@ namespace StoryEngine
                 if (!pointerList.Contains(pointer))
                 {
 
-                    Log("Pointer is new, added display for storyline " + pointer.currentPoint.StoryLine);
+                    Verbose("Pointer is new, added display for storyline " + pointer.currentPoint.StoryLine);
 
                     pointerList.Add(pointer);
 
@@ -277,7 +247,7 @@ namespace StoryEngine
                 if (!GENERAL.ALLPOINTERS.Contains(pointer))
                 {
 
-                    Log("Destroying ui for pointer for storyline " + pointer.currentPoint.StoryLine);
+                    Verbose("Destroying ui for pointer for storyline " + pointer.currentPoint.StoryLine);
 
                     // update first. some pointers reach end in a single go - we want those to be aligned.
 
@@ -309,29 +279,27 @@ namespace StoryEngine
         void updateTaskInfo(StoryPointer pointer)
         {
 
-
             StoryTask theTask = pointer.currentTask;
 
-            if (theTask == null)
+            if (theTask == null || theTask.Pointer.pointerObject==null)
                 return;
-
 
             if (theTask.Instruction != "wait")
             {
 
-                string displayText;
+                //string displayText;
 
-                // If global
+                string displayText = theTask.scope == SCOPE.GLOBAL ? "G| " : "L| ";
 
-                if (theTask.scope == SCOPE.GLOBAL)
-                {
-                    displayText = "G | ";
-                }
-                else
-                {
-                    displayText = "L | ";
+                // if (theTask.scope == SCOPE.GLOBAL)
+                //{
+                //    displayText = "G | ";
+                //}
+                //else
+                //{
+                //    displayText = "L | ";
 
-                }
+                //}
 
                 displayText = displayText + theTask.Instruction + " | ";
 
@@ -361,6 +329,13 @@ namespace StoryEngine
 
         void createNewPointerUi(StoryPointer targetPointer)
         {
+            if (PointerBlock == null || DeusCanvas == null)
+            {
+                Warning("Can't make pointerblock, null reference.");
+                return;
+            }
+            //return;
+            //Log("Making pointerblock");
             GameObject newPointerUi;
 
             newPointerUi = Instantiate(PointerBlock);
@@ -380,7 +355,7 @@ namespace StoryEngine
                 p++;
                 if (p==PointerdisplayBuffer)
                 {
-                    Error("To many pointers for display, crashing now.");
+                    Error("To many pointers for display, crashing now.");// ? really?
 
                 }
             }

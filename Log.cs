@@ -81,10 +81,10 @@ namespace StoryEngine
 #if LOGGING
             Init();
 
-            LOGLEVEL moduleLevel ; 
+            LOGLEVEL moduleLevel ;
 
-            if (!moduleLogStatus.TryGetValue (module, out moduleLevel))
-                moduleLevel = LOGLEVEL.WARNINGS;
+            if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
+                moduleLevel = AssitantDirector.Instance.DefaultLogLevel;
 
             if (messageLevel <= moduleLevel)
 				Debug.Log (module + ": " + message);
@@ -102,7 +102,7 @@ namespace StoryEngine
             LOGLEVEL moduleLevel;
 
             if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
-                moduleLevel = LOGLEVEL.WARNINGS;
+                moduleLevel = AssitantDirector.Instance.DefaultLogLevel;
 
             if (messageLevel <= moduleLevel)
                 Debug.LogWarning(module + ": " + message);
@@ -120,7 +120,7 @@ namespace StoryEngine
             LOGLEVEL moduleLevel;
 
             if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
-                moduleLevel = LOGLEVEL.WARNINGS;
+                moduleLevel = AssitantDirector.Instance.DefaultLogLevel;
 
             if (messageLevel <= moduleLevel)
             {

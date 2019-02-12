@@ -144,12 +144,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BroadcastPort: 47777
-  m_BroadcastKey: 2222
+  m_BroadcastKey: 1111
   m_BroadcastVersion: 1
   m_BroadcastSubVersion: 1
   m_BroadcastInterval: 1000
   m_UseNetworkManager: 0
-  m_BroadcastData: HELLO
+  m_BroadcastData: DEFAULT
   m_ShowGUI: 1
   m_OffsetX: 0
   m_OffsetY: 0

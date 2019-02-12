@@ -34,6 +34,7 @@ namespace StoryEngine.Network
     public class ExtendedNetworkManager : NetworkManager
     {
         string ID = "NetworkManager";
+        //public GameObject NetworkInfoPrefab;
 
         const short connectionMessageCode = 1001;
         List<string> __connectedAddresses;

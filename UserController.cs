@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace StoryEngine
 {
 
-    public delegate bool UserTaskHandler(StoryTask theTask);
+    //public delegate bool UserTaskHandler(StoryTask theTask);
 
     /*!
 * \brief
@@ -16,40 +16,30 @@ namespace StoryEngine
 
     public class UserController : MonoBehaviour
     {
-
-        GameObject StoryEngineObject;
-        UserTaskHandler userTaskHandler;
-
-        //AssitantDirector ad;
-        bool handlerWarning = false;
-
-        public List<StoryTask> taskList;
-
         string ID = "UserController";
 
+        TaskHandler userTaskHandler;
+bool handlerWarning = false;
+
+        public UserController Instance;
+
+         List<StoryTask> taskList;
+
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+        void Log(string message) => StoryEngine.Log.Message(message, ID);
+        void Warning(string message) => StoryEngine.Log.Warning(message, ID);
+        void Error(string message) => StoryEngine.Log.Error(message, ID);
+        void Verbose(string message) => StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
 
 
-        void Log(string message)
+        void Awake()
         {
-            StoryEngine.Log.Message(message, ID);
-        }
-        void Warning(string message)
-        {
-            StoryEngine.Log.Warning(message, ID);
-        }
-        void Error(string message)
-        {
-            StoryEngine.Log.Error(message, ID);
-        }
-        void Verbose(string message)
-        {
-            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+            Instance = this;
         }
 
         void Start()
         {
-            Log("Starting...");
+            Verbose("Starting...");
 
             taskList = new List<StoryTask>();
 
@@ -62,31 +52,14 @@ namespace StoryEngine
                 AssitantDirector.Instance.newTasksEvent += newTasksHandler;
                 }
 
-            //StoryEngineObject = GameObject.Find("StoryEngineObject");
 
-            //if (StoryEngineObject == null)
-            //{
-
-            //    Warning("StoryEngineObject not found.");
-
-            //}
-            //else
-            //{
-
-            //    AssitantDirector.Instance.newTasksEvent += newTasksHandler;
-
-
-            //    //ad = StoryEngineObject.GetComponent<AssitantDirector>();
-            //    //ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
-
-            //}
 
         }
 
-        public void addTaskHandler(UserTaskHandler theHandler)
+        public void addTaskHandler(TaskHandler theHandler)
         {
             userTaskHandler = theHandler;
-            Log("Handler added");
+            Verbose("Handler added");
         }
 
 

@@ -1,0 +1,14 @@
+﻿// Simple demo showing basic routing
+
+#simple
+debugon
+task1
+start other
+task2
+task3
+stop other
+end
+
+#other
+repeatingtask
+end

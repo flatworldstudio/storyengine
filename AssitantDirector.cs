@@ -16,7 +16,7 @@ using StoryEngine.Network;
 
 namespace StoryEngine
 {
-
+    public delegate bool TaskHandler(StoryTask theTask);
     public delegate void NewTasksEvent(object sender, TaskArgs e);
 
     /*!
@@ -39,6 +39,8 @@ namespace StoryEngine
 
         public static AssitantDirector Instance;
 
+        public LOGLEVEL DefaultLogLevel;/*!< \brief Set this value in Unity Editor */
+
         string ID = "AD";
 
         public event NewTasksEvent newTasksEvent;
@@ -46,12 +48,13 @@ namespace StoryEngine
         Director theDirector;
         string launchStoryline;
 
-
 #if NETWORKED
 
         List<StoryUpdate> StoryUpdateStack;
 
-        public ExtendedNetworkManager networkManager;
+        public GameObject NetworkObject;
+        ExtendedNetworkManager networkManager;
+
         const short stringCode = 1002;
         const short storyCode = 1005;
         static public int BufferStatusOut = 0;
@@ -69,7 +72,6 @@ namespace StoryEngine
 		{
             Instance=this; 
 		}
-
 
 
 		void Start()
@@ -125,18 +127,30 @@ namespace StoryEngine
 
 #if NETWORKED
 
-            // get the networkmanager to call network event methods on the assistant director.
-            if (networkManager != null)
-            {
-                networkManager.onStartServerDelegate = onStartServer;
-                networkManager.onStartClientDelegate = onStartClient;
-                networkManager.onServerConnectDelegate = OnServerConnect;
-                networkManager.onClientConnectDelegate = OnClientConnect;
-                networkManager.onClientDisconnectDelegate = OnClientDisconnect;
-                networkManager.onStopClientDelegate = OnStopClient;
 
-                Log("Max Message Size: " + NetworkMessage.MaxMessageSize);
+            // get the networkmanager to call network event methods on the assistant director.
+            // this should maybe move.
+
+            if (NetworkObject != null)
+            {
+
+                 networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
+
+                if (networkManager != null)
+                {
+                    networkManager.onStartServerDelegate = onStartServer;
+                    networkManager.onStartClientDelegate = onStartClient;
+                    networkManager.onServerConnectDelegate = OnServerConnect;
+                    networkManager.onClientConnectDelegate = OnClientConnect;
+                    networkManager.onClientDisconnectDelegate = OnClientDisconnect;
+                    networkManager.onStopClientDelegate = OnStopClient;
+
+                    //Log("Max Message Size: " + NetworkMessage.MaxMessageSize);
+
                 }
+
+
+            }
 
 #endif
 
@@ -225,15 +239,7 @@ namespace StoryEngine
                         StoryUpdateStack.RemoveAt(0);
 
                     }
-                    //    //for (int u = UpdateCount - 2; u >= 0; u--)
 
-                    //for (int u = 0; u < UpdateCount-1; u++)
-                    //{
-
-                    //    ApplyStoryUpdate(StoryUpdateStack[u]);
-                    //    StoryUpdateStack.RemoveAt(u);
-
-                    //}
 
                     break;
 
@@ -257,14 +263,10 @@ namespace StoryEngine
 
                             if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL || task.scope == SCOPE.LOCAL)
                             {
-
                                 task.Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
-
+                                }
                             }
-
                         }
-
-                    }
 
                     theDirector.EvaluatePointers();
 
@@ -274,9 +276,6 @@ namespace StoryEngine
                     {
 
                         StoryPointer pointer = GENERAL.ALLPOINTERS[p];
-
-                        //if (pointer.modified)
-                        //{
 
                             switch (pointer.scope)
                             {
@@ -329,8 +328,7 @@ namespace StoryEngine
                                     break;
 
                             }
-
-                        //}
+                                        
 
                     }
 
@@ -382,13 +380,8 @@ namespace StoryEngine
                         break;
                     }
                    
-
                     Error("No script reference found.");
-                    // create globals by default.
-
-                    //    GENERAL.storyPoints.Add("GLOBALS", new StoryPoint("GLOBALS", "none", new string[] { "GLOBALS" }));
-                    //   GENERAL.GLOBALS = new StoryTask("GLOBALS", SCOPE.GLOBAL);
-
+                  
                     break;
 
                 default:
@@ -405,29 +398,19 @@ namespace StoryEngine
             PointerUpdateBundled pointerUpdateBundled;
 
             while (storyUpdate.GetPointerUpdate(out pointerUpdateBundled))
-            {
-
-                ApplyPointerUpdate(pointerUpdateBundled);
-
-            }
+                 ApplyPointerUpdate(pointerUpdateBundled);
 
             TaskUpdateBundled taskUpdateBundled;
 
             while (storyUpdate.GetTaskUpdate(out taskUpdateBundled))
-            {
-
-                ApplyTaskUpdate(taskUpdateBundled);
-
-            }
-
+            ApplyTaskUpdate(taskUpdateBundled);
+                       
         }
 
         void ApplyPointerUpdate(PointerUpdateBundled pointerUpdate)
         {
 
             // Right now the only update we send for pointers is when they are killed.
-
-            //   StoryPointer pointer = GENERAL.GetStorylinePointerForPointID(pointerUpdate.storyPointID);
 
             StoryPointer pointer = GENERAL.GetPointerForStoryline(pointerUpdate.StoryLineName);
 
@@ -438,15 +421,8 @@ namespace StoryEngine
 
                 // We remove it instantly. No need to mark it as deleted, nothing else to do with it.
 
-                //       pointer.Kill();
-
                 GENERAL.ALLPOINTERS.Remove(pointer);
                 Log("Removing pointer: " + pointer.currentPoint.StoryLine);
-                // Remove task associated with pointer. This is only one at all times, we just don't know which one.
-
-                //if (GENERAL.ALLTASKS.Remove(pointer.currentTask)){
-                //    Log.Message("Removing local task: " + pointer.currentTask.description);
-                //}
 
                 // Server passes tasks, so if it is faster, client may be processing more than one task for a storyline. (Even if the deus dash would show it)
 
@@ -464,27 +440,6 @@ namespace StoryEngine
 
                     }
                 }
-
-
-                // Need to remove tasks for storyline. Normally there should be only one, but we don't know at which point this storyline is.
-
-
-                // On server, tasks are blocking, so the only task currently active would be currenttask.
-                // But on client, tasks are asynchronous. We do not know which task is active.
-
-
-                //if (GENERAL.ALLTASKS.Remove(pointer.currentTask))
-                //{
-
-                //    Log.Message("Removing task " + pointer.currentTask.description);
-
-                //}
-                //else
-                //{
-
-                //    Log.Warning("Failed removing task " + pointer.currentTask.description);
-
-                //}
 
             }
 

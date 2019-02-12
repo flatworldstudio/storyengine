@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 #if NETWORKED
+using UnityEngine.UI;
 using UnityEngine.Networking;
-//using System.Runtime.Remoting.Messaging;
 using StoryEngine.Network;
 #endif
 
@@ -12,7 +11,6 @@ using StoryEngine.Network;
 namespace StoryEngine
 {
 
-    public delegate bool DataTaskHandler(StoryTask theTask);
 
     /*!
  * \brief
@@ -25,14 +23,24 @@ namespace StoryEngine
     {
 
 
-        GameObject StoryEngineObject;
-        DataTaskHandler dataTaskHandler;
+        //GameObject StoryEngineObject;
+        TaskHandler dataTaskHandler;
 
 #if NETWORKED
         GameObject NetworkObject;
         NetworkBroadcast networkBroadcast;
         ExtendedNetworkManager networkManager;
         List<string> TrackConnectedAddresses;
+        public GameObject NetworkStatusObject;
+        GameObject BufferStatusIn, BufferStatusOut;
+
+
+        public string ConnectionMessage = "default";
+        public int ConnectionKey = 1111;
+        bool WasConnected = false;
+        float startListening = 0f;
+        bool listening = false;
+
         //   public string RemoteServerAddress,RemoteBroadcastServerAddress;
 #endif
 
@@ -58,29 +66,9 @@ namespace StoryEngine
         }
         void Start()
         {
-            Log("Starting.");
+            Verbose("Starting.");
 
             taskList = new List<StoryTask>();
-
-#if NETWORKED
-
-            NetworkObject = GameObject.Find("NetworkObject");
-
-            if (NetworkObject == null)
-            {
-
-                Warning("NetworkObject not found.");
-
-            }
-            else
-            {
-
-                networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
-                networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
-
-            }
-
-#endif
 
             if (AssitantDirector.Instance == null)
             {
@@ -89,28 +77,34 @@ namespace StoryEngine
             else
             {
                 AssitantDirector.Instance.newTasksEvent += newTasksHandler;
+#if NETWORKED
+
+                NetworkObject = AssitantDirector.Instance.NetworkObject;
+
+                if (NetworkObject == null)
+                {
+                    Warning("NetworkObject not found.");
+                }
+                else
+                {
+                    networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
+                    networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
+                }
+
+                if (DeusController.Instance != null && DeusController.Instance.DeusCanvas != null)
+                {
+                    // Create a network status prefab for visual debugging
+                    GameObject ns = Instantiate(NetworkStatusObject);
+                    ns.transform.SetParent(DeusController.Instance.DeusCanvas.transform, false);
+                    BufferStatusIn = ns.transform.Find("BufferIn").gameObject;
+                    BufferStatusOut = ns.transform.Find("BufferOut").gameObject;
+
+
+                }
+
+#endif
             }
-            //StoryEngineObject = GameObject.Find("StoryEngineObject");
-
-            //if (StoryEngineObject == null)
-            //{
-
-            //    Warning("StoryEngineObject not found.");
-
-            //}
-            //else
-            //{
-            //    //AssitantDirector.Instance.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
-
-            //    AssitantDirector.Instance.newTasksEvent += newTasksHandler;
-
-            //    //ad = StoryEngineObject.GetComponent<AssitantDirector>();
-            //    //ad.newTasksEvent += new NewTasksEvent(newTasksHandler); // registrer for task events
-
-            //}
-
         }
-
 
 #if UNITY_IOS && NETWORKED
 
@@ -125,34 +119,14 @@ namespace StoryEngine
                 Log("pauzing ...");
                 Log("Disconnecting client ...");
 
-
-                if (networkManager!=null && networkManager.client != null)
+                if (networkManager != null && networkManager.client != null)
                 {
-
                     StopNetworkClient();
-
-                    //				networkManager.client.Disconnect ();
-
-                    //	networkManager.client.Shutdown ();
-
-                    //	Network.CloseConnection(Network.connections[0], true);
-
-                    //	NetworkManager.InformServerOnDisconnect();
-
-
-
-
-                    //or maybe better use  Shutdown(); 
-
-
-
                 }
-
 
             }
             else
             {
-
                 Log("resuming ...");
 
             }
@@ -343,14 +317,19 @@ namespace StoryEngine
 
 #endif
 
-        public void addTaskHandler(DataTaskHandler theHandler)
+        public void addTaskHandler(TaskHandler theHandler)
         {
             dataTaskHandler = theHandler;
-            Log("Handler added.");
+            Verbose("Handler added.");
         }
 
         void Update()
         {
+
+#if NETWORKED
+            if (displayNetworkGUIState())
+                SetNetworkIndicators();
+#endif
 
             int t = 0;
 
@@ -358,8 +337,6 @@ namespace StoryEngine
             {
 
                 StoryTask task = taskList[t];
-
-                //			if (task.pointer.getStatus () == POINTERSTATUS.KILLED && task.description != "end") {
 
                 if (task.Instruction == "end")
                 {
@@ -371,49 +348,239 @@ namespace StoryEngine
 
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
-
-                    Log("Removing task:" + task.Instruction);
-
                     // Task was removed, so stop executing it.
-
+                    Log("Removing task:" + task.Instruction);
                     taskList.RemoveAt(t);
-
                 }
                 else
                 {
-
-                    if (dataTaskHandler != null)
+                    // Task needs to be executed.
+                    // first check for storyengine tasks.
+                    bool done = false;
+                    switch (task.Instruction)
                     {
+#if NETWORKED
 
-                        if (dataTaskHandler(task))
-                        {
+                        // ---------------------------- VISUAL DEBUGGING ----------------------------
+                        case "debugon":
 
-                            task.signOff(ID);
-                            taskList.RemoveAt(t);
+                            // Show network info.
 
-                        }
-                        else
-                        {
+                            displayNetworkGUI(true);
+                            done = true;
+                            break;
 
-                            t++;
+                        case "debugoff":
 
-                        }
+                            // Hide network info.
 
+                            displayNetworkGUI(false);
+                            done = true;
+                            break;
+
+                        case "toggledebug":
+
+                            // Toggle network info.
+
+                            displayNetworkGUI(!displayNetworkGUIState());
+                            done = true;
+                            break;
+
+                        // ---------------------------- SERVER SIDE ----------------------------
+
+                        case "startserver":
+
+                            // Start broadcast and network server
+
+                            Log("Starting broadcast server, key " + ConnectionKey + " message " + ConnectionMessage);
+                            startBroadcastServer(ConnectionKey, ConnectionMessage);
+
+                            Log("Starting network server.");
+                            startNetworkServer();
+
+                            done = true;
+                            break;
+
+                        case "stopserver":
+
+                            // Stop broadcast and network server
+
+                            Log("Stopping broadcast server.");
+                            stopBroadcast();
+
+                            Log("Stopping network server.");
+                            stopNetworkServer();
+
+                            done = true;
+                            break;
+
+                        case "monitorclients":
+
+                            // Watch for new clients. Stays live indefinitely.
+
+                            if (NewClientsConnected())
+                            {
+                                // new clients or are we getting all clients???
+
+                                foreach (string add in ConnectedAddresses())
+                                {
+                                    Log("New client at " + add);
+                                }
+
+                                task.SetStringValue("debug", "clients: " + ConnectedAddresses().Count);
+                                task.setCallBack("addclient");
+
+                            }
+
+                            break;
+
+                        case "pushglobaltasks":
+
+                            // go over all pointers  and mark everything as modified
+                            // that way it'll get sent.
+                            // with single client apps this is ok, but for multiple clients we need something more advanced
+
+                            Log("Pushing global tasks.");
+
+                            foreach (StoryTask theTask in GENERAL.ALLTASKS)
+                            {
+                                if (theTask.scope == SCOPE.GLOBAL)
+                                {
+                                    theTask.MarkAllAsModified();
+                                }
+                            }
+
+                            done = true;
+                            break;
+
+                        // ---------------------------- CLIENT SIDE ----------------------------
+
+
+                        case "serversearch":
+
+                            if (listening)
+                            {
+                                if (foundServer())
+                                {
+                                    Log("Found broadcast server.");
+
+                                    stopBroadcast();
+                                    task.setCallBack("serverfound");
+                                    listening = false;
+
+                                    done = true;
+                                }
+                            }
+                            else
+                            {
+                                startBroadcastClient(ConnectionKey);
+                                Log("Starting broadcast listening for key " + ConnectionKey);
+                                listening = true;
+                            }
+
+                            break;
+
+
+
+                        case "startclient":
+
+                            string ServerAddress = RemoteBroadcastServerAddress;
+
+                            if (ServerAddress != "")
+                            {
+                                Log("Starting network client for remote server " + ServerAddress);
+                                startNetworkClient(ServerAddress);
+                            }
+                            else
+                            {
+                                Warning("Trying to start client without server address.");
+                            }
+
+                            done = true;
+                            break;
+
+                        case "stopclient":
+
+                            Log("Stopping network client.");
+
+                            StopNetworkClient();
+                            WasConnected = false;
+
+                            done = true;
+
+                            break;
+
+                        case "monitorserver":
+
+                            // Watches the connection, stays active until connection lost.
+
+                            if (clientIsConnected())
+                            {
+                                WasConnected = true;
+                            }
+                            else
+                            {
+                                if (WasConnected)
+                                {
+                                    // Lost connection. Restart server search.
+
+                                    Log("Lost server connection.");
+
+                                    StopNetworkClient();
+                                    WasConnected = false;
+                                    task.setCallBack("serversearch");
+
+                                    done = true;
+
+                                }
+                                else
+                                {
+                                    //
+                                }
+                            }
+
+                            break;
+
+
+
+#endif
+                        default:
+
+                            // Not a controller task, pass it on.
+
+                            if (dataTaskHandler != null)
+                            {
+                                done = dataTaskHandler(task);
+
+                            }
+                            else
+                            {
+                                // If no handler available we just sign off, but issue a warning once.
+                                done = true;
+
+                                if (!handlerWarning)
+                                {
+                                    Warning("No handler registered.");
+                                    handlerWarning = true;
+                                }
+
+                            }
+
+                            break;
+
+                    }
+
+                    if (done)
+                    {
+                        task.signOff(ID);
+                        taskList.RemoveAt(t);
                     }
                     else
                     {
-                        // If no handler available we just sign off, but issue a warning once.
-
-                        task.signOff(ID);
-                        taskList.RemoveAt(t);
-
-                        if (!handlerWarning)
-                        {
-                            Warning("No handler registered.");
-                            handlerWarning = true;
-                            }
-                        //t++;
+                        t++;
                     }
+
+
 
                 }
 
@@ -421,24 +588,20 @@ namespace StoryEngine
 
         }
 
-        //	public void taskDone (StoryTask theTask){
-        //		theTask.signOff (me);
-        //		taskList.Remove (theTask);
+        //    public void taskDone (StoryTask theTask){
+        //        theTask.signOff (me);
+        //        taskList.Remove (theTask);
         //
-        //	}
+        //    }
 
         void newTasksHandler(object sender, TaskArgs e)
         {
-
             addTasks(e.theTasks);
-
         }
 
         public void addTasks(List<StoryTask> theTasks)
         {
-
             taskList.AddRange(theTasks);
-
         }
 
         //
@@ -447,22 +610,54 @@ namespace StoryEngine
 
         public bool displayNetworkGUIState()
         {
-
-
-            return networkBroadcast.showGUI;
-
+            return networkBroadcast != null && networkBroadcast.showGUI;
 
         }
 
 
         public void displayNetworkGUI(bool status)
         {
+            NetworkManagerHUD hud = (NetworkObject == null ? null : NetworkObject.GetComponent<NetworkManagerHUD>());
 
+            if (hud != null) hud.showGUI = status;
+            if (networkBroadcast != null) networkBroadcast.showGUI = status;
 
-            NetworkObject.GetComponent<NetworkManagerHUD>().showGUI = status;
-            networkBroadcast.showGUI = status;
+        }
 
+        void SetNetworkIndicators()
+        {
+            if (BufferStatusIn == null || BufferStatusOut == null)
+                return;
 
+            BufferStatusIn.SetActive(WasConnected);
+            BufferStatusOut.SetActive(WasConnected);
+
+            switch (AssitantDirector.BufferStatusIn)
+            {
+                case 0:
+                    BufferStatusIn.GetComponent<Image>().color = Color.grey;
+                    break;
+                case 1:
+                case 2:
+                    BufferStatusIn.GetComponent<Image>().color = Color.green;
+                    break;
+                default:
+                    BufferStatusIn.GetComponent<Image>().color = Color.cyan;
+                    break;
+            }
+            switch (AssitantDirector.BufferStatusOut)
+            {
+                case 0:
+                    BufferStatusOut.GetComponent<Image>().color = Color.grey;
+                    break;
+                case 1:
+                case 2:
+                    BufferStatusOut.GetComponent<Image>().color = Color.green;
+                    break;
+                default:
+                    BufferStatusOut.GetComponent<Image>().color = Color.cyan;
+                    break;
+            }
         }
 
 #endif

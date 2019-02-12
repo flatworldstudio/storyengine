@@ -1,28 +1,24 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace StoryEngine
 {
 
-    //public delegate bool SetTaskHandler(StoryTask theTask);
-
     /*!
 * \brief
-* Controls set (eg. scenery, content) operations.
+* Controls agents, objects that have behaviour.
 * 
 * Use addTaskHandler to attach your custom handler.
 */
 
-    public class SetController : MonoBehaviour
+    public class AgentController : MonoBehaviour
     {
-        string ID = "SetController";
-
-        //GameObject StoryEngineObject;
+        string ID = "AgentController";
         TaskHandler setTaskHandler;
-         List<StoryTask> taskList;
+        List<StoryTask> taskList;
 
-        public SetController Instance;
+        public AgentController Instance;
+
         bool handlerWarning = false;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
@@ -50,13 +46,15 @@ namespace StoryEngine
             {
                 AssitantDirector.Instance.newTasksEvent += newTasksHandler;
             }
-            }
+
+        }
 
         public void addTaskHandler(TaskHandler theHandler)
         {
             setTaskHandler = theHandler;
             Verbose("Handler added.");
         }
+
 
         void Update()
         {
@@ -67,8 +65,6 @@ namespace StoryEngine
             {
 
                 StoryTask task = taskList[t];
-
-                //			if (task.pointer.getStatus () == POINTERSTATUS.KILLED && task.description != "end") {
 
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
@@ -108,21 +104,9 @@ namespace StoryEngine
                             Warning("No handler registered.");
                             handlerWarning = true;
                         }
-
-                        //if (!handlerWarning)
-                        //{
-                        //    Warning("No handler available, blocking task while waiting.");
-                        //    handlerWarning = true;
-
-                        //}
-
-                        //t++;
                     }
-
                 }
-
             }
-
         }
 
         void newTasksHandler(object sender, TaskArgs e)

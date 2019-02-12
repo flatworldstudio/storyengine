@@ -1,0 +1,31 @@
+﻿// Demo showing basic networking
+
+#serversample
+debugon
+start server
+end
+
+#clientsample
+debugon
+start client
+end
+
+// The storylines and tasks below are all handled by the datacontroller.
+
+#server
+startserver
+monitorclients
+end
+
+#addclient
+pushglobaltasks
+end
+
+#client
+serversearch
+end
+
+#serverfound
+startclient
+monitorserver
+end
