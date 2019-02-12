@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657868, g: 0.49641263, b: 0.5748171, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -495,6 +495,11 @@ PrefabInstance:
       propertyPath: DeusCanvas
       value: 
       objectReference: {fileID: 1450095307}
+    - target: {fileID: 114673875059481080, guid: 9c67fc6e1926a45538c23ee13784ba74,
+        type: 3}
+      propertyPath: Width
+      value: 640
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9c67fc6e1926a45538c23ee13784ba74, type: 3}
 --- !u!114 &2018210637 stripped

@@ -22,7 +22,7 @@ namespace StoryEngine
         TaskHandler setTaskHandler;
          List<StoryTask> taskList;
 
-        public SetController Instance;
+        public static SetController Instance;
         bool handlerWarning = false;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.

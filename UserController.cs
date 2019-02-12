@@ -21,7 +21,7 @@ namespace StoryEngine
         TaskHandler userTaskHandler;
 bool handlerWarning = false;
 
-        public UserController Instance;
+        public static UserController Instance;
 
          List<StoryTask> taskList;
 

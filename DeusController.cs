@@ -19,13 +19,13 @@ namespace StoryEngine
 
         public GameObject DeusCanvas, PointerBlock;
 
-         int Width;
+        public int Width;
          //GameObject StoryEngineObject;
 
         List<StoryTask> taskList;
         List<StoryPointer> pointerList;
         StoryPointer[] pointerPositions;
-        public bool storyBoard;
+     //   public bool storyBoard;
 
         int PointerdisplayBuffer = 24;
 
@@ -151,6 +151,7 @@ namespace StoryEngine
 
 
                         case "toggledebug":
+                        case "debugtoggle":
 
                             DeusCanvas.SetActive(!DeusCanvas.activeSelf);
                             task.signOff(ID);

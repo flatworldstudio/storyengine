@@ -17,7 +17,7 @@ namespace StoryEngine
         TaskHandler setTaskHandler;
         List<StoryTask> taskList;
 
-        public AgentController Instance;
+        public static AgentController Instance;
 
         bool handlerWarning = false;
 

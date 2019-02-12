@@ -91,7 +91,7 @@ namespace StoryEngine
                     networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
                 }
 
-                if (DeusController.Instance != null && DeusController.Instance.DeusCanvas != null)
+                if (DeusController.Instance != null && DeusController.Instance.DeusCanvas != null && AssitantDirector.Instance.NetworkObject!=null)
                 {
                     // Create a network status prefab for visual debugging
                     GameObject ns = Instantiate(NetworkStatusObject);
@@ -391,7 +391,7 @@ namespace StoryEngine
                         case "startserver":
 
                             // Start broadcast and network server
-
+                        
                             Log("Starting broadcast server, key " + ConnectionKey + " message " + ConnectionMessage);
                             startBroadcastServer(ConnectionKey, ConnectionMessage);
 
@@ -402,7 +402,7 @@ namespace StoryEngine
                             break;
 
                         case "stopserver":
-
+                                                       
                             // Stop broadcast and network server
 
                             Log("Stopping broadcast server.");
