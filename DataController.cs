@@ -63,6 +63,7 @@ namespace StoryEngine
         void Awake()
         {
             Instance = this;
+            //UUID.Reset();
         }
         void Start()
         {

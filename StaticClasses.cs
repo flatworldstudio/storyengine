@@ -242,21 +242,25 @@ namespace StoryEngine
 * 
 * \todo This currently works but could be more elegant.
 */
-
+/*
     public static class UUID
     {
         static int uid { get; set; }
 
-        public static string identity;
+     //   public static string identity;
 
-        public static string getGlobalID()
-        {
+        //public static string getGlobalID()
+        //{
 
-            uid++;
+        //    uid++;
 
-            return identity + uid.ToString("x8");
+        //    return identity + uid.ToString("x8");
 
-        }
+        //}
+        //public static void Reset()
+        //{
+        //    uid = 0;
+        //}
 
         public static string getID()
         {
@@ -267,14 +271,15 @@ namespace StoryEngine
 
         }
 
-        public static void setIdentity()
-        {
+        //public static void setIdentity()
+        //{
 
-            string stamp = System.DateTime.UtcNow.ToString("yyyyMMddhhmmss");
+        //    string stamp = System.DateTime.UtcNow.ToString("yyyyMMddhhmmss");
 
-            Int64 num = Int64.Parse(stamp);
-            identity = num.ToString("x8");
+        //    Int64 num = Int64.Parse(stamp);
+        //    identity = num.ToString("x8");
 
-        }
+        //}
     }
+    */
 }

@@ -47,9 +47,19 @@ namespace StoryEngine
             //isReady = true;
 
         }
+        int __idcount;
+
+        string GetId()
+        {
+            __idcount++;
+
+            return __idcount.ToString("x8"); ;
+        }
 
         void parse(string _text)
         {
+            __idcount = 0;
+
 
             manuscript = new List<string>();
             string[] lines = _text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -171,20 +181,10 @@ namespace StoryEngine
 
                 if (storyLine == null && storyLabel == null && storyPoint != null)
                 {
-                    //				Log.Message ("storyPoint: "+l+" " + storyPoint);
                     string[] task = getTask(manuscript[l]);
-                    //				Log.Message ("task: " + task[0]);
+                 
+                    point = new StoryPoint(GetId(), currentStoryline, task);
 
-                    //				point = new StoryPoint (storyPoint, currentStoryline, task);
-                    point = new StoryPoint(UUID.getID(), currentStoryline, task);
-
-                    //				if (point.taskType != TASKTYPE.BASIC) {
-                    //					storyPoint = UUID.getId ();
-                    //					point.ID = storyPoint;
-                    //				}
-
-
-                    //				storyPoints.Add (storyPoint, point);
                     GENERAL.storyPoints.Add(point.ID, point);
 
                     if (previousPoint != null)

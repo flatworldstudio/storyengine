@@ -79,8 +79,8 @@ namespace StoryEngine
           
             Verbose("Starting.");
 
-            UUID.setIdentity();
-            Verbose("Identity stamp " + UUID.identity);
+            //UUID.setIdentity();
+            //Verbose("Identity stamp " + UUID.identity);
 
             GENERAL.AUTHORITY = AUTHORITY.LOCAL;
             theDirector = new Director();
