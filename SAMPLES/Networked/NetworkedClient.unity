@@ -465,12 +465,12 @@ PrefabInstance:
     - target: {fileID: 4243633383540711642, guid: da0cb99c447270f4b8518dae513c6d39,
         type: 3}
       propertyPath: PointerDisplayCols
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4243633383540711642, guid: da0cb99c447270f4b8518dae513c6d39,
         type: 3}
       propertyPath: PointerDisplayRows
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 389362265, guid: da0cb99c447270f4b8518dae513c6d39, type: 3}
       propertyPath: NetworkStatusObject

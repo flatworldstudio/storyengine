@@ -14,113 +14,29 @@ namespace StoryEngine.UI
 */
     public static class Methods
     {
-        //public static GameObject DefaultPanePrefab;
-        //public static float DefaultPaneMargin;
+        static string ID = "Methods";
 
-        //public static void AddDefaultPane(InterFace _interface)
-        //{
+        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+        static void Log(string message) => StoryEngine.Log.Message(message, ID);
+        static void Warning(string message) => StoryEngine.Log.Warning(message, ID);
+        static void Error(string message) => StoryEngine.Log.Error(message, ID);
+        static void Verbose(string message) => StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
 
-        //    if (_interface != null)
-
-        //    {
-
-        //        if (DefaultPanePrefab != null)
-        //        {
-        //            _interface.gameObject = GameObject.Instantiate(DefaultPanePrefab);
-        //            _interface.gameObject.transform.SetParent(_interface.canvasObject.transform, false);
-        //            _interface.gameObject.name=_interface.name;
-        //        }
-        //        else
-        //        {
-        //            Log.Warning("Default pane prefab is null, can't instantiate. (Did you forget to assign it?)");
-
-        //        }
-
-        //        float m = DefaultPaneMargin;
-        //        Plane plane = _interface.plane;
-
-        //        if (plane != null)
-        //        {
-
-        //            Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
-        //            _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
-
-        //            Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
-        //            _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
-
-        //            //_interface.anchorPosition=anchorPosition;
-
-        //            //Vector2 anchorPos = _plane.interFace.gameObject.GetComponent<RectTransform>().anchoredPosition;
-
-        //        }
-        //        else
-        //        {
-
-        //            Log.Warning("Plane reference for interface is null, can't set dimensions on default pane.");
-
-        //        }
-
-        //    }
-        //    else
-        //    {
-
-        //        Log.Warning("Interface reference is null, can't add default pane.");
-
-        //    }
-        //}
-
-
-        //public static void ResizeDefaultPane(InterFace _interface)
-        //{
-
-        //    if (_interface != null)
-
-        //    {
-
-        //        float m = DefaultPaneMargin;
-        //        Plane plane = _interface.plane;
-
-        //        if (plane != null)
-        //        {
-
-        //            Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
-        //            _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
-        //            Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
-        //            _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
-
-
-        //        }
-        //        else
-        //        {
-
-        //            Log.Warning("Plane reference for interface is null, can't set dimensions on default pane.");
-
-        //        }
-
-        //    }
-        //    else
-        //    {
-
-        //        Log.Warning("Interface reference is null, can't add default pane.");
-
-        //    }
-        //}
         // --------------------------------------------   2D    ----------------------------------------------------------------------
 
-
-        // Drag a 2d interactive object (ie button). 
+        /*!\brief Drag a 2d interactive object (ie button). */
 
         public static void Drag2D(object sender, UIArgs uxArgs)
         {
-           
-          
-            if (uxArgs.uiEvent.targetButton == null) 
+
+
+            if (uxArgs.uiEvent.targetButton == null)
                 return;
 
             GameObject dragTarget = uxArgs.uiEvent.targetButton.GetDragTarget(uxArgs.uiEvent.direction);
             Constraint constraint = uxArgs.uiEvent.targetButton.GetConstraint(uxArgs.uiEvent.direction);
 
-            if (dragTarget==null || constraint==null)
+            if (dragTarget == null || constraint == null)
                 return; // don't drag if no target or constraint availabe.
 
             Translate2D(dragTarget, uxArgs.delta, constraint, uxArgs.uiEvent);
@@ -138,76 +54,49 @@ namespace StoryEngine.UI
                 if (anchor.x < constraint.hardClampMin.x)
                 {
                     anchor.x = constraint.hardClampMin.x;
-                    ui.dx = 0;
-
+                    ui.BounceHorizontal();
                 }
                 else if (anchor.x > constraint.hardClampMax.x)
                 {
                     anchor.x = constraint.hardClampMax.x;
-                    ui.dx = 0;
-
+                    ui.BounceHorizontal();
                 }
                 if (anchor.y < constraint.hardClampMin.y)
                 {
                     anchor.y = constraint.hardClampMin.y;
-                    ui.dy = 0;
-
+                    ui.BounceVertical();
                 }
                 else if (anchor.y > constraint.hardClampMax.y)
                 {
                     anchor.y = constraint.hardClampMax.y;
-                    ui.dy = 0;
+                    ui.BounceVertical();
                 }
             }
 
             if (constraint.radiusClamp)
             {
                 Vector2 relativePosition = new Vector2(anchor.x, anchor.y) - constraint.anchor;
-
                 float magnitude = relativePosition.magnitude;
-
                 magnitude = Mathf.Clamp(magnitude, constraint.radiusClampMin, constraint.radiusClampMax);
-
                 relativePosition = relativePosition.normalized * magnitude;
-
-                //              relativePosition = Vector2.ClampMagnitude (relativePosition, constraint.radiusClampMax);
-
                 anchor = constraint.anchor + relativePosition;
-
             }
-
 
             target.GetComponent<RectTransform>().anchoredPosition = anchor;
 
-            //      if (ui.action == UIACTION.INERTIA) {
-
-
-            //                      if (ui.isInert || ui.isSpringing) {
             if (ui.isSpringing)
             {
-
                 bool springing = apply2Dsprings(target, constraint, ui.springIndex);
 
                 if (ui.isSpringing && springing == false)
                 {
-                    //                  Debug.Log ("Springing stopped");
                     ui.isSpringing = false;
                     ui.springIndex = -1;
                 }
-
-                //  Debug.Log("am springing");
-                // only apply springs when user not touching. reset 2d target only when springs have put object in place. 
-                //              if (applyGUISprings (target, constraint)) {
-                ////                    ui.target2D = null;
-                ////                    ui.action = UIACTION.DELETE;
-                //                  ui.isSpringing
-                //                  Debug.Log ("DELETE ME");
-                //              }
             }
         }
 
-
-        static bool apply2Dsprings(GameObject target, Constraint constraint, int springIndex)
+static bool apply2Dsprings(GameObject target, Constraint constraint, int springIndex)
         {
             // apply springs to gui object. returns true if it did anything.
             bool result = false;
@@ -309,9 +198,8 @@ namespace StoryEngine.UI
         }
 
         // --------------------------------------------   3D    ----------------------------------------------------------------------
-
-
-        // Dolly a 3d camera in and out
+                
+        /*!\brief Dolly a 3d camera in and out by argument dd */
 
         public static void LongitudinalCamera(object sender, UIArgs uxArgs)
         {
@@ -372,7 +260,7 @@ namespace StoryEngine.UI
             cameraObject = interFace.uiCam3D.cameraObject;
 
             Constraint constraint = interFace.uiCam3D.constraint;
-Vector3 delta = uxArgs.delta;
+            Vector3 delta = uxArgs.delta;
 
             Vector3 cameraPositionOut = cameraObject.transform.position;
             cameraPositionOut += delta;
@@ -393,7 +281,7 @@ Vector3 delta = uxArgs.delta;
         }
 
 
-        // Pan a 3D camera;
+        /*!\brief Pan a 3d camera laterally by arguments dx,dy */
 
         public static void LateralCamera(object sender, UIArgs uxArgs)
         {
@@ -433,12 +321,11 @@ Vector3 delta = uxArgs.delta;
 
         }
 
-        // Technically, it's more of a YPR camera, not an orbit camera.
+       /*!\brief Rotate a camera around its interest using pitch and yaw. */
 
         static public void OrbitCamera(object sender, UIArgs uxArgs)
         {
             InterFace interFace = uxArgs.uiEvent.plane.interFace;
-
 
             GameObject cameraObject = interFace.uiCam3D.cameraObject;
             GameObject cameraInterest = interFace.uiCam3D.cameraInterest;
@@ -479,17 +366,13 @@ Vector3 delta = uxArgs.delta;
 
         public static void someAction(object sender, UIArgs uxArgs)
         {
-
-            Log.Message("SOME ACTION TRIGGERRED");
-          //  Debug.Log
-            //uxArgs.uiEvent.target2D
-
-        }
+            Log("Debug action called.");
+         }
 
 
 
         // ------------------------------------------------------------------------------------------------------------------
-        // SALVAGED CODE
+        // OLD CODE, from Fabric
 
         /*
 
@@ -616,7 +499,7 @@ void HullClamp{
         {
             InterFace interFace = uxArgs.uiEvent.plane.interFace;
 
-            Log.Message("3d target: " + uxArgs.uiEvent.target3D.transform.name);
+            Log("3d target: " + uxArgs.uiEvent.target3D.transform.name);
 
             if (interFace.selectedObjects.IndexOf(uxArgs.uiEvent.target3D) != -1)
             {
@@ -644,61 +527,31 @@ void HullClamp{
         }
 
 
-        public static void blinkButton(object sender,UIArgs uxArgs)
+        public static void blinkButton(object sender, UIArgs uxArgs)
         {
             if (uxArgs.uiEvent.targetButton != null)
-            uxArgs.uiEvent.targetButton.DefaultBlink();
+                uxArgs.uiEvent.targetButton.DefaultBlink();
 
         }
 
         public static void tapButton2D(object sender, UIArgs uxArgs)
         {
 
-
-            //  string name = uxArgs.uiEvent.target2D.transform.name;
-
-
-
-            //    setTargetBrightness(uxArgs.activeInterface.getButtonNames(), 0.75f, uxArgs.activeInterface);
-
-            //      setTargetBrightness
-
-
-            //     setBrightness(name, 1f, uxArgs.activeInterface);
-            //      setTargetBrightness(name, 0.75f,0.25f, uxArgs.activeInterface);
-
-            //Debug.Log("highlight "+name);
-
-            //      UiButton theButton;
-            //      uxArgs.activeInterface.uiButtons.TryGetValue (name, out theButton);
-            //
-
             if (uxArgs.uiEvent.targetButton != null)
             {
                 uxArgs.uiEvent.callback = uxArgs.uiEvent.targetButton.callback;
-
                 uxArgs.uiEvent.targetButton.Tap();
 
-               //Verbose("Tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callback);
+                //Verbose("Tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callback);
             }
-
-
-
-
-            //      uxArgs.uiEvent.callback = theButton.callback; // to be retrieved from button object..
-            //
-            //      Debug.Log ("tap callback: " + theButton.callback);
-        }
+}
 
 
         public static void stopControls(object sender, UIArgs uxArgs)
         {
-            //      uxArgs.uiEvent.callback = "stopControls";
-
+         
             InterFace interFace = uxArgs.uiEvent.plane.interFace;
-
             setTargetBrightness(interFace.getButtonNames(), 0.75f, interFace);
-
 
         }
 
@@ -710,6 +563,7 @@ void HullClamp{
             if (theButton != null)
                 theButton.SetTargetBrightness(value);
         }
+
         static void setTargetBrightness(string name, float value, float step, InterFace activeInterface)
         {
             Button theButton;
@@ -717,7 +571,7 @@ void HullClamp{
 
             if (theButton != null)
             {
-                theButton.SetTargetBrightness(value,step);
+                theButton.SetTargetBrightness(value, step);
                 //theButton.targetBrightness = value;
             }
         }
@@ -738,15 +592,6 @@ void HullClamp{
             foreach (string name in names)
                 setTargetBrightness(name, value, activeInterface);
         }
-
-
-
-
-
-
-        //  static public  void orbitCamera (UxInterface state, Vector2 delta)
-
-
 
         static public void rotateCamera(object sender, UIArgs uxArgs)
         {

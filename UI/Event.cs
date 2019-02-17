@@ -23,7 +23,8 @@ namespace StoryEngine.UI
         // holds user interaction description. note that x and y are NOT continuously updated for touch.
         string ID = "Event";
 
-        public float dx, dy, dd, x, y, d, px, py;
+
+        float dx, dy, dd, x, y, d, px, py, pd;
         public bool firstFrame;
 
         public ACTION action;
@@ -38,7 +39,7 @@ namespace StoryEngine.UI
         public bool isInert, isSpringing;
         public int springIndex;
 
-        public float tapCount;
+        float tapCount;
         public string callback;
 
         public Plane plane; // the plane (and possibly interface) that this event plays out in.
@@ -70,6 +71,47 @@ namespace StoryEngine.UI
 
         }
 
+        public float scaledDx
+        {
+            get
+            {
+             return dx * plane.Scale;
+            }
+
+        }
+
+
+        public float scaledDy
+        {
+            get
+            {
+                //return dy;
+                return dy * plane.Scale;
+            }
+
+        }
+
+
+        public float scaledDd
+        {
+            get
+            {
+                return dd * plane.Scale;
+            }
+
+        }
+
+        public void BounceHorizontal()
+        {
+            dx *= -0.25f;
+
+        }
+
+        public void BounceVertical()
+        {
+            dy *= -0.25f;
+        }
+
         public Event()
         {
             __position = Vector2.zero;
@@ -77,8 +119,6 @@ namespace StoryEngine.UI
             target2D = null;
             target3D = null;
             targetButton = null;
-            px = 0;
-            py = 0;
             firstFrame = true;
             action = ACTION.VOID;
             touch = TOUCH.NONE;
@@ -104,6 +144,7 @@ namespace StoryEngine.UI
             result.d = this.d;
             result.px = this.px;
             result.py = this.py;
+            result.pd = this.pd;
 
             result.firstFrame = this.firstFrame;
             result.action = this.action;
@@ -117,86 +158,77 @@ namespace StoryEngine.UI
             return result;
         }
 
-        //void applyUserInteraction(Event ui)
-
-
-        public void CorrectForCanvasScale()
+        public void Inertia()
         {
-            if (plane == null || plane.interFace == null || plane.interFace.canvasObject == null)
-                return;
 
-            float scale =1f/ plane.interFace.canvasObject.GetComponent<RectTransform>().localScale.x;
+            if (isInert)
+            {
 
-            // We don't scale the absolute position, just the delta values.
+                float iVel = 0f;
+                Vector2 iVec = Vector2.zero;
 
-            dx *= scale;
-            dy *= scale;
-            dd *= scale;
+                // Dampen double touch distance inertia.
+
+                if (Mathf.Abs(dd) < 0.5f)
+                    dd = 0;
+                else
+                    dd = Mathf.SmoothDamp(dd, 0, ref iVel, 0.075f);
 
 
+                // Dampen touch motion inertia.
 
+                Vector2 deltavec = new Vector2(dx, dy);
+
+                if (deltavec.magnitude < 0.25f)
+                {
+                    dx = 0;
+                    dy = 0;
+                }
+                else
+                {
+                    deltavec = Vector2.SmoothDamp(deltavec, Vector2.zero, ref iVec, 0.075f);
+                    dx = deltavec.x;
+                    dy = deltavec.y;
+                }
+
+
+                if (Mathf.Approximately(dx, 0f) && Mathf.Approximately(dy, 0f) && Mathf.Approximately(dd, 0f))
+                {
+                    isInert = false;
+                }
+
+            }
         }
-
 
         public void GetUserActivity()
         {
 
-            //void applyUserInteraction(Event ui, Interface theUiState)
-            //{
-
-            //cycle++;
-            //cycle = cycle % 1000;
-
-            // check user mouse/touch interaction and populate this passed-in UIEVENT accordingly
-
-            //#if UNITY_IOS
-            //                        Event storeUi = ui.clone();
-            //#endif
-
-            //float scale = plane.interFace.canvasObject.GetComponent<RectTransform>().localScale.x;
-            //Log("scale " + scale);
-
-            float lastdd = dd;
-
             touch = TOUCH.NONE;
-
-            dd = 0;
-
 
 #if UNITY_EDITOR || UNITY_STANDALONE
 
-            //      if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer) {
-
-            // if we're on macos .... or windows?
+            // if we're on macos or windows
 
             x = Input.mousePosition.x;
             y = Input.mousePosition.y;
             dx = x - px;
-            //            ui.dx = ui.dx / currentScale;
-
             dy = y - py;
-            //         ui.dy = ui.dy / currentScale;
-
             px = x;
             py = y;
 
             if (Input.GetButton("Fire1"))
             {
+                // First frame doesn't produce delta values yet.
+                if (firstFrame)
+                {
+                    firstFrame = false;
+                    touch = TOUCH.BEGAN;
+                    dx = 0;
+                    dy = 0;
+                    dd = 0;
 
-                //ui.x = Input.mousePosition.x;
-                //ui.y = Input.mousePosition.y;
-                //ui.dx = ui.x - ui.px;
-                //ui.dx = ui.dx / currentScale;
-
-                //dy = ui.y - ui.py;
-                //ui.dy = ui.dy / currentScale;
-
-                //ui.px = ui.x;
-                //ui.py = ui.y;
-
-                if (!firstFrame)
-                { // skip first frame because delta value will jump.
-
+                } else
+                {
                     action = ACTION.SINGLEDRAG;
                     touch = TOUCH.TOUCHING;
 
@@ -204,8 +236,7 @@ namespace StoryEngine.UI
                     {
                         // equivalent to doubletouch dragging only
                         action = ACTION.DOUBLEDRAG;
-                        //Debug.Log("spc "+dx + " " + dy);
-
+                        dd = 0;
                     }
                     if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
                     {
@@ -214,15 +245,7 @@ namespace StoryEngine.UI
                         dd = dx;
                         dx = 0;
                         dy = 0;
-                        //Debug.Log("alt "+dx + " " + dy);
                     }
-                }
-                else
-                {
-                    firstFrame = false;
-                    touch = TOUCH.BEGAN;
-                    dx = 0;
-                    dy = 0;
                 }
 
                 trackTap();
@@ -233,6 +256,8 @@ namespace StoryEngine.UI
 
                 touch = TOUCH.ENDED;
 
+                // Catch double drag simulation to get the correct inertia, a dd value rather than dx/dy 
+              
                 if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
                 {
                     // equivalent to doubletouch pinching only
@@ -241,14 +266,12 @@ namespace StoryEngine.UI
                     dx = 0;
                     dy = 0;
                 }
-
+               
 
                 if (wasTap())
                 {
-
                     action = ACTION.TAP;
-
-                }
+                    }
                 else
                 {
 
@@ -257,120 +280,133 @@ namespace StoryEngine.UI
                 firstFrame = true;
 
             }
-            //      }
+           
 
 #endif
 
 
-#if UNITY_IOS
-            
-//      if (Application.platform == RuntimePlatform.IPhonePlayer) {
+#if UNITY_IOS 
 
             // if we're on ios
 
-            if (Input.touchCount == 1) {
+            if (Input.touchCount == 1)
+            {
                 // review single touch
-                Vector2 tp = Input.GetTouch (0).position;
+                Vector2 tp = Input.GetTouch(0).position;
 
-                switch (Input.GetTouch (0).phase) {
-                case TouchPhase.Began:
-                    x = tp.x;
-                    y = tp.y;
-                    trackTap ();
-                    touch = TOUCH.BEGAN;
-                    break;
+                switch (Input.GetTouch(0).phase)
+                {
+                    case TouchPhase.Began:
+                        // Set x and y for target raycast.
+                        x = tp.x;
+                        y = tp.y;
+                        dx = 0;
+                        dy = 0;
+                        dd = 0;
+                        trackTap();
+                        touch = TOUCH.BEGAN;
+                        break;
 
-                case TouchPhase.Moved:
-                    Vector2 touchDelta = Input.GetTouch (0).deltaPosition;
+                    case TouchPhase.Moved:
 
-//      dx = touchDelta.x / Screen.height * 720f;
-//                  dy = touchDelta.y / Screen.height * 720f;
-
-        //dx = touchDelta.x /currentScale;
-        //dy = touchDelta.y /currentScale;
-
-
+                        Vector2 touchDelta = Input.GetTouch(0).deltaPosition;
                         dx = touchDelta.x;
                         dy = touchDelta.y;
-
+                        dd = 0;
                         action = ACTION.SINGLEDRAG;
-                    touch = TOUCH.TOUCHING;
-                    trackTap ();
-                    break;
+                        touch = TOUCH.TOUCHING;
+                        trackTap();
+                        break;
 
-                case TouchPhase.Stationary:
-                    dx = 0;
-                    dy = 0;
-                    action = ACTION.SINGLEDRAG;
-                    touch = TOUCH.TOUCHING;
-                    trackTap ();
-                    break;
+                    case TouchPhase.Stationary:
+                        dx = 0;
+                        dy = 0;
+                        dd = 0;
+                        action = ACTION.SINGLEDRAG;
+                        touch = TOUCH.TOUCHING;
+                        trackTap();
+                        break;
 
-                case TouchPhase.Ended:
+                    case TouchPhase.Ended:
 
-                    touch = TOUCH.ENDED;
+                        touch = TOUCH.ENDED;
 
-                    if (wasTap ()) {
-                        action = ACTION.TAP;
-                    } else {
+                        if (wasTap())
+                        {
+                            action = ACTION.TAP;
+                        }
+                        else
+                        {
 
-                    }
-                    break;
+                        }
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
                 }
             }
 
-            if (Input.touchCount == 2) {
+            if (Input.touchCount == 2)
+            {
                 // review double touch 
-                TouchPhase phase0 = Input.GetTouch (0).phase;
-                TouchPhase phase1 = Input.GetTouch (1).phase;
+                TouchPhase phase0 = Input.GetTouch(0).phase;
+                TouchPhase phase1 = Input.GetTouch(1).phase;
 
-                Vector2 tp0 = Input.GetTouch (0).position;
-                Vector2 tp1 = Input.GetTouch (1).position;
+                Vector2 tp0 = Input.GetTouch(0).position;
+                Vector2 tp1 = Input.GetTouch(1).position;
 
-                if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && phase1 == TouchPhase.Began) {
-                    // if one finger was touching, we leave the targets untouched, and initialise the d value
-                    d = Vector2.Distance (tp0, tp1);
+                if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && phase1 == TouchPhase.Began)
+                {
+                    // One finger was touching, second was added.
+                    // Leave x and y at the position of the first touch
+                    // initialise the d value so we can get delta d in the next frame
+                    d = Vector2.Distance(tp0, tp1);
+                    dd=dx=dy = 0;
+                 
                     touch = TOUCH.TOUCHING;
 
-                } else if (phase0 == TouchPhase.Began && phase1 == TouchPhase.Began) {
+                }
+                else if (phase0 == TouchPhase.Began && phase1 == TouchPhase.Began)
+                {
                     // if both start at the same time, aim in between to set targets and initialise the d value
                     x = (tp0.x + tp1.x) / 2f;
                     y = (tp0.y + tp1.y) / 2f;
-                    d = Vector2.Distance (tp0, tp1);
+                    d = Vector2.Distance(tp0, tp1);
+                    dd = dx = dy = 0;
+
                     touch = TOUCH.BEGAN;
 
-                } else if (phase0 == TouchPhase.Ended && phase1 == TouchPhase.Began) {
+                }
+                else if (phase0 == TouchPhase.Ended && phase1 == TouchPhase.Began)
+                {
                     // unlikely but could happen: flicking fingers in a single frame. catch the start of a new single touch.
                     x = tp1.x;
                     y = tp1.y;
+
+                    dd = dx = dy = 0;
                     touch = TOUCH.BEGAN;
 
-                } else if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && (phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary)) {
+                }
+                else if ((phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary) && (phase0 == TouchPhase.Moved || phase0 == TouchPhase.Stationary))
+                {
                     // dragging
-                    Vector2 touchDelta0 = Input.GetTouch (0).deltaPosition;
-                    Vector2 touchDelta1 = Input.GetTouch (1).deltaPosition;
+                    Vector2 touchDelta0 = Input.GetTouch(0).deltaPosition;
+                    Vector2 touchDelta1 = Input.GetTouch(1).deltaPosition;
 
-//                  dx = (touchDelta0.x + touchDelta1.x) / 2f / Screen.height * 720f; 
-//                  dy = (touchDelta0.y + touchDelta1.y) / 2f / Screen.height * 720f; 
+                    dx = (touchDelta0.x + touchDelta1.x) / 2f;
+                    dy = (touchDelta0.y + touchDelta1.y) / 2f;
 
-        //dx = (touchDelta0.x + touchDelta1.x) / 2f /currentScale; 
-        //dy = (touchDelta0.y + touchDelta1.y) / 2f /currentScale;
-
-                    dx = (touchDelta0.x + touchDelta1.x) / 2f ;
-                    dy = (touchDelta0.y + touchDelta1.y) / 2f ;
-
-                    d = Vector2.Distance (tp0, tp1);
-                    dd = d - lastdd;
+                    d = Vector2.Distance(tp0, tp1);
+                    dd = d - pd;
+                    pd = d;
 
                     action = ACTION.DOUBLEDRAG;
                     touch = TOUCH.TOUCHING;
                 }
+
+
             }
 
-//      }
 #endif
         }
 
@@ -399,25 +435,14 @@ namespace StoryEngine.UI
                 return;
 
 
-
-
             // finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
 
             RaycastHit hit;
 
             Vector2 uiPosition = new Vector2(x, y);
+            // Sometimes an offset is needed, ie when using indirect cameras and rendertextures.
+            Vector2 uiPositionOffset = uiPosition - plane.interFace.GetAnchorOffset(); 
 
-            Vector2 uiPositionOffset = uiPosition - plane.interFace.GetAnchorOffset();
-
-
-            // Correct for the layout of the plane, and possibly in the plane. The offset can be controlled via the plane drawing delegate.
-
-            //Vector2 anchorPos = _plane.interFace.gameObject.GetComponent<RectTransform>().anchoredPosition;
-
-            //uiPosition -= anchorPos;
-            //uiPosition -= _plane.screenOffset;
-
-            //Vector3 screenPosition =new Vector3(uiPosition.x,uiPosition.y,0); 
 
             // cast a 3d ray from the camera we are controlling to find any 3D objects.
 

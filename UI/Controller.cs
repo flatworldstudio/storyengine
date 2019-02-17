@@ -68,7 +68,7 @@ namespace StoryEngine.UI
 
         public UserCallBack updateUi(Layout _layout)
         {
-            cycle=(cycle+1)%1000;
+            cycle = (cycle + 1) % 1000;
 
             UserCallBack callBack = new UserCallBack();
 
@@ -161,7 +161,7 @@ namespace StoryEngine.UI
             // Before we start applying drag etc to object, we need to scale the delta values.
 
             //float scale = (activeUiEvent.plane.interFace)
-            activeUiEvent.CorrectForCanvasScale();
+            //activeUiEvent.CorrectForCanvasScale();
 
             // now handle the stack of ui events. this way, events can play out (inertia, springing) while the user starts new interaction.
             // create empty callback object
@@ -293,11 +293,12 @@ namespace StoryEngine.UI
 
         void AnimateButtons()
         {
-            int i=AnimatingButtons.Count-1;
+            int i = AnimatingButtons.Count - 1;
 
-            while (i>=0){
-                
-                Button button=AnimatingButtons[i];
+            while (i >= 0)
+            {
+
+                Button button = AnimatingButtons[i];
                 button.ApplyBrightness();
 
                 i--;
@@ -305,286 +306,186 @@ namespace StoryEngine.UI
 
         }
 
-        public void AddAnimatingButton (Button _button){
+        public void AddAnimatingButton(Button _button)
+        {
 
             if (!AnimatingButtons.Contains(_button))
                 AnimatingButtons.Add(_button);
-            
+
         }
 
-        public void RemoveAnimatingButton (Button _button){
+        public void RemoveAnimatingButton(Button _button)
+        {
 
-                AnimatingButtons.Remove(_button);
+            AnimatingButtons.Remove(_button);
 
         }
 
 
         /*!\brief Move a Button to a given spring position.*/
-          
+
         public void setSpringTarget(Button button, int index, DIRECTION dir = DIRECTION.FREE)
-{
+        {
 
-// Moves an interface segment (dragtarget, so a parent object) to a given spring. 
-// it uses a button as a hook. checks if any event is targeting the same dragtarget to prevent interference.
-// If there is we just take over. Could delete and replace it as well...
+            // Moves an interface segment (dragtarget, so a parent object) to a given spring. 
+            // it uses a button as a hook. checks if any event is targeting the same dragtarget to prevent interference.
+            // If there is we just take over. Could delete and replace it as well...
 
-int i = uiEventStack.Count - 1;
+            int i = uiEventStack.Count - 1;
 
-while (i >= 0)
-{
+            while (i >= 0)
+            {
 
-   Event uie = uiEventStack[i];
+                Event uie = uiEventStack[i];
 
-   if (uie.targetButton != null && uie.targetButton.GetDragTarget(uie.direction) == button.GetDragTarget(dir))
-   {
+                if (uie.targetButton != null && uie.targetButton.GetDragTarget(uie.direction) == button.GetDragTarget(dir))
+                {
 
-       // the event explicitly targets the (explicit) target of the passed in button
-       //remove the event
-       uiEventStack.RemoveAt(i);
+                    // the event explicitly targets the (explicit) target of the passed in button
+                    //remove the event
+                    uiEventStack.RemoveAt(i);
 
-   }
+                }
 
-   i--;
+                i--;
 
-}
+            }
 
 
-Verbose("Adding a springing event for spring target call.");
+            Verbose("Adding a springing event for spring target call.");
 
-Event springEvent = new Event();
+            Event springEvent = new Event();
 
-springEvent.targetButton = button;
-springEvent.action = ACTION.SINGLEDRAG;
-springEvent.target2D = button.gameObject;
-springEvent.isSpringing = true;
-springEvent.springIndex = index;
+            springEvent.targetButton = button;
+            springEvent.action = ACTION.SINGLEDRAG;
+            springEvent.target2D = button.gameObject;
+            springEvent.isSpringing = true;
+            springEvent.springIndex = index;
 
-uiEventStack.Add(springEvent);
+            uiEventStack.Add(springEvent);
 
 
-}
+        }
 
-// ------------------------------------------------------------------------------------------------------------------------------------------
+        // ------------------------------------------------------------------------------------------------------------------------------------------
 
-void processUiEvent(Event ui)
-{
+        void processUiEvent(Event ui)
+        {
 
-//ui.callback = "";
+            if (ui.plane == null || ui.plane.interFace == null)
+                return;
 
-if (ui.plane == null || ui.plane.interFace == null)
-   return;
+            ui.callback = "";
 
-ui.callback = "";
+            UIArgs args = new UIArgs();
 
-UIArgs args = new UIArgs();
+            args.delta = Vector3.zero;
+            args.uiEvent = ui;
 
-//args.activeInterface = activeInterface;
+            InterFace interFace = ui.plane.interFace;
 
-args.delta = Vector3.zero;
-args.uiEvent = ui;
+            switch (ui.action)
+            {
 
-//float scale = ui.plane.interFace.canvasObject.GetComponent<RectTransform>().localScale.x;
-//Log("scale " + scale);
+                case ACTION.TAP:
 
-InterFace interFace = ui.plane.interFace;
+                    ui.action = ACTION.SINGLEDRAG;
 
-switch (ui.action)
-{
+                    if (ui.target2D != null)
+                        interFace.tap_2d(this, args);
+                    else if (ui.target3D != null)
+                        interFace.tap_3d(this, args);
+                    else
+                        interFace.tap_none(this, args);
 
-   case ACTION.TAP:
+                    break;
 
-       ui.action = ACTION.SINGLEDRAG;
+                case ACTION.SINGLEDRAG:
 
-       //if (interFace == null)
-       //break;
+                    // If this is an orthodrag button, we need to set and lock the initial direction.
+                    // We also get the appropriate targets and constraints for that direction and load them into the uievent.
 
-       if (ui.target2D != null)
-           interFace.tap_2d(this, args);
-       else if (ui.target3D != null)
-           interFace.tap_3d(this, args);
-       else
-           interFace.tap_none(this, args);
+                    if (ui.targetButton != null && ui.targetButton.orthoDragging && ui.direction == DIRECTION.FREE)
+                    {
+                        if (Mathf.Abs(ui.scaledDx) > Mathf.Abs(ui.scaledDy))
+                        {
+                            ui.direction = DIRECTION.HORIZONTAL;
+                            Verbose("Locking to drag horizontally");
+                        }
+                        if (Mathf.Abs(ui.scaledDx) < Mathf.Abs(ui.scaledDy))
+                        {
+                            ui.direction = DIRECTION.VERTICAL;
+                            Verbose("Locking to drag vertically");
+                        }
 
-       break;
+                    }
 
-   // 
+                    args.delta = new Vector3(ui.scaledDx, ui.scaledDy, 0);
 
-   case ACTION.SINGLEDRAG:
+                    if (ui.target2D != null)
+                        interFace.single_2d(this, args);
+                    else if (ui.target3D != null)
+                        interFace.single_3d(this, args);
+                    else
+                        interFace.single_none(this, args);
 
-       // If this is an orthodrag button, we need to set and lock the initial direction.
-       // We also get the appropriate targets and constraints for that direction and load them into the uievent.
+                    break;
 
-       if (ui.targetButton != null && ui.targetButton.orthoDragging && ui.direction == DIRECTION.FREE)
-       {
-           if (Mathf.Abs(ui.dx) > Mathf.Abs(ui.dy))
-           {
-               ui.direction = DIRECTION.HORIZONTAL;
+                case ACTION.DOUBLEDRAG:
 
-               //        Debug.Log("Locking to drag horizontally");
-           }
-           if (Mathf.Abs(ui.dx) < Mathf.Abs(ui.dy))
-           {
-               ui.direction = DIRECTION.VERTICAL;
+                    args.delta = new Vector3(ui.scaledDx, ui.scaledDy, ui.scaledDd);
 
-               //       Debug.Log("Locking to drag vertically");
-           }
+                    if (ui.target2D != null)
+                        interFace.double_2d(this, args);
+                    else if (ui.target3D != null)
+                        interFace.double_3d(this, args);
+                    else
+                        interFace.double_none(this, args);
 
+                    break;
 
+                default:
 
+                    interFace.none(this, args);
 
-       }
+                    break;
+            }
 
-       //			Debug.Log ("single drag");
 
+            ui.Inertia();
 
-       //if (activeInterface == null)
-       //break;
+        }
 
-       args.delta = new Vector3(ui.dx, ui.dy, 0);
 
-       if (ui.target2D != null)
-           interFace.single_2d(this, args);
-       else if (ui.target3D != null)
-           interFace.single_3d(this, args);
-       else
-           interFace.single_none(this, args);
+        // ------------------------------------------------------------------------------------------------------------------------------------------
 
-       break;
 
-   case ACTION.DOUBLEDRAG:
+        void setRaycastActive(string name, bool value, InterFace activeInterface)
+        {
+            Button theButton;
+            activeInterface.uiButtons.TryGetValue(name, out theButton);
 
-       //if (activeInterface == null)
-       //break;
+            if (theButton != null)
+                theButton.image.raycastTarget = value;
 
-       args.delta = new Vector3(ui.dx, ui.dy, ui.dd);
+        }
 
-       if (ui.target2D != null)
-           interFace.double_2d(this, args);
-       else if (ui.target3D != null)
-           interFace.double_3d(this, args);
-       else
-           interFace.double_none(this, args);
+        bool brightnessIsChanging(string name, InterFace activeInterface)
+        {
+            //bool result = false;
+            Button theButton;
+            activeInterface.uiButtons.TryGetValue(name, out theButton);
 
-       break;
+            if (theButton != null)
+            {
+                return theButton.BrightnessChanging();
 
-   default:
+            }
 
-       //if (activeInterface == null)
-       //break;
+            return false;
+        }
 
-       interFace.none(this, args);
-
-       break;
-}
-
-
-
-if (ui.isInert)
-{
-
-   float iVel = 0f;
-   Vector2 iVec = Vector2.zero;
-
-   // Dampen double touch distance inertia.
-
-   if (Mathf.Abs(ui.dd) < 0.5f)
-       ui.dd = 0;
-   else
-       ui.dd = Mathf.SmoothDamp(ui.dd, 0, ref iVel, 0.075f);
-
-
-   // Dampen touch motion inertia.
-
-   Vector2 deltavec = new Vector2(ui.dx, ui.dy);
-
-   if (deltavec.magnitude < 0.25f)
-   {
-       ui.dx = 0;
-       ui.dy = 0;
-   }
-   else
-   {
-       deltavec = Vector2.SmoothDamp(deltavec, Vector2.zero, ref iVec, 0.075f);
-       ui.dx = deltavec.x;
-       ui.dy = deltavec.y;
-       }
-
-
-   //if (Mathf.Abs(ui.dx) < 0.5f)
-   //    ui.dx = 0;
-   //else
-   //    ui.dx = Mathf.SmoothDamp(ui.dx, 0, ref iVel, 0.075f);
-
-   //if (Mathf.Abs(ui.dy) < 0.5f)
-   //    ui.dy = 0;
-   //else
-       //ui.dy = Mathf.SmoothDamp(ui.dy, 0, ref iVel, 0.075f);
-
-   if (Mathf.Approximately(ui.dx,0f) && Mathf.Approximately(ui.dy, 0f) && Mathf.Approximately(ui.dd, 0f))
-   {
-       ui.isInert = false;
-   }
-
-   //if (ui.dx <float.Epsilon 0 && ui.dy == 0 && ui.dd == 0)
-   //{
-   //    ui.isInert = false;
-   //}
-
-
-}
-
-
-
-//			if (ui.touch == UITOUCH.NONE && ui.target2D != null) {
-//				// no touch, lettings springs run out while we have a target: apply a singledrag with delta 0
-//				singleDrag2D (state, ui, Vector2.zero);
-//			}
-
-//			if (ui.action == UIACTION.INERTIA && ui.target2D != null) {
-//				// no touch, lettings springs run out while we have a target: apply a singledrag with delta 0
-//				singleDrag2D (state, ui, Vector2.zero);
-//			}
-
-
-}
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// execution of ui events
-
-
-void setRaycastActive(string name, bool value, InterFace activeInterface)
-{
-Button theButton;
-activeInterface.uiButtons.TryGetValue(name, out theButton);
-
-if (theButton != null)
-   theButton.image.raycastTarget = value;
-
-}
-
-bool brightnessIsChanging(string name, InterFace activeInterface)
-{
-//bool result = false;
-Button theButton;
-activeInterface.uiButtons.TryGetValue(name, out theButton);
-
-if (theButton != null)
-{
-   return theButton.BrightnessChanging();
-
-   //if (theButton.brightness != theButton.targetBrightness)
-   //{
-   //    result = true;
-
-   //}
-   //if (activeInterface.a)
-}
-
-return false;
-}
-
-}
+    }
 
 }
 

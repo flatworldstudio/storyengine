@@ -32,7 +32,7 @@ namespace StoryEngine
 
         public TextAsset script;/*!< \brief Set this value in Unity Editor */
 
-        public string scriptName;/*!< \brief Set this value in Unity Editor, will be deprecated. */
+        //public string scriptName;/*!< \brief Set this value in Unity Editor, will be deprecated. */
         public string launchOSX, launchWIN, launchIOS, launchAndroid;/*!< \brief Set this value in Unity Editor */
 
         public static AssitantDirector Instance;
@@ -371,12 +371,12 @@ namespace StoryEngine
                         break;
                     }
 
-                    if (scriptName != "")
-                    {
-                        Warning("Please use the TextAsset field for your script.");
-                        theDirector.loadScript(scriptName);
-                        break;
-                    }
+                    //if (scriptName != "")
+                    //{
+                    //    Warning("Please use the TextAsset field for your script.");
+                    //    theDirector.loadScript(scriptName);
+                    //    break;
+                    //}
                    
                     Error("No script reference found.");
                   

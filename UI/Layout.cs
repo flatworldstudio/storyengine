@@ -31,12 +31,16 @@ namespace StoryEngine.UI
 
         }
 
-        /*! \brief Add an interface to the root plane. This is usually for single plane layouts. */       
+        /*! \brief Add an interface directly to the root plane of this layout. This is usually for single plane layouts. */  
+             
         public void AddInterface (InterFace _interface)
         {
+           
             rootPlane.AddInterface(_interface);
+        
         }
 
+        /*! \brief Add a plane to the layout, layering it 'on top' of the ones already there. */
         public void AddPlane(Plane _plane)
         {
             AllPlanes.Add(_plane);
@@ -44,8 +48,7 @@ namespace StoryEngine.UI
         }
         public Plane GetRootPlane()
         {
-           
-            return rootPlane;
+           return rootPlane;
         }
 
         public Plane FindPlaneByPoint(Vector2 _point)
@@ -55,7 +58,7 @@ namespace StoryEngine.UI
 
                 int p = AllPlanes.Count - 1;
            
-                while (plane == null)
+                while (plane == null && p>=0)
                 {
                     Plane check = AllPlanes[p];
                     if (check.WorldCoordinateInPlane(_point))

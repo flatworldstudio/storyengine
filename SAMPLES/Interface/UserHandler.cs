@@ -162,7 +162,7 @@ namespace StoryEngine.Samples.Interface
 
 
                     // Just using single plane for demo, add the interface to it 
-                    MainLayout.GetRootPlane().AddInterface(MainInterface);
+                    MainLayout.AddInterface(MainInterface);
 
                     done = true;
 

@@ -19,6 +19,7 @@ namespace StoryEngine.UI
 
         public InterFace interFace;
         GameObject sceneObject;
+        RectTransform rt;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
         void Log(string message) => StoryEngine.Log.Message(message, ID);
@@ -28,11 +29,25 @@ namespace StoryEngine.UI
 
         public Plane()
         {
+
         }
 
         public Plane(GameObject _object)
         {
             sceneObject = _object;
+
+            if ((rt = sceneObject.GetComponent<RectTransform>()) == null)
+                Warning("No recttransform on Plane gameobject");
+        }
+
+        public float Scale
+        {
+            get
+            {
+                //lossyScale is global scale, so including any scaling along the hierarchy
+                return rt == null ? 1f : 1f / rt.lossyScale.x;
+
+            }
         }
 
         void GetSizeFromScene()
@@ -41,9 +56,7 @@ namespace StoryEngine.UI
             // Each corner provides its world space value. The returned array of 4 vertices is clockwise. 
             // It starts bottom left and rotates to top left, then top right, and finally bottom right.
 
-            RectTransform rt;
-
-            if (sceneObject == null || (rt = sceneObject.GetComponent<RectTransform>()) == null)
+            if (rt == null)
             {
                 // If no refs, assume full screen (ie, the root plane)
                 x0 = 0;
@@ -69,8 +82,15 @@ namespace StoryEngine.UI
         {
             interFace = _interface;
             interFace.plane = this;
+
+            if (rt == null)
+            {
+                // there was no gameobject or somehow no recttransform on it, so we set the canvas rt as ref
+                rt = interFace.canvasObject.GetComponent<RectTransform>();
+
+            }
         }
-               
+
         public bool WorldCoordinateInPlane(Vector2 _point)
         {
 

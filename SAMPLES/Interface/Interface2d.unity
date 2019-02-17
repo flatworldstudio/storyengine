@@ -280,7 +280,7 @@ PrefabInstance:
     - target: {fileID: 114673875059481080, guid: 9c67fc6e1926a45538c23ee13784ba74,
         type: 3}
       propertyPath: PointerDisplayCols
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 114673875059481080, guid: 9c67fc6e1926a45538c23ee13784ba74,
         type: 3}
@@ -1286,7 +1286,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 650, y: 1334}
+  m_ReferenceResolution: {x: 750, y: 1334}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
