@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-#if NETWORKED
+#if !SOLO
 
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;

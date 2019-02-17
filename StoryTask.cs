@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
-#if NETWORKED
+#if !SOLO
 
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
@@ -68,7 +68,7 @@ namespace StoryEngine
         public bool modified = false;
         bool allModified = false;
 
-#if NETWORKED
+#if !SOLO
 
         TaskUpdateBundled updateSend, updateReceive;
 
@@ -206,7 +206,7 @@ namespace StoryEngine
             taskStringArrayValues = new Dictionary<string, string[]>();
 
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask = new Dictionary<string, bool>();
             updateSend = new TaskUpdateBundled();
             updateReceive = new TaskUpdateBundled();
@@ -224,7 +224,7 @@ namespace StoryEngine
 
         }
 
-#if NETWORKED
+#if !SOLO
 
 
         public TaskUpdateBundled GetUpdateBundled()
@@ -778,7 +778,7 @@ namespace StoryEngine
 
             taskIntValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -802,7 +802,7 @@ namespace StoryEngine
 
             taskStringValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -826,7 +826,7 @@ namespace StoryEngine
 
             taskFloatValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -850,7 +850,7 @@ namespace StoryEngine
 
             taskUshortValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -874,7 +874,7 @@ namespace StoryEngine
 
             taskByteValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -899,7 +899,7 @@ namespace StoryEngine
 
             taskVector3Values[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -923,7 +923,7 @@ namespace StoryEngine
 
             taskVector3ArrayValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -947,7 +947,7 @@ namespace StoryEngine
 
             taskBoolArrayValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -971,7 +971,7 @@ namespace StoryEngine
 
             taskStringArrayValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif
@@ -995,7 +995,7 @@ namespace StoryEngine
 
             taskQuaternionValues[valueName] = value;
 
-#if NETWORKED
+#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
 #endif

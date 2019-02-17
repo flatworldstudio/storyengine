@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-#if NETWORKED
+#if !SOLO
 
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
@@ -49,7 +49,7 @@ namespace StoryEngine
 
         //public bool modified;
 
-//#if NETWORKED
+//#if !SOLO
 //        public bool modified;
 //#endif
 
@@ -147,7 +147,7 @@ namespace StoryEngine
 //    return message;
 
 //}
-#if NETWORKED
+#if !SOLO
 
         public PointerUpdateBundled GetUpdate()
 
@@ -209,7 +209,7 @@ namespace StoryEngine
                 status = theStatus;
             }
 
-//#if NETWORKED
+//#if !SOLO
 
             //modified = true;
 

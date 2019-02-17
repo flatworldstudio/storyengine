@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-#if NETWORKED
+#if !SOLO
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using StoryEngine.Network;
@@ -25,7 +25,7 @@ namespace StoryEngine
 
         TaskHandler dataTaskHandler;
 
-#if NETWORKED
+#if !SOLO
         GameObject NetworkObject;
         NetworkBroadcast networkBroadcast;
         ExtendedNetworkManager networkManager;
@@ -77,7 +77,7 @@ namespace StoryEngine
             else
             {
                 AssitantDirector.Instance.newTasksEvent += newTasksHandler;
-#if NETWORKED
+#if !SOLO
 
                 NetworkObject = AssitantDirector.Instance.NetworkObject;
 
@@ -134,7 +134,7 @@ namespace StoryEngine
 
 #endif
 
-#if NETWORKED
+#if !SOLO
 
         // These are networking methods to be called from datahandler to establish connections.
         // Once connected, handling is done internally by the assistant directors.
@@ -379,7 +379,7 @@ namespace StoryEngine
         void Update()
         {
 
-#if NETWORKED
+#if !SOLO
             if (displayNetworkGUIState())
                 SetNetworkIndicators();
 #endif
@@ -412,7 +412,7 @@ namespace StoryEngine
                     bool done = false;
                     switch (task.Instruction)
                     {
-#if NETWORKED
+#if !SOLO
 
                         // ---------------------------- VISUAL DEBUGGING ----------------------------
                         case "debugon":
@@ -662,7 +662,7 @@ namespace StoryEngine
 
         //
 
-#if NETWORKED
+#if !SOLO
 
         public bool displayNetworkGUIState()
         {

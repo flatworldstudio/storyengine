@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
+
 
 namespace StoryEngine
 {
@@ -79,7 +79,7 @@ namespace StoryEngine
         public static void Message(string message, string module = "Unkown", LOGLEVEL messageLevel = LOGLEVEL.NORMAL)
         {
 
-#if LOGGING
+#if !NOLOGGING
             Init();
 
             LOGLEVEL moduleLevel ;
@@ -95,7 +95,7 @@ namespace StoryEngine
 
         public static void Warning(string message, string module = "Unkown")
         {
-#if LOGGING
+#if !NOLOGGING
             Init();
 
             LOGLEVEL messageLevel = LOGLEVEL.WARNINGS;

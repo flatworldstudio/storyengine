@@ -4,13 +4,13 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-#if NETWORKED
+#if !SOLO
 using UnityEngine.Networking;
 #endif
 
 namespace StoryEngine.Network
 {
-#if NETWORKED
+#if !SOLO
 
     /*!
 * \brief

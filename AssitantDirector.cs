@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 
 using Random = UnityEngine.Random;
 
 
-#if NETWORKED
+#if !SOLO
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 using StoryEngine.Network;
@@ -48,7 +46,7 @@ namespace StoryEngine
         Director theDirector;
         string launchStoryline;
 
-#if NETWORKED
+#if !SOLO
 
         List<StoryUpdate> StoryUpdateStack;
 
@@ -86,7 +84,7 @@ namespace StoryEngine
             theDirector = new Director();
             GENERAL.ALLTASKS = new List<StoryTask>();
 
-            #if NETWORKED
+            #if !SOLO
             StoryUpdateStack = new List<StoryUpdate>();
 #endif
 
@@ -125,7 +123,7 @@ namespace StoryEngine
 
 #endif
 
-#if NETWORKED
+#if !SOLO
 
 
             // get the networkmanager to call network event methods on the assistant director.
@@ -190,7 +188,7 @@ namespace StoryEngine
         void Update()
         {
 
-#if NETWORKED
+#if !SOLO
 
             // Handle story updates, aiming for 1 per frame, assuming we're tyring to run in sync.
             // Lowest numbers are oldest.
@@ -390,7 +388,7 @@ namespace StoryEngine
 
         }
 
-#if NETWORKED
+#if !SOLO
 
         void ApplyStoryUpdate(StoryUpdate storyUpdate)
         {
@@ -511,7 +509,7 @@ namespace StoryEngine
 #endif
 
 
-#if NETWORKED
+#if !SOLO
 
         void LateUpdate()
         {
@@ -734,7 +732,7 @@ namespace StoryEngine
 
 #endif
 
-#if NETWORKED
+#if !SOLO
 
         // Network connectivity handling.
 
