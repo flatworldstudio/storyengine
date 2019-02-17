@@ -1,9 +1,12 @@
 ﻿namespace StoryEngine.UI
 {
+    public delegate void UIEventHandler(object sender, UIArgs args);
+
     /*!
 * \brief 
-* Used to create different sets of eventhandlers for user events.
+* Used to create different sets of handlers for user interactions.
 * 
+* Add a mapping object to an interface.
 * Ie. zoom for two-finger drag in 2D, rotate for one-finger drag in 3D, etc.
 */
 
@@ -11,10 +14,26 @@
     {
 
         public event UIEventHandler ux_none, ux_tap_2d, ux_tap_3d, ux_tap_none, ux_single_2d, ux_single_3d, ux_single_none, ux_double_2d, ux_double_3d, ux_double_none;
-
+        static Mapping __empty;
 
         public Mapping()
         {
+
+        }
+        public static Mapping Empty
+        {
+            get
+            {
+                if (__empty == null)
+                    __empty = new Mapping();
+
+                return __empty;
+            }
+
+            set
+            {
+
+            }
 
         }
 

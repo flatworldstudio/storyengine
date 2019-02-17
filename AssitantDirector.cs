@@ -25,7 +25,7 @@ namespace StoryEngine
      * 
      * On Update the AssistantDirector first processes incoming lan StoryUpdate objects.
      * Secondly it goes over all StoryPointers to generate new StoryTask objects and distributes these locally.  
-     * On LateUpdate it goes over all tasks and sends StoryUpdate objects over lan. These will have executed their first frame by then.
+     * On LateUpdate it goes over all tasks and sends StoryUpdate objects over lan. These tasks will have executed their first frame by then.
      * 
      */    
 

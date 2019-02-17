@@ -1,15 +1,7 @@
 ﻿
 using UnityEngine;
-//using System.Collections;
 using System.Collections.Generic;
-using System;
-//using System.Linq;
 
-
-//#if NETWORKED
-//using UnityEngine.Networking;
-//using UnityEngine.Networking.NetworkSystem;
-//#endif
 
 namespace StoryEngine
 {
@@ -29,7 +21,6 @@ namespace StoryEngine
     }
 
     /*! \brief Describes a callback event, which is manually used to set a callback in a StoryTask 
-     * \todo Shouldn't this object be passed to a StoryTask and synchronised over lan, rather than manually setting StoryTask variables?   
         */
 
     public class UserCallBack
@@ -49,7 +40,6 @@ namespace StoryEngine
 * \brief
 * Holds variables that are used across the engine.
 * 
-* \todo It makes sense to have a settings struct, but a lot of this should move. 
 */
 
     public static class GENERAL
@@ -57,8 +47,8 @@ namespace StoryEngine
   
         public static AUTHORITY AUTHORITY = AUTHORITY.LOCAL;
 
-        public static float pointerScreenScalar = -0.5f;
-        public static float pointerRectScalar = 0.5f;
+        //public static float pointerScreenScalar = -0.5f;
+        //public static float pointerRectScalar = 0.5f;
 
         public static int SIGNOFFS;
 
@@ -214,72 +204,8 @@ namespace StoryEngine
 
         }
 
-        //public static int CONNECTIONINDEX;
 
-        //static int NEWCONNECTION;
-
-
-        //public static void SETNEWCONNECTION(int value)
-        //{
-        //    NEWCONNECTION = value;
-
-        //}
-
-        //public static int GETNEWCONNECTION()
-        //{
-
-        //    int r = NEWCONNECTION;
-        //    NEWCONNECTION = -1;
-        //    return r;
-
-        //}
 
     }
 
-    /*!
-* \brief
-* Generates globally unique ID's to identify StoryTask and StoryPointer objects.
-* 
-* \todo This currently works but could be more elegant.
-*/
-/*
-    public static class UUID
-    {
-        static int uid { get; set; }
-
-     //   public static string identity;
-
-        //public static string getGlobalID()
-        //{
-
-        //    uid++;
-
-        //    return identity + uid.ToString("x8");
-
-        //}
-        //public static void Reset()
-        //{
-        //    uid = 0;
-        //}
-
-        public static string getID()
-        {
-
-            uid++;
-
-            return uid.ToString("x8");
-
-        }
-
-        //public static void setIdentity()
-        //{
-
-        //    string stamp = System.DateTime.UtcNow.ToString("yyyyMMddhhmmss");
-
-        //    Int64 num = Int64.Parse(stamp);
-        //    identity = num.ToString("x8");
-
-        //}
-    }
-    */
 }

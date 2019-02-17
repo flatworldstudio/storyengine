@@ -4,19 +4,17 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
-
+using System.Linq;
 
 namespace StoryEngine.UI
 {
-
-    public delegate void InitialiseInterface(InterFace _interface);
-    public delegate void ResizeInterface(InterFace _interface);
 
     /*!
      * \brief 
      * Describes a collection of interactive objects and how they are interacted with.
      * 
-     * To use, add buttons, optionally add delegates for layout initialisation and resizing.
+     * An interface references a Mapping that maps user actions to methods.
+     * An interface is assigned to a Plane which in turn is part of a Layout.    
      */
 
     public class InterFace
@@ -26,7 +24,6 @@ namespace StoryEngine.UI
         public List<GameObject> selectedObjects;
         public Dictionary<string, Button> uiButtons;
         public Material editMat, defaultMat;
-
         public string tapNoneCallback = "";
 
         Mapping mapping;
@@ -34,34 +31,19 @@ namespace StoryEngine.UI
         public GameObject canvasObject, gameObject;
 
         public Plane plane;
-
         public UiCam3D uiCam3D;
-
         public Vector2 anchorPosition;
-
-        event InitialiseInterface initialise;
-        event ResizeInterface resize;
 
         public InterFace(GameObject _canvasObject, string _name = "Unnamed")
         {
             canvasObject = _canvasObject;
             name = _name;
 
-            //if (_initialise!=null)
-            //initialise+=_initialise;
+            mapping = Mapping.Empty;
 
             Initvars();
 
         }
-
-        //public Interface (InitialiseInterface _initialise){
-
-        //    initialise+=_initialise;
-        //    Initvars();
-
-        //    Initialise();
-
-        //}
 
         void Initvars()
         {
@@ -76,67 +58,24 @@ namespace StoryEngine.UI
 
         }
 
-
-
-        public void Initialise()
-        {
-            if (initialise != null)
-            {
-                initialise.Invoke(this);
-            }
-
-        }
-
-        public void Resize()
-        {
-            if (resize != null)
-            {
-                resize.Invoke(this);
-            }
-
-        }
-
-        public void AddInitialiser(InitialiseInterface _initialiser)
-        {
-
-            initialise += _initialiser;
-
-        }
-
-        public void AddResizer(ResizeInterface _resizer)
-        {
-
-            resize += _resizer;
-
-        }
-
         public void AddMapping(Mapping _mapping)
         {
-
             mapping = _mapping;
-
         }
 
         public void AddUiCam3D(UiCam3D _cam)
         {
-
             uiCam3D = _cam;
-
         }
 
         public Vector2 GetAnchorOffset()
         {
-
             return anchorPosition;
-
-
         }
 
         public void none(object sender, UIArgs args)
         {
-
             mapping.none(sender, args);
-
         }
 
 
@@ -207,13 +146,15 @@ namespace StoryEngine.UI
         public string[] getButtonNames()
         {
 
-            Dictionary<string, Button>.KeyCollection allButtons = uiButtons.Keys;
+            return  uiButtons.Select(item => ""+item.Key ).ToArray();
 
-            string[] allButtonNames = new string[allButtons.Count];
+            ////return test.ToArray<string>();
 
-            allButtons.CopyTo(allButtonNames, 0);
+            //Dictionary<string, Button>.KeyCollection allButtons = uiButtons.Keys;
+            //string[] allButtonNames = new string[allButtons.Count];
+            //allButtons.CopyTo(allButtonNames, 0);
 
-            return allButtonNames;
+            //return allButtonNames;
         }
 
 
@@ -230,13 +171,13 @@ namespace StoryEngine.UI
 
 
 
-   
 
 
-   
 
 
-   
+
+
+
 
 
 
@@ -246,24 +187,24 @@ namespace StoryEngine.UI
 
 
 
-    public delegate void UIEventHandler(object sender, UIArgs args);
+   
 
-    /*!
-* \brief
-* Holds ui info to pass onto handlers.
-* 
-*/
-    public class UIArgs : EventArgs
-    {
+//    /*!
+//* \brief
+//* Holds ui info to pass onto handlers.
+//* 
+//*/
+    //public class UIArgs : EventArgs
+    //{
 
-        public Event uiEvent;
-        public Vector3 delta;
- 
- public UIArgs() : base() // extend the constructor 
-        {
+    //    public Event uiEvent;
+    //    public Vector3 delta;
 
-        }
+    //    public UIArgs() : base() // extend the constructor 
+    //    {
 
-    }
+    //    }
+
+    //}
 
 }

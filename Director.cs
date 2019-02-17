@@ -24,9 +24,9 @@ namespace StoryEngine
 
     /*!
    * \brief
-   * Progresses storylines from a script.
+   * Progresses StoryPointer objects along Storylines generated from a Script.
    * 
-   * AssistantDirector generates StoryTask objects from the updated StoryPointer objects.
+   * AssistantDirector generates StoryTask objects from the StoryPointer objects updated by the director.
    */
     
     public class Director

@@ -7,7 +7,7 @@ namespace StoryEngine.UI
 * \brief 
 * Describes a 3D camera setup with an interest point.
 * 
-* Holds references to various objects, constraint and method of control, eg. orbit.
+* Can have a Constraint  
 */
 
     public class UiCam3D

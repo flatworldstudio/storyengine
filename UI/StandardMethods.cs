@@ -14,97 +14,97 @@ namespace StoryEngine.UI
 */
     public static class Methods
     {
-        public static GameObject DefaultPanePrefab;
-        public static float DefaultPaneMargin;
+        //public static GameObject DefaultPanePrefab;
+        //public static float DefaultPaneMargin;
 
-        public static void AddDefaultPane(InterFace _interface)
-        {
+        //public static void AddDefaultPane(InterFace _interface)
+        //{
 
-            if (_interface != null)
+        //    if (_interface != null)
 
-            {
+        //    {
 
-                if (DefaultPanePrefab != null)
-                {
-                    _interface.gameObject = GameObject.Instantiate(DefaultPanePrefab);
-                    _interface.gameObject.transform.SetParent(_interface.canvasObject.transform, false);
-                    _interface.gameObject.name=_interface.name;
-                }
-                else
-                {
-                    Log.Warning("Default pane prefab is null, can't instantiate. (Did you forget to assign it?)");
+        //        if (DefaultPanePrefab != null)
+        //        {
+        //            _interface.gameObject = GameObject.Instantiate(DefaultPanePrefab);
+        //            _interface.gameObject.transform.SetParent(_interface.canvasObject.transform, false);
+        //            _interface.gameObject.name=_interface.name;
+        //        }
+        //        else
+        //        {
+        //            Log.Warning("Default pane prefab is null, can't instantiate. (Did you forget to assign it?)");
 
-                }
+        //        }
 
-                float m = DefaultPaneMargin;
-                Plane plane = _interface.plane;
+        //        float m = DefaultPaneMargin;
+        //        Plane plane = _interface.plane;
 
-                if (plane != null)
-                {
+        //        if (plane != null)
+        //        {
 
-                    Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
-                    _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+        //            Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
+        //            _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
 
-                    Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
-                    _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
+        //            Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
+        //            _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
 
-                    //_interface.anchorPosition=anchorPosition;
+        //            //_interface.anchorPosition=anchorPosition;
 
-                    //Vector2 anchorPos = _plane.interFace.gameObject.GetComponent<RectTransform>().anchoredPosition;
+        //            //Vector2 anchorPos = _plane.interFace.gameObject.GetComponent<RectTransform>().anchoredPosition;
 
-                }
-                else
-                {
+        //        }
+        //        else
+        //        {
 
-                    Log.Warning("Plane reference for interface is null, can't set dimensions on default pane.");
+        //            Log.Warning("Plane reference for interface is null, can't set dimensions on default pane.");
 
-                }
+        //        }
 
-            }
-            else
-            {
+        //    }
+        //    else
+        //    {
 
-                Log.Warning("Interface reference is null, can't add default pane.");
+        //        Log.Warning("Interface reference is null, can't add default pane.");
 
-            }
-        }
-
-
-        public static void ResizeDefaultPane(InterFace _interface)
-        {
-
-            if (_interface != null)
-
-            {
-
-                float m = DefaultPaneMargin;
-                Plane plane = _interface.plane;
-
-                if (plane != null)
-                {
-
-                    Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
-                    _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
-                    Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
-                    _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
+        //    }
+        //}
 
 
-                }
-                else
-                {
+        //public static void ResizeDefaultPane(InterFace _interface)
+        //{
 
-                    Log.Warning("Plane reference for interface is null, can't set dimensions on default pane.");
+        //    if (_interface != null)
 
-                }
+        //    {
 
-            }
-            else
-            {
+        //        float m = DefaultPaneMargin;
+        //        Plane plane = _interface.plane;
 
-                Log.Warning("Interface reference is null, can't add default pane.");
+        //        if (plane != null)
+        //        {
 
-            }
-        }
+        //            Vector2 anchorPosition = new Vector2(plane.x0 + m, plane.y0 + m);
+        //            _interface.gameObject.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+        //            Vector2 sizeDelta = new Vector2(plane.x1 - plane.x0 - 2 * m, plane.y1 - plane.y0 - 2 * m);
+        //            _interface.gameObject.GetComponent<RectTransform>().sizeDelta = sizeDelta;
+
+
+        //        }
+        //        else
+        //        {
+
+        //            Log.Warning("Plane reference for interface is null, can't set dimensions on default pane.");
+
+        //        }
+
+        //    }
+        //    else
+        //    {
+
+        //        Log.Warning("Interface reference is null, can't add default pane.");
+
+        //    }
+        //}
         // --------------------------------------------   2D    ----------------------------------------------------------------------
 
 
@@ -112,7 +112,8 @@ namespace StoryEngine.UI
 
         public static void Drag2D(object sender, UIArgs uxArgs)
         {
-
+           
+          
             if (uxArgs.uiEvent.targetButton == null) 
                 return;
 
@@ -328,11 +329,36 @@ namespace StoryEngine.UI
 
                 Quaternion cameraOrientation = cameraObject.transform.rotation;
                 Vector3 forward = cameraOrientation * Vector3.forward;
-                uxArgs.delta = unitsPerPixel * delta * forward;
+                //uxArgs.delta = unitsPerPixel * delta * forward;
 
-                TranslateCamera(sender, uxArgs);
+                TranslateCamera(interFace.uiCam3D, unitsPerPixel * delta * forward);
 
             }
+        }
+
+        // Translate a 3D camera by a vector3.
+
+        static void TranslateCamera(UiCam3D uicam, Vector3 delta)
+        {
+
+            GameObject cameraObject = uicam.cameraObject;
+            Constraint constraint = uicam.constraint;
+            Vector3 cameraPositionOut = cameraObject.transform.position;
+            cameraPositionOut += delta;
+
+            // Constraint is applied to camera object.
+
+            if (constraint != null && constraint.hardClamp)
+            {
+                cameraPositionOut.x = Mathf.Clamp(cameraPositionOut.x, constraint.hardClampMin.x, constraint.hardClampMax.x);
+                cameraPositionOut.y = Mathf.Clamp(cameraPositionOut.y, constraint.hardClampMin.y, constraint.hardClampMax.y);
+                cameraPositionOut.z = Mathf.Clamp(cameraPositionOut.z, constraint.hardClampMin.z, constraint.hardClampMax.z);
+            }
+
+            // Translation is applied to camera object.
+
+            cameraObject.transform.position = cameraPositionOut;
+
         }
 
         // Translate a 3D camera by a vector3.
@@ -342,21 +368,13 @@ namespace StoryEngine.UI
 
             InterFace interFace = uxArgs.uiEvent.plane.interFace;
 
-            //if (uxArgs.uiEvent.plane.interFace
-
             GameObject cameraObject;
-
             cameraObject = interFace.uiCam3D.cameraObject;
 
-            //cameraInterest = uxArgs.activeInterface.uiCam3D.cameraInterest;
-
             Constraint constraint = interFace.uiCam3D.constraint;
+Vector3 delta = uxArgs.delta;
 
-            Vector3 delta = uxArgs.delta;
-
-            //Vector3 cameraPositionIn = cameraObject.transform.position;
             Vector3 cameraPositionOut = cameraObject.transform.position;
-
             cameraPositionOut += delta;
 
             // Constraint is applied to camera object.
@@ -385,6 +403,8 @@ namespace StoryEngine.UI
             GameObject cameraInterest = interFace.uiCam3D.cameraInterest;
             Constraint constraint = interFace.uiCam3D.constraint;
             Vector3 delta = -1f * uxArgs.delta;
+
+            //Debug.Log(delta.ToString());
 
             Vector3 cameraPositionIn = cameraObject.transform.position;
             Vector3 cameraPositionOut = cameraPositionIn;

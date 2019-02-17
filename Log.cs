@@ -20,6 +20,7 @@ namespace StoryEngine
    * \brief
    * Log messages supporting different log levels for different modules.
    * 
+   * Default level can be set in inspector on the AssistantDirector
    * By setting a loglevel for a module, logging can be set to verbose, normal, warnings or errors.
    * An echo method can be added to errors, ie. for logging them to a server.  
    */

@@ -17,13 +17,12 @@ namespace StoryEngine
  * Controls data and network operations.
  * 
  * Use addTaskHandler to attach your custom handler.
+ * See samples for default tasks to create a LAN application.
  */
 
     public class DataController : MonoBehaviour
     {
 
-
-        //GameObject StoryEngineObject;
         TaskHandler dataTaskHandler;
 
 #if NETWORKED

@@ -1,0 +1,20 @@
+﻿// Demo showing basic interface elements
+
+#interface2d
+debugon
+makeinterface2d
+interface
+end
+
+
+#interface3d
+debugon
+makeinterfaceplanes3d
+interface
+end
+
+#interfaceplanes
+debugon
+makeinterfaceplanes
+interface
+end

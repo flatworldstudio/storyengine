@@ -19,13 +19,17 @@ namespace StoryEngine
 
         public GameObject DeusCanvas, PointerBlock;
 
-        public int Width;
+        //public int Width;
          //GameObject StoryEngineObject;
 
         List<StoryTask> taskList;
         List<StoryPointer> pointerList;
         StoryPointer[] pointerPositions;
-     //   public bool storyBoard;
+
+        public int PointerDisplayCols;
+        public int PointerDisplayRows;
+
+        //   public bool storyBoard;
 
         int PointerdisplayBuffer = 24;
 
@@ -48,6 +52,15 @@ namespace StoryEngine
 
             taskList = new List<StoryTask>();
             pointerList = new List<StoryPointer>();
+
+            if (PointerDisplayCols==0 || PointerDisplayRows == 0)
+            {
+                Warning("Set number of rows and columns for pointer display.");
+                PointerDisplayCols = 1;
+                PointerDisplayRows = 1;
+            }
+         
+            PointerdisplayBuffer = PointerDisplayCols * PointerDisplayRows;
             pointerPositions = new StoryPointer[PointerdisplayBuffer];
 
             //		smoothMouseX = 0;
@@ -335,8 +348,7 @@ namespace StoryEngine
                 Warning("Can't make pointerblock, null reference.");
                 return;
             }
-            //return;
-            //Log("Making pointerblock");
+           
             GameObject newPointerUi;
 
             newPointerUi = Instantiate(PointerBlock);
@@ -351,56 +363,28 @@ namespace StoryEngine
             // find empty spot
 
             int p = 0;
-            while (pointerPositions[p] != null)
+            while (p < PointerdisplayBuffer && pointerPositions[p] != null  )
             {
                 p++;
-                if (p==PointerdisplayBuffer)
-                {
-                    Error("To many pointers for display, crashing now.");// ? really?
-
                 }
-            }
 
-            //		Debug.Log ("found point position: " + p);
+            if (p == PointerdisplayBuffer)
+            {
+                Warning("Too many pointers to display.");
+                p = 0;
+            }
 
             pointerPositions[p] = targetPointer;
             targetPointer.position = p;
 
-            int maxPosition = 0;
+            // Place it on the canvas
 
-            for (int i = 0; i < PointerdisplayBuffer; i++)
-            {
-                if (pointerPositions[i] != null)
-                {
-                    maxPosition = i;
-                }
-            }
-            maxPosition++;
+            int row = p / PointerDisplayCols;
+            int col = p % PointerDisplayCols;
+            float scale = 1f / PointerDisplayCols;
 
-          //  maxPosition = Mathf.Max(maxPosition, 4);
-
-            maxPosition = Mathf.Clamp(maxPosition, 4, 6);
-
-
-            float xSize = (float) Width / maxPosition;
-            float xAnchor = xSize / 2f;
-            float scalar = xSize / 320f;
-            float ySize = xSize / 320f * 160f;
-
-
-            for (int i = 0; i < PointerdisplayBuffer; i++)
-            {
-                if (pointerPositions[i] != null)
-                {
-                    //pointerPositions[i].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3((-640f + xAnchor + i * xSize) * screenCorrection, yAnchor, 0);
-                    //pointerPositions[i].pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scalar * screenCorrection, scalar * screenCorrection, 1);
-                    int row = i / 6;
-                    int col = i % 6;
-
-                    pointerPositions[i].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3((-Width/2 + xAnchor + col * xSize) , row*ySize, 0);
-                    pointerPositions[i].pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scalar , scalar, scalar);
-                }
-            }
+            targetPointer.pointerObject.GetComponent<RectTransform>().localPosition = scale * new Vector3(PointerDisplayCols /2f* -1024f+512f+col*1024f, PointerDisplayRows/2f* 512f-256f-row*512f, 0);
+            targetPointer.pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, scale);
 
         }
 
@@ -408,6 +392,7 @@ namespace StoryEngine
         {
 
             string inputString = Input.inputString;
+
             if (inputString.Length > 0)
             {
 

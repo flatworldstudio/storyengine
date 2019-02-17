@@ -17,7 +17,7 @@ namespace StoryEngine.UI
    * The Controller maintains a stack of events.
    *   
    */
-    
+
     public class Event
     {
         // holds user interaction description. note that x and y are NOT continuously updated for touch.
@@ -83,7 +83,7 @@ namespace StoryEngine.UI
             action = ACTION.VOID;
             touch = TOUCH.NONE;
             direction = DIRECTION.FREE;
-            callback="";
+            callback = "";
 
             isInert = false;
             isSpringing = false;
@@ -119,6 +119,25 @@ namespace StoryEngine.UI
 
         //void applyUserInteraction(Event ui)
 
+
+        public void CorrectForCanvasScale()
+        {
+            if (plane == null || plane.interFace == null || plane.interFace.canvasObject == null)
+                return;
+
+            float scale =1f/ plane.interFace.canvasObject.GetComponent<RectTransform>().localScale.x;
+
+            // We don't scale the absolute position, just the delta values.
+
+            dx *= scale;
+            dy *= scale;
+            dd *= scale;
+
+
+
+        }
+
+
         public void GetUserActivity()
         {
 
@@ -133,6 +152,9 @@ namespace StoryEngine.UI
             //#if UNITY_IOS
             //                        Event storeUi = ui.clone();
             //#endif
+
+            //float scale = plane.interFace.canvasObject.GetComponent<RectTransform>().localScale.x;
+            //Log("scale " + scale);
 
             float lastdd = dd;
 
@@ -182,6 +204,8 @@ namespace StoryEngine.UI
                     {
                         // equivalent to doubletouch dragging only
                         action = ACTION.DOUBLEDRAG;
+                        //Debug.Log("spc "+dx + " " + dy);
+
                     }
                     if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
                     {
@@ -190,6 +214,7 @@ namespace StoryEngine.UI
                         dd = dx;
                         dx = 0;
                         dy = 0;
+                        //Debug.Log("alt "+dx + " " + dy);
                     }
                 }
                 else
@@ -374,6 +399,8 @@ namespace StoryEngine.UI
                 return;
 
 
+
+
             // finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
 
             RaycastHit hit;
@@ -444,14 +471,14 @@ namespace StoryEngine.UI
 
                 target2D = results[0].gameObject;
 
-                Verbose("Targeting object2d " + target2D.name);
+                //Verbose("Targeting object2d " + target2D.name);
                 // find out if this 2d object is a button.
 
-                Button checkButton = null;
-                if (plane.interFace.uiButtons.TryGetValue(target2D.transform.name, out checkButton))
-                {
-                    Verbose("targeting button " + checkButton.name);
-                }
+
+                if (plane.interFace.uiButtons.TryGetValue(target2D.transform.name, out Button checkButton))
+                    Verbose("targeting button: " + checkButton.name + " in interface: " + plane.interFace.name);
+                else
+                    Verbose("Targeting object2d: " + target2D.name + " in interface: " + plane.interFace.name);
 
                 targetButton = checkButton;
 

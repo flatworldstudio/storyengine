@@ -4,16 +4,16 @@ using UnityEngine.UI;
 
 namespace StoryEngine.UI
 {
+    public delegate void OnTap();
+
     /*!
   * \brief
-  * Holds an interactable object, including contraints, dragtarget, callback on click.
+  * Holds an interactable object.
   * 
-  * Draggable by default, use constraints to limit dragging in different ways.
-  * Dragtarget can be different, ie a higher level so user drags a group of objects.
-  * Callback is the storyline to be launched on click.
+  * See sample scenes for examples of use. 
   * Basic brightness and animation for user feedback - can be expanded to be more versatile.
   */
-    public delegate void OnTap();
+
 
     public class Button
     {
@@ -42,15 +42,15 @@ namespace StoryEngine.UI
         void Error(string message) => StoryEngine.Log.Error(message, ID);
         void Verbose(string message) => StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
 
-        public Button()
-        {
-            lastPosition = Vector2.zero;
-        }
+        //public Button()
+        //{
+        //    lastPosition = Vector2.zero;
+        //}
 
         public Button(string _name)
         {
             Initialise(_name);
-            constraint = new Constraint();
+            constraint =  Constraint.none;
             dragTarget = gameObject;
             lastPosition = Vector2.zero;
             orthoDragging = false;
@@ -60,7 +60,7 @@ namespace StoryEngine.UI
         {
             Initialise(_name);
             dragTarget = _dragTarget;
-            constraint = new Constraint();
+            constraint =  Constraint.none;
             lastPosition = Vector2.zero;
             orthoDragging = false;
         }
@@ -80,7 +80,7 @@ namespace StoryEngine.UI
 
             // Button with differentiated constraints for horizontal and vertical dragging. Dragging will snap to initial direction.
 
-            constraint = new Constraint();
+            constraint = Constraint.none;
             dragTarget = gameObject;
 
             dragTargetHorizontal = _dragTargetHorizontal;
@@ -99,8 +99,8 @@ namespace StoryEngine.UI
             callback = "";
             name = _name;
             color = new Color(1, 1, 1, 1);
-            brightness = 0.75f;
-            targetBrightness = 0.75f;
+            brightness = 1f;
+            targetBrightness = 1f;
             stepBrightness = 1f / 0.25f;
 
             gameObject = GameObject.Find(_name);
@@ -137,8 +137,30 @@ namespace StoryEngine.UI
 
         }
 
+        public void AddConstraint (Constraint _constraint)
+        {
+            constraint = _constraint;
+        }
+
+        public void AddOrthoConstraints(GameObject _dragTargetHorizontal, Constraint _constraintHorizontal, GameObject _dragTargetVertical, Constraint _constraintVertical)
+        {
+            constraint = Constraint.none;
+
+            dragTargetHorizontal = _dragTargetHorizontal;
+            constraintHorizontal = _constraintHorizontal;
+
+            dragTargetVertical = _dragTargetVertical;
+            constraintVertical = _constraintVertical;
+
+            orthoDragging = true;
+       
+        }
+
+
+
         public void AddDefaultBlink()
         {
+            SetBrightness(0.75f);
             onTap = DefaultBlink;
         }
 

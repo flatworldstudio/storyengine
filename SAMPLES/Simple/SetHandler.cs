@@ -3,12 +3,7 @@ using UnityEngine;
 
 namespace StoryEngine.Samples.Simple
 {
-    /*!
-* \brief
-* Sample handler.
-* 
-* Handlers registrer with a controller to receive tasks.
-*/
+
     public class SetHandler : MonoBehaviour
     {
 

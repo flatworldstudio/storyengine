@@ -18,9 +18,8 @@ namespace StoryEngine
     {
         string ID = "Script";
 
-
-        List<String> manuscript;
-        public Boolean isReady;
+        List<string> manuscript;
+      //  public bool isReady;
 
         // Copy these into every class for easy debugging.
         void Log(string _m) => StoryEngine.Log.Message(_m, ID);
