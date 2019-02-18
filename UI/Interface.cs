@@ -164,6 +164,7 @@ namespace StoryEngine.UI
 
             uiButtons.Remove(button.name);
             uiButtons.Add(button.name, button);
+            button.InterFace = this;// cross ref.
 
         }
 

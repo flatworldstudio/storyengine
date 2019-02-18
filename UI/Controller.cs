@@ -168,7 +168,7 @@ namespace StoryEngine.UI
 
 
             int i = 0;
-
+            //Log("events "+uiEventStack.Count);
             while (i < uiEventStack.Count)
             {
 
@@ -184,7 +184,10 @@ namespace StoryEngine.UI
                 {
 
                     uiEventStack.RemoveAt(i);
-                    //      Debug.Log("removing event, total left" + uiEventStack.Count);
+                  Verbose("Removing event, total left " + uiEventStack.Count);
+
+
+
 
                     i--;
 
@@ -193,6 +196,15 @@ namespace StoryEngine.UI
                 i++;
 
             }
+            //foreach (Event e in uiEventStack)
+            //{
+            //    if (e.target2D != null)
+            //        Verbose("event button " + e.target2D.name);
+            //    else
+            //        Verbose("event without target ");
+
+            //}
+
 
             if (activeUiEvent.callback != "")
             {
@@ -211,44 +223,47 @@ namespace StoryEngine.UI
                 // the active event just ended. set inert and springing to true.
 
                 activeUiEvent.touch = TOUCH.NONE;
-
                 activeUiEvent.isInert = true;
-
 
                 if (activeUiEvent.targetButton != null)
                 {
-
                     activeUiEvent.isSpringing = true;
 
                     // If we were dragging an ortho button, we want an event on the other direction to spring.
 
-                    if (activeUiEvent.targetButton.orthoDragging)
-                    {
-                        if (activeUiEvent.direction != DIRECTION.FREE)
-                        {
-                            //    Debug.Log("adding springing event for " + (activeUiEvent.direction == DIRECTION.HORIZONTAL ? "vertical" :"horizontal"));
+                    //if (activeUiEvent.targetButton.orthoDragging)
+                    //{
+                    //    if (activeUiEvent.direction != DIRECTION.FREE)
+                    //    {
+                    //        //    Debug.Log("adding springing event for " + (activeUiEvent.direction == DIRECTION.HORIZONTAL ? "vertical" :"horizontal"));
 
-                            Event springEvent = activeUiEvent.clone();
-                            springEvent.direction = activeUiEvent.direction == DIRECTION.HORIZONTAL ? DIRECTION.VERTICAL : DIRECTION.HORIZONTAL;
-                            springEvent.isSpringing = true;
-                            springEvent.action = ACTION.SINGLEDRAG;
-                            uiEventStack.Add(springEvent);
+                    //        Event springEvent = activeUiEvent.clone();
 
-                        }
-                        else
-                        {
+                    //        springEvent.direction = activeUiEvent.direction == DIRECTION.HORIZONTAL ? DIRECTION.VERTICAL : DIRECTION.HORIZONTAL;
+                    //        springEvent.isSpringing = true;
+                    //        springEvent.action = ACTION.SINGLEDRAG;
+                    //        Verbose("cloning event for springing");
+                    //         uiEventStack.Add(springEvent);
 
-                            //     Debug.Log("touch ended, ortho button, direction free");
-                            // Direction was never set. We'll create springing events for both direcionts.
+                    //    }
+                    //    else
+                    //    {
 
-                            activeUiEvent.direction = DIRECTION.HORIZONTAL;
-                            Event springEvent = activeUiEvent.clone();
+                    //        //     Debug.Log("touch ended, ortho button, direction free");
 
-                            springEvent.direction = DIRECTION.VERTICAL;
-                            uiEventStack.Add(springEvent);
+                    //        // Direction was never set. We'll create springing events for both direcionts.
+                    //        // ??? direction not set means it didn't go anywhere??
+                    //        //activeUiEvent.direction = DIRECTION.HORIZONTAL;
 
-                        }
-                    }
+                    //        //Event springEvent = activeUiEvent.clone();
+
+                    //        //springEvent.direction = DIRECTION.VERTICAL;
+
+                    //        //Verbose("cloning event for ortho springing");
+                    //        //uiEventStack.Add(springEvent);
+
+                    //    }
+                    //}
                 }
 
                 if (activeUiEvent.action == ACTION.TAP)
@@ -268,6 +283,7 @@ namespace StoryEngine.UI
                 uiEventStack.Add(newEvent);
                 activeUiEvent = newEvent;
 
+                Verbose("added new event");
             }
 
             int stackSizeNew = uiEventStack.Count;
@@ -323,8 +339,9 @@ namespace StoryEngine.UI
 
 
         /*!\brief Move a Button to a given spring position.*/
+        public void setSpringTarget(Button _button, int index, DIRECTION dir = DIRECTION.FREE)
 
-        public void setSpringTarget(Button button, int index, DIRECTION dir = DIRECTION.FREE)
+        //public void setSpringTarget(Button button, int index, DIRECTION dir = DIRECTION.FREE)
         {
 
             // Moves an interface segment (dragtarget, so a parent object) to a given spring. 
@@ -338,32 +355,32 @@ namespace StoryEngine.UI
 
                 Event uie = uiEventStack[i];
 
-                if (uie.targetButton != null && uie.targetButton.GetDragTarget(uie.direction) == button.GetDragTarget(dir))
+                if (uie.targetButton != null && uie.targetButton.GetDragTarget(uie.direction) == _button.GetDragTarget(dir))
                 {
 
                     // the event explicitly targets the (explicit) target of the passed in button
                     //remove the event
                     uiEventStack.RemoveAt(i);
-
+                    Log("removing event");
                 }
 
                 i--;
 
             }
 
-
-            Verbose("Adding a springing event for spring target call.");
+            Log("Adding a springing event for spring, button "+_button.name);
 
             Event springEvent = new Event();
 
-            springEvent.targetButton = button;
+            springEvent.targetButton = _button;
+            springEvent.target2D = _button.gameObject;
+            springEvent.plane = _button.InterFace.plane;
             springEvent.action = ACTION.SINGLEDRAG;
-            springEvent.target2D = button.gameObject;
             springEvent.isSpringing = true;
             springEvent.springIndex = index;
+            springEvent.direction = dir;
 
             uiEventStack.Add(springEvent);
-
 
         }
 
@@ -419,7 +436,7 @@ namespace StoryEngine.UI
                         }
 
                     }
-
+                    //Verbose("singledrag");
                     args.delta = new Vector3(ui.scaledDx, ui.scaledDy, 0);
 
                     if (ui.target2D != null)

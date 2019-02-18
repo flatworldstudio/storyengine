@@ -29,6 +29,8 @@ namespace StoryEngine.UI
 
         public bool orthoDragging;
 
+        public InterFace InterFace;
+
         public Image image;
          Color color;
          float brightness, targetBrightness, stepBrightness;

@@ -86,6 +86,7 @@ namespace StoryEngine.UI
 
             if (ui.isSpringing)
             {
+               
                 bool springing = apply2Dsprings(target, constraint, ui.springIndex);
 
                 if (ui.isSpringing && springing == false)
