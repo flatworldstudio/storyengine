@@ -74,6 +74,13 @@ namespace StoryEngine
             Instance = this;
             state = STATE.AWAKE;
         }
+        public bool Connected
+        {
+            get
+            {
+                return WasConnected;
+            }
+        }
 
         void Start()
         {
@@ -758,10 +765,18 @@ namespace StoryEngine
             // Client side shutdown.
 
             if (listening)
+            {
+                Verbose("Stopping broadcast");
                 stopBroadcast();
+            }
+           
 
             if (networkManager != null && networkManager.client != null)
+            {
+                Verbose("Stopping networkclient.");
                 StopNetworkClient();
+            }
+          
 
             // Server side shutdown.
 

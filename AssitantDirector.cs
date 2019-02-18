@@ -547,14 +547,14 @@ namespace StoryEngine
 
 
             }
-            if (GENERAL.AUTHORITY == AUTHORITY.LOCAL && NetworkClient.active)
+            if (GENERAL.AUTHORITY == AUTHORITY.LOCAL && networkManager != null && networkManager.client != null)
             {
 
                 // We're an active client.
 
                 byte error=(byte)NetworkError.Ok;
 
-                if (networkManager.client != null && networkManager.client.connection != null)
+                if (networkManager.client.connection != null)
                 {
                     QueueSize = NetworkTransport.GetOutgoingMessageQueueSize(networkManager.client.connection.hostId, out error);
                 }
