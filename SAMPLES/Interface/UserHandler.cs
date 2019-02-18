@@ -2,6 +2,8 @@
 using UnityEngine;
 using StoryEngine.UI;
 using Plane = StoryEngine.UI.Plane;
+using UnityEngine.SceneManagement;
+
 
 namespace StoryEngine.Samples.Interface
 {
@@ -160,6 +162,11 @@ namespace StoryEngine.Samples.Interface
                     button.AddConstraint(circleConstraint);
                     MainInterface.addButton(button);
 
+                    // Create a free moving button and add it to the interface
+                   button = new Button("Exit");
+                    button.AddConstraint(Constraint.LockInPlace(button));
+                    button.AddCallback("startmenu");
+                    MainInterface.addButton(button);
 
                     // Just using single plane for demo, add the interface to it 
                     MainLayout.AddInterface(MainInterface);
@@ -203,6 +210,12 @@ namespace StoryEngine.Samples.Interface
                     UpperInterface.addButton(button);
                     button = new Button("Button02");
                     LowerInterface.addButton(button);
+
+                    // Create an exit button and add it to the interface
+                    button = new Button("Exit");
+                    button.AddConstraint(Constraint.LockInPlace(button));
+                    button.AddCallback("startmenu");
+                    UpperInterface.addButton(button);
 
                     // Add to layout.
 
@@ -250,7 +263,13 @@ namespace StoryEngine.Samples.Interface
                   
                     UiCam3D lowercam = new UiCam3D(GameObject.Find("CameraLower"));
                     lowercam.AddContraint(orbitConstraint);
-                   
+
+                    // Create an exit button and add it to the interface
+                    button = new Button("Exit");
+                    button.AddConstraint(Constraint.LockInPlace(button));
+                    button.AddCallback("startmenu");
+                    UpperInterface.addButton(button);
+
                     // Add together.
 
                     UpperInterface.AddUiCam3D(uppercam);
@@ -279,11 +298,17 @@ namespace StoryEngine.Samples.Interface
 
                     if (result.trigger)
                     {
-                        Log("User tapped: " + result.label);
+                        Log("User tapped " + result.sender + ", starting storyline " + result.label);
+                        Director.Instance.NewStoryLine(result.label);
                     }
 
                     break;
 
+                case "startallsamples":
+
+                    SceneManager.LoadScene("AllSamples", LoadSceneMode.Single);
+                    done = true;
+                    break;
 
                 default:
                     done = true;

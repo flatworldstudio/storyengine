@@ -503,12 +503,12 @@ PrefabInstance:
     - target: {fileID: 114673875059481080, guid: 9c67fc6e1926a45538c23ee13784ba74,
         type: 3}
       propertyPath: PointerDisplayCols
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 114673875059481080, guid: 9c67fc6e1926a45538c23ee13784ba74,
         type: 3}
       propertyPath: PointerDisplayRows
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9c67fc6e1926a45538c23ee13784ba74, type: 3}

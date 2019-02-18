@@ -4,11 +4,19 @@
 debugon
 start server
 start pingpong
+makeinterface
+interface
 end
 
 #clientsample
 debugon
 start client
+makeinterface
+interface
+end
+
+#startmenu
+startallsamples
 end
 
 // The storylines and tasks below are all handled by the datacontroller.

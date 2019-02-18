@@ -1,10 +1,6 @@
 ﻿
 using UnityEngine;
 using UnityEngine.SceneManagement;
-//using UnityEngine.edito
-//#if UNITY_EDITOR
-//using UnityEditor.SceneManagement;
-//#endif
 
 namespace StoryEngine.Samples.All
 {
@@ -86,15 +82,9 @@ namespace StoryEngine.Samples.All
         void LoadScene(string _name)
         {
 
-//#if !uni
+
             SceneManager.LoadScene(_name, LoadSceneMode.Single);
-                   
-
-//#if UNITY_EDITOR
-
-//            //EditorSceneManager.LoadScene(_name, LoadSceneMode.Single);
-
-//#endif
+             
         }
 
         void Update()

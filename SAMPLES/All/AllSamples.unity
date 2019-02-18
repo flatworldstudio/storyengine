@@ -397,7 +397,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 04860f7fee37e4e2f8f2c059c82f1edc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9948ec1aabee84388b89d0db5e45b4c1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -734,7 +734,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 04860f7fee37e4e2f8f2c059c82f1edc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9948ec1aabee84388b89d0db5e45b4c1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -888,7 +888,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 04860f7fee37e4e2f8f2c059c82f1edc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9948ec1aabee84388b89d0db5e45b4c1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -963,7 +963,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 04860f7fee37e4e2f8f2c059c82f1edc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9948ec1aabee84388b89d0db5e45b4c1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1342,7 +1342,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 04860f7fee37e4e2f8f2c059c82f1edc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9948ec1aabee84388b89d0db5e45b4c1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1449,6 +1449,16 @@ PrefabInstance:
       propertyPath: DeusCanvas
       value: 
       objectReference: {fileID: 2071398987}
+    - target: {fileID: 114673875059481080, guid: 9c67fc6e1926a45538c23ee13784ba74,
+        type: 3}
+      propertyPath: PointerDisplayCols
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114673875059481080, guid: 9c67fc6e1926a45538c23ee13784ba74,
+        type: 3}
+      propertyPath: PointerDisplayRows
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9c67fc6e1926a45538c23ee13784ba74, type: 3}
 --- !u!114 &1981000514 stripped

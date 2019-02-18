@@ -40,23 +40,24 @@ namespace StoryEngine
         public int ConnectionKey = 1111;
         bool WasConnected = false;
 
-        // float startListening = 0f;
-
         bool listening = false;
         bool sending = false;
 
         bool serving = false;
-        //bool connectedToServer = false;
 
-        //   public string RemoteServerAddress,RemoteBroadcastServerAddress;
 #endif
 
-        //AssitantDirector ad;
-
         public static DataController Instance;
-
         bool handlerWarning = false;
-        bool isPaused = false; // for debugging
+
+        enum STATE
+        {
+            AWAKE,
+            PAUSED,
+            RESUMED
+        }
+
+        STATE state = STATE.AWAKE;
 
         public List<StoryTask> taskList;
 
@@ -71,174 +72,111 @@ namespace StoryEngine
         void Awake()
         {
             Instance = this;
-            //UUID.Reset();
+            state = STATE.AWAKE;
         }
-
-#if !SOLOS
-        void MakeNetworkObject()
-        {
-            if (NetworkObject != null)
-                return;
-
-            if (NetworkObjectRef == null)
-            {
-                Log("No networkobject reference.");
-                return;
-            }
-
-
-            Log("Creating network object.");
-            NetworkObject = Instantiate(NetworkObjectRef);
-            networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
-            networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
-
-            AssitantDirector.Instance.SetNetworkObject(NetworkObject);
-
-
-            //if (NetworkObject == null)
-            //    NetworkObject = Instantiate(AssitantDirector.Instance.NetworkObject);
-
-            //if (NetworkObject == null)
-            //{
-            //    Warning("NetworkObject not found.");
-            //}
-            //else
-            //{
-            //    networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
-            //    networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
-            //}
-        }
-#endif
 
         void Start()
         {
             Verbose("Starting.");
 
             taskList = new List<StoryTask>();
+            AssitantDirector.Instance.newTasksEvent += newTasksHandler;
 
-            if (AssitantDirector.Instance == null)
-            {
-                Error("No Assistant Director instance.");
-            }
-            else
-            {
-                AssitantDirector.Instance.newTasksEvent += newTasksHandler;
 #if !SOLO
+            NetworkObjectInit();
 
-                MakeNetworkObject();
+            if (DeusController.Instance.DeusCanvas != null && NetworkStatusObjectRef != null)
+            {
+                // Instantiate network status object for debugging
+                GameObject ns = Instantiate(NetworkStatusObjectRef);
+                ns.transform.SetParent(DeusController.Instance.DeusCanvas.transform, false);
+                BufferStatusIn = ns.transform.Find("BufferIn").gameObject;
+                BufferStatusOut = ns.transform.Find("BufferOut").gameObject;
 
-                ////NetworkObject = AssitantDirector.Instance.NetworkObject;
-                //if (NetworkObject == null)
-                //    NetworkObject = Instantiate(AssitantDirector.Instance.NetworkObject);
-
-                //if (NetworkObject == null)
-                //{
-                //    Warning("NetworkObject not found.");
-                //}
-                //else
-                //{
-                //    networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
-                //    networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
-                //}
-
-                if (DeusController.Instance != null && DeusController.Instance.DeusCanvas != null && NetworkObject != null)
-                {
-                    // Create a network status prefab for visual debugging
-                    GameObject ns = Instantiate(NetworkStatusObjectRef);
-                    ns.transform.SetParent(DeusController.Instance.DeusCanvas.transform, false);
-                    BufferStatusIn = ns.transform.Find("BufferIn").gameObject;
-                    BufferStatusOut = ns.transform.Find("BufferOut").gameObject;
-
-
-                }
+            }
 
 #endif
-            }
+
         }
 
 #if !SOLO
-        void OnApplicationQuit()
+        private void OnApplicationQuit()
         {
-            Log("Application stopping, shutting down network services.");
+            Log("Application stopping, shutting down network object.");
 
-            if (listening || sending)
-                stopBroadcast();
-
-            if (serving)
-                stopNetworkServer();
-
-            if (networkManager != null && networkManager.client != null)
-                StopNetworkClient();
+            NetworkObjectShutdown();
 
         }
+
+        private void OnDestroy()
+        {
+            Log("Scene stopping, shutting down network object.");
+            NetworkObjectShutdown();
+        }
+
 #endif
 
 #if UNITY_IOS && !SOLO
 
         void OnApplicationPause(bool paused)
         {
-            isPaused = paused;
 
-            if (paused)
+            if (state == STATE.AWAKE && paused == false)
+                return;// catching false call on startup
+
+            state = paused ? STATE.PAUSED : STATE.RESUMED;
+
+            switch (state)
             {
-                Log("Application pausing, shutting down network services.");
+                case STATE.PAUSED:
 
-                if (listening)
-                    stopBroadcast();
+                    Log("Application pausing.");
 
-                if (networkManager != null && networkManager.client != null)
-                    StopNetworkClient();
-
-
-
-                if (serving || sending)
-                {
-                    if (serving)
-                        stopNetworkServer(); // close ports
-
-                    if (sending)
-                        stopBroadcast();// close ports
+                    NetworkObjectShutdown();
 
                     // This is a workaround. On IOS, when putting the app to sleep with the side button, 
                     // networking fails on resume. Home button is ok, side button isn't.
-                    NetworkTransport.Shutdown();
 
-                    networkBroadcast = null;
-                    networkManager = null;
-                    Destroy(NetworkObject);
-                    sending = false;
-                    serving = false;
-                }
+                    //Log("Shutting down networktransport.");
+                    //NetworkTransport.Shutdown();
 
+                    //if (listening)
+                    //    stopBroadcast();
 
+                    //if (networkManager != null && networkManager.client != null)
+                    //    StopNetworkClient();
 
+                    //if (serving || sending)
+                    //{
+                    //    if (serving)
+                    //        stopNetworkServer(); // close ports
+
+                    //    if (sending)
+                    //        stopBroadcast();// close ports
+
+                    //    // This is a workaround. On IOS, when putting the app to sleep with the side button, 
+                    //    // networking fails on resume. Home button is ok, side button isn't.
+                    //    NetworkTransport.Shutdown();
+
+                    //    networkBroadcast = null;
+                    //    networkManager = null;
+                    //    Destroy(NetworkObject);
+                    //    sending = false;
+                    //    serving = false;
+                    //}
+
+                    break;
+
+                case STATE.RESUMED:
+
+                    Log("Application resuming.");
+
+                    NetworkObjectInit();
+                    //NetworkTransport.Init();
+                    break;
 
             }
-            else
-            {
-                //  networkManager.Reset();
-                Log("Application resuming.");
 
-                MakeNetworkObject();
-                NetworkTransport.Init();
-                //if (NetworkObject == null)
-                //{
-                //    Log("Creating network object.");
-                //    NetworkObject = Instantiate(AssitantDirector.Instance.NetworkObject);
-                //    networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
-                //    networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
-
-                //}
-
-
-                //NetworkObject.AddComponent<ExtendedNetworkManager>();
-
-                //  networkManager = NetworkObject.AddComponent<ExtendedNetworkManager>();
-
-
-
-
-            }
         }
 
 #endif
@@ -443,7 +381,7 @@ namespace StoryEngine
                 OnApplicationPause(false);
             }
 
-            if (isPaused)
+            if (state == STATE.PAUSED)
                 return;
 
 #endif
@@ -530,7 +468,7 @@ namespace StoryEngine
                             done = true;
                             break;
 
-                 
+
 
                         // ---------------------------- SERVER SIDE ----------------------------
 
@@ -568,7 +506,7 @@ namespace StoryEngine
 
                         case "monitorconnections":
 
-                            if (NetworkObject == null || isPaused)
+                            if (NetworkObject == null || state == STATE.PAUSED)
                                 break;
 
                             // Keep servers up on IOS (because of application pause)
@@ -633,6 +571,8 @@ namespace StoryEngine
 
                         case "serversearch":
 
+                            if (NetworkObject == null || state == STATE.PAUSED)
+                                break;
 
                             if (listening)
                             {
@@ -641,6 +581,7 @@ namespace StoryEngine
                                     Log("Found broadcast server " + networkBroadcast.serverAddress);
 
                                     stopBroadcast();
+
                                     task.setCallBack("serverfound");
                                     listening = false;
 
@@ -649,12 +590,11 @@ namespace StoryEngine
                             }
                             else
                             {
-                                if (!isPaused)
-                                {
-                                    startBroadcastClient(ConnectionKey);
-                                    Log("Starting broadcast listening for key " + ConnectionKey);
-                                    listening = true;
-                                }
+
+                                startBroadcastClient(ConnectionKey);
+                                Log("Restarting broadcast listening for key " + ConnectionKey);
+                                listening = true;
+
 
                             }
 
@@ -768,12 +708,6 @@ namespace StoryEngine
 
         }
 
-        //    public void taskDone (StoryTask theTask){
-        //        theTask.signOff (me);
-        //        taskList.Remove (theTask);
-        //
-        //    }
-
         void newTasksHandler(object sender, TaskArgs e)
         {
             addTasks(e.theTasks);
@@ -784,16 +718,77 @@ namespace StoryEngine
             taskList.AddRange(theTasks);
         }
 
-        //
-
+      
 #if !SOLO
+
+        void NetworkObjectInit()
+        {
+
+            if (NetworkObject != null)
+                return;
+
+            if (NetworkObjectRef == null)
+            {
+                Log("No networkobject reference.");
+                return;
+            }
+
+            Log("Creating network object.");
+            NetworkObject = Instantiate(NetworkObjectRef);
+            networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
+            networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
+            AssitantDirector.Instance.SetNetworkObject(NetworkObject);
+
+            if (state == STATE.RESUMED)
+            {
+                // on state awake this is already active.
+                NetworkTransport.Init();
+            }
+
+        }
+
+        void NetworkObjectShutdown()
+        {
+            // When pausing a server on ios using the sleep/side button, somehow network resources aren't properly disposed.
+            // This why we destroy the object and stop start networkstransport.
+
+            if (NetworkObject == null)
+                return;
+
+            // Client side shutdown.
+
+            if (listening)
+                stopBroadcast();
+
+            if (networkManager != null && networkManager.client != null)
+                StopNetworkClient();
+
+            // Server side shutdown.
+
+            if (serving || sending)
+            {
+                if (serving)
+                    stopNetworkServer(); // close ports
+
+                if (sending)
+                    stopBroadcast();// close ports
+
+                networkBroadcast = null;
+                networkManager = null;
+                Destroy(NetworkObject);
+
+                Log("Shutting down networktransport.");
+                NetworkTransport.Shutdown();
+
+            }
+
+        }
 
         public bool displayNetworkGUIState()
         {
             return networkBroadcast != null && networkBroadcast.showGUI;
 
         }
-
 
         public void displayNetworkGUI(bool status)
         {
@@ -842,8 +837,5 @@ namespace StoryEngine
 
 #endif
     }
-
-
-
 
 }

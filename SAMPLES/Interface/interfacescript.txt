@@ -18,3 +18,7 @@ debugon
 makeinterfaceplanes
 interface
 end
+
+#startmenu
+startallsamples
+end
