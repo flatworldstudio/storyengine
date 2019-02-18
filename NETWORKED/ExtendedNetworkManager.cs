@@ -60,15 +60,15 @@ namespace StoryEngine.Network
         }
 
 
-        void OnApplicationQuit()
-        {
-            if (client != null)
-                StopNetworkClient();
+        //void OnApplicationQuit()
+        //{
+        //    if (client != null)
+        //        StopNetworkClient();
 
-            if (NetworkServer.active)
-                StopNetworkServer();
+        //    if (NetworkServer.active)
+        //        StopNetworkServer();
 
-        }
+        //}
 
         // Client methods.
 
@@ -88,7 +88,7 @@ namespace StoryEngine.Network
 
         public override void OnStartClient(NetworkClient theClient)
         {
-            Log("Started as Client.");
+            Verbose("Started as Client.");
 
             if (onStartClientDelegate != null)
                 onStartClientDelegate(theClient);
@@ -105,7 +105,7 @@ namespace StoryEngine.Network
         public override void OnStopClient()
         {
 
-            Log("Stopped as Client.");
+            Verbose("Stopped as Client.");
 
             if (onStopClientDelegate != null)
                 onStopClientDelegate();
@@ -115,7 +115,7 @@ namespace StoryEngine.Network
         public override void OnClientConnect(NetworkConnection conn)
         {
 
-            Log("Connected to remote Server as Client.");
+            Verbose("Connected to remote Server as Client.");
 
             if (onClientConnectDelegate != null)
                 onClientConnectDelegate(conn);
@@ -125,7 +125,7 @@ namespace StoryEngine.Network
         public override void OnClientDisconnect(NetworkConnection connection)
         {
 
-            Log("Disconnected from remote Server as Client");
+            Verbose("Disconnected from remote Server as Client");
 
             if (onClientDisconnectDelegate != null)
                 onClientDisconnectDelegate(connection);
@@ -153,15 +153,14 @@ namespace StoryEngine.Network
 
         public void StopNetworkServer()
         {
-            Log("Stopping as Server.");
+            Verbose("Stopping as Server.");
             StopServer();
             __connectedAddresses.Clear();
         }
 
         public override void OnStartServer()
         {
-            Log("Started as Server.");
-            
+            Verbose("Started as Server.");
 
             if (onStartServerDelegate != null)
                 onStartServerDelegate();
@@ -171,7 +170,7 @@ namespace StoryEngine.Network
 
         public override void OnStopServer()
         {
-            Log("Stopped as Server");
+            Verbose("Stopped as Server");
 
             if (onStopServerDelegate != null)
                 onStopServerDelegate();
@@ -180,7 +179,7 @@ namespace StoryEngine.Network
 
         public override void OnServerConnect(NetworkConnection connection)
         {
-            Log("Remote client connected.");
+            Verbose("Remote client connected.");
       //      Debug.Log("client connecct");
 
             GetConnectedAddresses();
@@ -192,7 +191,7 @@ namespace StoryEngine.Network
 
         public override void OnServerDisconnect(NetworkConnection connection)
         {
-            Log("Remote client disconnected.");
+            Verbose("Remote client disconnected.");
 
             GetConnectedAddresses();
 

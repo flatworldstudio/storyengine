@@ -29,16 +29,24 @@ namespace StoryEngine
         GameObject NetworkObject;
         NetworkBroadcast networkBroadcast;
         ExtendedNetworkManager networkManager;
-        List<string> TrackedAddresses,NewAddresses;
-        public GameObject NetworkStatusObject;
+        List<string> TrackedAddresses, NewAddresses;
+
+        public GameObject NetworkObjectRef;
+        public GameObject NetworkStatusObjectRef;
         GameObject BufferStatusIn, BufferStatusOut;
 
 
         public string ConnectionMessage = "default";
         public int ConnectionKey = 1111;
         bool WasConnected = false;
-        float startListening = 0f;
+
+        // float startListening = 0f;
+
         bool listening = false;
+        bool sending = false;
+
+        bool serving = false;
+        //bool connectedToServer = false;
 
         //   public string RemoteServerAddress,RemoteBroadcastServerAddress;
 #endif
@@ -48,6 +56,7 @@ namespace StoryEngine
         public static DataController Instance;
 
         bool handlerWarning = false;
+        bool isPaused = false; // for debugging
 
         public List<StoryTask> taskList;
 
@@ -64,6 +73,43 @@ namespace StoryEngine
             Instance = this;
             //UUID.Reset();
         }
+
+#if !SOLOS
+        void MakeNetworkObject()
+        {
+            if (NetworkObject != null)
+                return;
+
+            if (NetworkObjectRef == null)
+            {
+                Log("No networkobject reference.");
+                return;
+            }
+
+
+            Log("Creating network object.");
+            NetworkObject = Instantiate(NetworkObjectRef);
+            networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
+            networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
+
+            AssitantDirector.Instance.SetNetworkObject(NetworkObject);
+
+
+            //if (NetworkObject == null)
+            //    NetworkObject = Instantiate(AssitantDirector.Instance.NetworkObject);
+
+            //if (NetworkObject == null)
+            //{
+            //    Warning("NetworkObject not found.");
+            //}
+            //else
+            //{
+            //    networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
+            //    networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
+            //}
+        }
+#endif
+
         void Start()
         {
             Verbose("Starting.");
@@ -79,22 +125,26 @@ namespace StoryEngine
                 AssitantDirector.Instance.newTasksEvent += newTasksHandler;
 #if !SOLO
 
-                NetworkObject = AssitantDirector.Instance.NetworkObject;
+                MakeNetworkObject();
 
-                if (NetworkObject == null)
-                {
-                    Warning("NetworkObject not found.");
-                }
-                else
-                {
-                    networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
-                    networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
-                }
+                ////NetworkObject = AssitantDirector.Instance.NetworkObject;
+                //if (NetworkObject == null)
+                //    NetworkObject = Instantiate(AssitantDirector.Instance.NetworkObject);
 
-                if (DeusController.Instance != null && DeusController.Instance.DeusCanvas != null && AssitantDirector.Instance.NetworkObject!=null)
+                //if (NetworkObject == null)
+                //{
+                //    Warning("NetworkObject not found.");
+                //}
+                //else
+                //{
+                //    networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
+                //    networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
+                //}
+
+                if (DeusController.Instance != null && DeusController.Instance.DeusCanvas != null && NetworkObject != null)
                 {
                     // Create a network status prefab for visual debugging
-                    GameObject ns = Instantiate(NetworkStatusObject);
+                    GameObject ns = Instantiate(NetworkStatusObjectRef);
                     ns.transform.SetParent(DeusController.Instance.DeusCanvas.transform, false);
                     BufferStatusIn = ns.transform.Find("BufferIn").gameObject;
                     BufferStatusOut = ns.transform.Find("BufferOut").gameObject;
@@ -106,28 +156,87 @@ namespace StoryEngine
             }
         }
 
-#if UNITY_IOS && NETWORKED
+#if !SOLO
+        void OnApplicationQuit()
+        {
+            Log("Application stopping, shutting down network services.");
 
+            if (listening || sending)
+                stopBroadcast();
+
+            if (serving)
+                stopNetworkServer();
+
+            if (networkManager != null && networkManager.client != null)
+                StopNetworkClient();
+
+        }
+#endif
+
+#if UNITY_IOS && !SOLO
 
         void OnApplicationPause(bool paused)
         {
-
+            isPaused = paused;
 
             if (paused)
             {
+                Log("Application pausing, shutting down network services.");
 
-                Log("pauzing ...");
-                Log("Disconnecting client ...");
+                if (listening)
+                    stopBroadcast();
 
                 if (networkManager != null && networkManager.client != null)
-                {
                     StopNetworkClient();
+
+
+
+                if (serving || sending)
+                {
+                    if (serving)
+                        stopNetworkServer(); // close ports
+
+                    if (sending)
+                        stopBroadcast();// close ports
+
+                    // This is a workaround. On IOS, when putting the app to sleep with the side button, 
+                    // networking fails on resume. Home button is ok, side button isn't.
+                    NetworkTransport.Shutdown();
+
+                    networkBroadcast = null;
+                    networkManager = null;
+                    Destroy(NetworkObject);
+                    sending = false;
+                    serving = false;
                 }
+
+
+
 
             }
             else
             {
-                Log("resuming ...");
+                //  networkManager.Reset();
+                Log("Application resuming.");
+
+                MakeNetworkObject();
+                NetworkTransport.Init();
+                //if (NetworkObject == null)
+                //{
+                //    Log("Creating network object.");
+                //    NetworkObject = Instantiate(AssitantDirector.Instance.NetworkObject);
+                //    networkBroadcast = NetworkObject.GetComponent<NetworkBroadcast>();
+                //    networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
+
+                //}
+
+
+                //NetworkObject.AddComponent<ExtendedNetworkManager>();
+
+                //  networkManager = NetworkObject.AddComponent<ExtendedNetworkManager>();
+
+
+
 
             }
         }
@@ -135,16 +244,6 @@ namespace StoryEngine
 #endif
 
 #if !SOLO
-
-        // These are networking methods to be called from datahandler to establish connections.
-        // Once connected, handling is done internally by the assistant directors.
-
-        //public List<string> ConnectedAddresses()
-        //{
-
-        //    return networkManager.ConnectedAddresses;
-
-        //}
 
         public List<string> TrackedConnectedAddresses()
         {
@@ -160,7 +259,7 @@ namespace StoryEngine
 
         public bool NewTrackedAddresses()
         {
-           
+
 
             if (NewAddresses == null)
                 NewAddresses = new List<string>();
@@ -176,12 +275,12 @@ namespace StoryEngine
                 {
                     TrackedAddresses.Add(address);
                     NewAddresses.Add(address);
-                    
+
                 }
             }
 
-           int i=TrackedAddresses.Count-1;
-                
+            int i = TrackedAddresses.Count - 1;
+
             while (i >= 0)
             {
                 if (!networkManager.ConnectedAddresses.Contains(TrackedAddresses[i]))
@@ -192,63 +291,14 @@ namespace StoryEngine
                 i--;
             }
 
-          
-
-            return NewAddresses.Count>0;
-
+            return NewAddresses.Count > 0;
 
         }
 
-        //public bool NewClientsConnected()
-        //{
-
-        //    // Returns if new clients connected since the last call.
-
-        //    List<string> NewConnectedAddresses = networkManager.ConnectedAddresses;
-
-        //    if (TrackConnectedAddresses == null)
-        //    {
-        //        TrackConnectedAddresses = new List<string>();
-
-        //        foreach (string s in NewConnectedAddresses)
-        //            TrackConnectedAddresses.Add(s);
-
-        //        return NewConnectedAddresses.Count > 0 ? true : false;
-        //    }
-
-        //    bool NewClient = false;
-
-        //    foreach (string address in NewConnectedAddresses)
-        //    {
-        //        if (!TrackConnectedAddresses.Contains(address))
-        //        {
-        //            NewClient = true;
-        //            break;
-        //        }
-        //    }
-
-        //    TrackConnectedAddresses.Clear();
-
-        //    foreach (string s in NewConnectedAddresses)
-        //        TrackConnectedAddresses.Add(s);
-
-        //    return NewClient;
-
-        //}
-
-        //public int ConnectedClientsCount()
-        //{
-
-        //    return networkManager.ConnectedAddresses.Count;
-
-        //}
-
         public void startBroadcastClient()
         {
-
-            Log("Starting broadcast client, key: " + networkBroadcast.broadcastKey);
             networkBroadcast.StartClient();
-
+            listening = true;
         }
 
         public void startBroadcastClient(int _key)
@@ -256,33 +306,38 @@ namespace StoryEngine
 
             networkBroadcast.broadcastKey = _key;
             startBroadcastClient();
+            listening = true;
         }
 
         public void startBroadcastServer()
         {
-
-            Log("Starting broadcast server, key: " + networkBroadcast.broadcastKey);
+            //if (networkBroadcast == null)
+            //return;
 
             networkBroadcast.StartServer();
-
+            sending = true;
         }
 
         public void startBroadcastServer(int _key, string _message)
         {
+            //if (networkBroadcast == null)
+            //return;
 
             networkBroadcast.broadcastKey = _key;
             networkBroadcast.broadcastData = _message;
             startBroadcastServer();
+            sending = true;
 
         }
 
         public void stopBroadcast()
         {
-
-            Log("Stopping broadcast server.");
-            //if (networkBroadcast.isServer)
             networkBroadcast.Stop();
 
+            //networkBroadcast.
+            //networkBroadcast.StopBroadcast();
+            listening = false;
+            sending = false;
         }
 
         public void startNetworkClient(string server)
@@ -290,7 +345,7 @@ namespace StoryEngine
 
             if (server == "")
             {
-                Error("trying to start client without server address");
+                Error("No server address.");
                 return;
             }
 
@@ -303,9 +358,14 @@ namespace StoryEngine
         public void StopNetworkClient()
         {
 
-            Log("Stopping network client.");
+            //Log("Stopping network client.");
+            NetworkClient client = networkManager.client;
 
-            networkManager.StopClient();
+            if (client != null)
+            {
+                networkManager.client.Disconnect();
+                networkManager.StopClient();
+            }
 
         }
 
@@ -313,29 +373,14 @@ namespace StoryEngine
         {
 
             networkManager.StartNetworkServer();
-
+            serving = true;
         }
 
         public void stopNetworkServer()
         {
 
-            //networkManager.isNetworkActive
             networkManager.StopNetworkServer();
-
-        }
-
-
-        public string RemoteBroadcastServerAddress
-        {
-            get
-            {
-                return networkBroadcast.serverAddress;
-            }
-            set
-            {
-                Warning("Can't set remote broadcast server address directly");
-            }
-
+            serving = false;
         }
 
         public bool foundServer()
@@ -364,6 +409,8 @@ namespace StoryEngine
             if (!networkManager.client.isConnected)
                 return false;
 
+            //  !networkManager.client.
+
             return true;
 
         }
@@ -378,6 +425,29 @@ namespace StoryEngine
 
         void Update()
         {
+
+
+
+
+#if UNITY_EDITOR && UNITY_IOS
+
+            // Pause applicatin simulation for debugging.
+
+            if (Input.GetKeyDown("p"))
+            {
+                OnApplicationPause(true);
+            }
+
+            if (Input.GetKeyDown("o"))
+            {
+                OnApplicationPause(false);
+            }
+
+            if (isPaused)
+                return;
+
+#endif
+
 
 #if !SOLO
             if (displayNetworkGUIState())
@@ -439,23 +509,52 @@ namespace StoryEngine
                             done = true;
                             break;
 
+                        // ---------------------------- SCOPE ----------------------------
+
+                        case "isglobal":
+
+                            if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL)
+                            {
+                                task.Pointer.scope = SCOPE.GLOBAL;
+                            }
+
+                            done = true;
+                            break;
+
+                        case "islocal":
+
+                            task.Pointer.SetLocal();
+
+                            //Verbose("Setting pointer scope to local: " + task.Pointer.currentPoint.StoryLine);
+
+                            done = true;
+                            break;
+
+                 
+
                         // ---------------------------- SERVER SIDE ----------------------------
 
                         case "startserver":
 
-                            // Start broadcast and network server
-                        
-                            Log("Starting broadcast server, key " + ConnectionKey + " message " + ConnectionMessage);
-                            startBroadcastServer(ConnectionKey, ConnectionMessage);
+                            // Start broadcast and network server if not already going.
 
-                            Log("Starting network server.");
-                            startNetworkServer();
+                            if (!sending)
+                            {
+                                Log("Starting broadcast server, key " + ConnectionKey + " message " + ConnectionMessage);
+                                startBroadcastServer(ConnectionKey, ConnectionMessage);
+                            }
+
+                            if (!serving)
+                            {
+                                Log("Starting network server.");
+                                startNetworkServer();
+                            }
 
                             done = true;
                             break;
 
                         case "stopserver":
-                                                       
+
                             // Stop broadcast and network server
 
                             Log("Stopping broadcast server.");
@@ -467,12 +566,32 @@ namespace StoryEngine
                             done = true;
                             break;
 
-                        case "monitorclients":
+                        case "monitorconnections":
+
+                            if (NetworkObject == null || isPaused)
+                                break;
+
+                            // Keep servers up on IOS (because of application pause)
+
+#if UNITY_IOS
+                            if (!sending)
+                            {
+                                Log("Starting broadcast server, key " + ConnectionKey + " message " + ConnectionMessage);
+                                startBroadcastServer(ConnectionKey, ConnectionMessage);
+                            }
+
+                            if (!serving)
+                            {
+                                Log("Starting network server.");
+                                startNetworkServer();
+                            }
+
+#endif
 
                             // Watch for new clients. Stays live indefinitely.
-                          //  List<string new;
 
-                            if (NewTrackedAddresses())
+
+                            if (serving && NewTrackedAddresses())
                             {
                                 // new addresses connected since last call
 
@@ -481,7 +600,7 @@ namespace StoryEngine
                                     Log("New client at " + add);
                                 }
 
-                              
+
                                 task.setCallBack("addclient");
 
                             }
@@ -514,11 +633,12 @@ namespace StoryEngine
 
                         case "serversearch":
 
+
                             if (listening)
                             {
                                 if (foundServer())
                                 {
-                                    Log("Found broadcast server.");
+                                    Log("Found broadcast server " + networkBroadcast.serverAddress);
 
                                     stopBroadcast();
                                     task.setCallBack("serverfound");
@@ -529,9 +649,13 @@ namespace StoryEngine
                             }
                             else
                             {
-                                startBroadcastClient(ConnectionKey);
-                                Log("Starting broadcast listening for key " + ConnectionKey);
-                                listening = true;
+                                if (!isPaused)
+                                {
+                                    startBroadcastClient(ConnectionKey);
+                                    Log("Starting broadcast listening for key " + ConnectionKey);
+                                    listening = true;
+                                }
+
                             }
 
                             break;
@@ -540,7 +664,7 @@ namespace StoryEngine
 
                         case "startclient":
 
-                            string ServerAddress = RemoteBroadcastServerAddress;
+                            string ServerAddress = networkBroadcast.serverAddress;
 
                             if (ServerAddress != "")
                             {

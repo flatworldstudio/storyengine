@@ -208,13 +208,13 @@ namespace StoryEngine.UI
 #if UNITY_EDITOR || UNITY_STANDALONE
 
             // if we're on macos or windows
-
+            px = x;
+            py = y;
             x = Input.mousePosition.x;
             y = Input.mousePosition.y;
             dx = x - px;
             dy = y - py;
-            px = x;
-            py = y;
+           
 
             if (Input.GetButton("Fire1"))
             {
@@ -396,10 +396,10 @@ namespace StoryEngine.UI
                     dx = (touchDelta0.x + touchDelta1.x) / 2f;
                     dy = (touchDelta0.y + touchDelta1.y) / 2f;
 
+                    pd = d;
                     d = Vector2.Distance(tp0, tp1);
                     dd = d - pd;
-                    pd = d;
-
+                   
                     action = ACTION.DOUBLEDRAG;
                     touch = TOUCH.TOUCHING;
                 }

@@ -50,7 +50,8 @@ namespace StoryEngine
 
         List<StoryUpdate> StoryUpdateStack;
 
-        public GameObject NetworkObject;
+         GameObject NetworkObject;
+
         ExtendedNetworkManager networkManager;
 
         const short stringCode = 1002;
@@ -123,34 +124,6 @@ namespace StoryEngine
 
 #endif
 
-#if !SOLO
-
-
-            // get the networkmanager to call network event methods on the assistant director.
-            // this should maybe move.
-
-            if (NetworkObject != null)
-            {
-
-                 networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
-
-                if (networkManager != null)
-                {
-                    networkManager.onStartServerDelegate = onStartServer;
-                    networkManager.onStartClientDelegate = onStartClient;
-                    networkManager.onServerConnectDelegate = OnServerConnect;
-                    networkManager.onClientConnectDelegate = OnClientConnect;
-                    networkManager.onClientDisconnectDelegate = OnClientDisconnect;
-                    networkManager.onStopClientDelegate = OnStopClient;
-
-                    //Log("Max Message Size: " + NetworkMessage.MaxMessageSize);
-
-                }
-
-
-            }
-
-#endif
 
         }
 
@@ -175,6 +148,44 @@ namespace StoryEngine
                 Verbose("leaving focus ...");
 
         }
+
+#if !SOLO
+        public void SetNetworkObject (GameObject _object)
+        {
+
+            if (_object == null)
+                return;
+
+            // get the networkmanager to call network event methods on the assistant director.
+            // this should maybe move.
+            NetworkObject = _object;
+
+            //if (NetworkObject != null)
+            //{
+
+                networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
+
+                if (networkManager != null)
+                {
+                    networkManager.onStartServerDelegate = onStartServer;
+                    networkManager.onStartClientDelegate = onStartClient;
+                    networkManager.onServerConnectDelegate = OnServerConnect;
+                    networkManager.onClientConnectDelegate = OnClientConnect;
+                    networkManager.onClientDisconnectDelegate = OnClientDisconnect;
+                    networkManager.onStopClientDelegate = OnStopClient;
+
+                    //Log("Max Message Size: " + NetworkMessage.MaxMessageSize);
+
+                }
+
+
+            //}
+        }
+#endif
+
+
+
+
 
         public static StoryTask FindTaskByByLabel(string id)
         {

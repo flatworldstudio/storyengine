@@ -43,7 +43,7 @@ namespace StoryEngine.Network
             StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
-        public void ResetMessage()
+         void ResetMessage()
         {
 
             serverAddress = "";
@@ -60,59 +60,59 @@ namespace StoryEngine.Network
 
         }
 
-        void OnApplicationPause(bool paused)
-        {
+        //void OnApplicationPause(bool paused)
+        //{
 
-            if (paused)
-            {
+        //    if (paused)
+        //    {
 
-                if (isClient)
-                {
+        //        if (isClient)
+        //        {
 
-                    resumeClient = true;
-                    Stop();
+        //            resumeClient = true;
+        //            Stop();
 
-                    Log("Pausing broadcast client.");
+        //            Log("Pausing broadcast client.");
 
-                }
+        //        }
 
-                if (isServer)
-                {
+        //        if (isServer)
+        //        {
 
-                    resumeServer = true;
-                    Stop();
+        //            resumeServer = true;
+        //            Stop();
 
-                    Log("Pausing broadcast server.");
+        //            Log("Pausing broadcast server.");
 
-                }
+        //        }
 
-            }
-            else
-            {
+        //    }
+        //    else
+        //    {
 
-                if (resumeClient)
-                {
+        //        if (resumeClient)
+        //        {
 
-                    resumeClient = false;
-                    StartClient();
+        //            resumeClient = false;
+        //            StartClient();
 
-                    Log("Resuming broadcast client.");
+        //            Log("Resuming broadcast client.");
 
-                }
+        //        }
 
-                if (resumeServer)
-                {
+        //        if (resumeServer)
+        //        {
 
-                    resumeServer = false;
-                    StartServer();
+        //            resumeServer = false;
+        //            StartServer();
 
-                    Log("Resuming broadcast server.");
+        //            Log("Resuming broadcast server.");
 
-                }
+        //        }
 
-            }
+        //    }
 
-        }
+        //}
 
         public void StartServer()
         {

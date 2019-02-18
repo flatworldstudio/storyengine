@@ -3,6 +3,7 @@
 #serversample
 debugon
 start server
+start pingpong
 end
 
 #clientsample
@@ -14,7 +15,7 @@ end
 
 #server
 startserver
-monitorclients
+monitorconnections
 end
 
 #addclient
@@ -28,4 +29,9 @@ end
 #serverfound
 startclient
 monitorserver
+end
+
+#pingpong
+isglobal
+pingpong
 end
