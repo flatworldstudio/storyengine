@@ -184,8 +184,10 @@ namespace StoryEngine.UI
         {
             brightness = _value;
             targetBrightness = _value;
-            Controller.instance.AddAnimatingButton(this);
-            //ApplyBrightness();
+
+            //Controller.instance.AddAnimatingButton(this);
+
+            ApplyBrightness();
         }
 
         public bool BrightnessChanging()

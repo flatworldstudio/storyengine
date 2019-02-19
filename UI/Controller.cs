@@ -313,7 +313,7 @@ namespace StoryEngine.UI
 
             while (i >= 0)
             {
-
+              
                 Button button = AnimatingButtons[i];
                 button.ApplyBrightness();
 
