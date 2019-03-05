@@ -506,7 +506,7 @@ void HullClamp{
             {
 
                 // object was selected, deselect
-                uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.defaultMat;
+             //   uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.defaultMat;
                 interFace.selectedObjects.Remove(uxArgs.uiEvent.target3D);
 
             }
@@ -514,7 +514,7 @@ void HullClamp{
             {
 
                 // object was not selected, select
-                uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.editMat;
+           //     uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.editMat;
                 interFace.selectedObjects.Add(uxArgs.uiEvent.target3D);
 
             }

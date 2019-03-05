@@ -32,7 +32,7 @@ namespace StoryEngine.UI
 
         public Plane plane;
         public UiCam3D uiCam3D;
-        public Vector2 anchorPosition;
+     //   public Vector2 anchorPosition;
 
         public InterFace(GameObject _canvasObject, string _name = "Unnamed")
         {
@@ -54,7 +54,7 @@ namespace StoryEngine.UI
             uiButtons = new Dictionary<string, Button>();
             selectedObjects = new List<GameObject>();
 
-            anchorPosition = Vector2.zero;
+       //     anchorPosition = Vector2.zero;
 
         }
 
@@ -68,10 +68,10 @@ namespace StoryEngine.UI
             uiCam3D = _cam;
         }
 
-        public Vector2 GetAnchorOffset()
-        {
-            return anchorPosition;
-        }
+        //public Vector2 GetAnchorOffset()
+        //{
+        //    return anchorPosition;
+        //}
 
         public void none(object sender, UIArgs args)
         {

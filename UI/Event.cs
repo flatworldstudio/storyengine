@@ -440,10 +440,26 @@ namespace StoryEngine.UI
             RaycastHit hit;
 
             Vector2 uiPosition = new Vector2(x, y);
+
+ 
+
             // Sometimes an offset is needed, ie when using indirect cameras and rendertextures.
-            Vector2 uiPositionOffset = uiPosition - plane.interFace.GetAnchorOffset(); 
+            //    Vector2 uiPositionOffset = uiPosition - plane.interFace.GetAnchorOffset();
+          //  Log("screen " + uiPosition);
+
+            Vector2 uiPositionOffset =  plane.GetOffsetPosition(uiPosition);
+
+       //     Log("offset " + uiPositionOffset);
+
+          //  RectTransformUtility.ScreenPointToLocalPointInRectangle(rect,)
+
+       //     Canvas[] c = GetComponentsInParent<Canvas>();
+       //    Canvas topmost = c[c.Length - 1];
+
+            //    plane.transform.root.GetComponent<Canvas>();
 
 
+            //     RectTransformUtility.ScreenPointToLocalPointInRectangle(colorpad.rectTransform, Input.mousePosition, Camera.main, out localPoint);
             // cast a 3d ray from the camera we are controlling to find any 3D objects.
 
             target3D = null;
@@ -455,7 +471,10 @@ namespace StoryEngine.UI
 
                 Ray ray = activeCamera.ScreenPointToRay(uiPositionOffset);
 
-                Debug.DrawRay(ray.origin, 10f * ray.direction, Color.red, 3f, false);
+             //    ray = activeCamera.ViewportPointToRay(uiPositionOffset);
+
+
+                Debug.DrawRay(ray.origin, 25f * ray.direction, Color.red, 3f, false);
 
                 int layerMask = 1 << 8; // only check colliders in layer '8'. 
 

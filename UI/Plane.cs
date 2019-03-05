@@ -18,7 +18,7 @@ namespace StoryEngine.UI
         public float x0, y0, x1, y1;
 
         public InterFace interFace;
-        GameObject sceneObject;
+        GameObject sceneObject,anchorObject;
         RectTransform rt;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
@@ -39,6 +39,28 @@ namespace StoryEngine.UI
             if ((rt = sceneObject.GetComponent<RectTransform>()) == null)
                 Warning("No recttransform on Plane gameobject");
         }
+        public void AddOffsetRect (GameObject _object)
+        {
+            anchorObject = _object;
+        }
+
+        public Vector2 GetOffsetPosition(Vector2 _pos)
+        {
+            if (anchorObject != null)
+            {
+                RectTransform rect = anchorObject.GetComponent<RectTransform>();
+
+                if (rect != null )
+                {
+
+             Vector2 relative=      rect.InverseTransformPoint(_pos) + new Vector3(rect.rect.width/2f,rect.rect.height/2f);
+
+                    return relative;
+                }
+            }
+            return _pos;
+        }
+
 
         public float Scale
         {
