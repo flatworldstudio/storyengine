@@ -848,7 +848,8 @@ namespace StoryEngine
         {
             var message = netMsg.ReadMessage<StringMessage>();
 
-            Verbose("Message received from client: " + message.value);
+            Warning("Message received from client "+ netMsg.conn.address+" : " + message.value);
+                       
 
         }
 

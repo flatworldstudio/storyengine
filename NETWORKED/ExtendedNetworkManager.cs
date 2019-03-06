@@ -36,7 +36,7 @@ namespace StoryEngine.Network
         string ID = "NetworkManager";
         //public GameObject NetworkInfoPrefab;
 
-        const short connectionMessageCode = 1001;
+     //   const short connectionMessageCode = 1001;
         List<string> __connectedAddresses;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.

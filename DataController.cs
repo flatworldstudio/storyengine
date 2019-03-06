@@ -35,6 +35,7 @@ namespace StoryEngine
         public GameObject NetworkStatusObjectRef;
         GameObject BufferStatusIn, BufferStatusOut;
 
+        const short connectionMessageCode = 1001;
 
         public string ConnectionMessage = "default";
         public int ConnectionKey = 1111;
@@ -138,6 +139,11 @@ namespace StoryEngine
                 case STATE.PAUSED:
 
                     Log("Application pausing.");
+        // networkManager.client.Send(connectionCode, "pausing");
+
+             var msg = new StringMessage("clientpause");
+            networkManager.client.Send(stringCode, msg);
+            Verbose("Sending message to server: " + value);
 
                     NetworkObjectShutdown();
 
@@ -746,6 +752,11 @@ namespace StoryEngine
             networkManager = NetworkObject.GetComponent<ExtendedNetworkManager>();
             AssitantDirector.Instance.SetNetworkObject(NetworkObject);
 
+            //networkManager.onServerConnectDelegate = OnServerConnect;
+            //networkManager.onServerDisconnectDelegate = OnServerDisconnect;
+
+
+
             if (state == STATE.RESUMED)
             {
                 // on state awake this is already active.
@@ -798,6 +809,24 @@ namespace StoryEngine
             }
 
         }
+
+        //void OnServerConnect(NetworkConnection conn)
+        //{
+
+        //    Warning("Incoming server connection delegate called ");
+
+        //    //     GENERAL.SETNEWCONNECTION(conn.connectionId);
+
+        //}
+
+        //void OnServerDisconnect(NetworkConnection conn)
+        //{
+
+        //    Warning("Incoming server disconnection delegate called ");
+
+        //    //     GENERAL.SETNEWCONNECTION(conn.connectionId);
+
+        //}
 
         public bool displayNetworkGUIState()
         {
