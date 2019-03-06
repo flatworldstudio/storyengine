@@ -211,7 +211,12 @@ namespace StoryEngine
         {
             return NewAddresses;
         }
+        public void RemoveTrackedAddress(string address)
+        {
 
+            TrackedAddresses.Remove(address);
+
+        }
         public bool NewTrackedAddresses()
         {
 

@@ -849,7 +849,12 @@ namespace StoryEngine
         {
             var message = netMsg.ReadMessage<StringMessage>();
 
-            Warning("Message received from client "+ netMsg.conn.address+" : " + message.value);
+            Verbose("Message received from client "+ netMsg.conn.address+" : " + message.value);
+
+            if (message.value == "REGISTER")
+            {
+                DataController.Instance.RemoveTrackedAddress(netMsg.conn.address);
+            }
                        
 
         }
