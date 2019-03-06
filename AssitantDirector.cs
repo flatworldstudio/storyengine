@@ -803,6 +803,7 @@ namespace StoryEngine
             Verbose("Client connection delegate called");
 
             GENERAL.AUTHORITY = AUTHORITY.LOCAL;
+            AssitantDirector.Instance.sendMessageToServer("REGISTER");
 
         }
 
@@ -956,7 +957,7 @@ namespace StoryEngine
         {
 
             networkManager.client.Send(storyCode, message);
-
+          //  sendMessageToServer("ping");
         }
 
         void OnStoryUpdateFromClient(NetworkMessage netMsg)
@@ -982,14 +983,14 @@ namespace StoryEngine
         {
             var msg = new StringMessage(value);
             networkManager.client.Send(stringCode, msg);
-            Verbose("Sending message to server: " + value);
+            Log("Sending message to server: " + value);
         }
 
         public void sendMessageToClients(string value)
         {
             var msg = new StringMessage(value);
             NetworkServer.SendToAll(stringCode, msg);
-            Verbose("Sending message to all clients: " + value);
+            Log("Sending message to all clients: " + value);
         }
 
 

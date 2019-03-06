@@ -6,9 +6,6 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using StoryEngine.Network;
 
-
-using UnityEngine.Networking.NetworkSystem;
-
 #endif
 
 
@@ -145,11 +142,14 @@ namespace StoryEngine
                     Log("Application pausing.");
                     // networkManager.client.Send(connectionCode, "pausing");
 
-                    AssitantDirector.Instance.sendMessageToServer("PAUSING");
+                    //AssitantDirector.Instance.sendMessageToServer("I'm new.");
 
-            // var msg = new StringMessage("clientpause");
-            //networkManager.client.Send(stringCode, msg);
-            //Verbose("Sending message to server: " + value);
+                    // var msg = new StringMessage("clientpause");
+                    //networkManager.client.Send(stringCode, msg);
+                    //Verbose("Sending message to server: " + value);
+
+               //    NetworkTransport.s();
+                   
 
                     NetworkObjectShutdown();
 
@@ -211,8 +211,6 @@ namespace StoryEngine
         {
             return NewAddresses;
         }
-
-
 
         public bool NewTrackedAddresses()
         {
@@ -547,7 +545,6 @@ namespace StoryEngine
 
                             // Watch for new clients. Stays live indefinitely.
 
-
                             if (serving && NewTrackedAddresses())
                             {
                                 // new addresses connected since last call
@@ -564,6 +561,8 @@ namespace StoryEngine
 
                             task.SetStringValue("debug", "clients: " + TrackedConnectedAddresses().Count);
                             WasConnected = TrackedConnectedAddresses().Count > 0;
+
+
                             break;
 
                         case "pushglobaltasks":
