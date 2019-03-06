@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using StoryEngine.Network;
+
+
+using UnityEngine.Networking.NetworkSystem;
+
 #endif
 
 
@@ -139,11 +143,13 @@ namespace StoryEngine
                 case STATE.PAUSED:
 
                     Log("Application pausing.");
-        // networkManager.client.Send(connectionCode, "pausing");
+                    // networkManager.client.Send(connectionCode, "pausing");
 
-             var msg = new StringMessage("clientpause");
-            networkManager.client.Send(stringCode, msg);
-            Verbose("Sending message to server: " + value);
+                    AssitantDirector.Instance.sendMessageToServer("PAUSING");
+
+            // var msg = new StringMessage("clientpause");
+            //networkManager.client.Send(stringCode, msg);
+            //Verbose("Sending message to server: " + value);
 
                     NetworkObjectShutdown();
 
