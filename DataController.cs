@@ -46,7 +46,13 @@ namespace StoryEngine
         bool sending = false;
 
         bool serving = false;
-
+         public bool Connected
+        {
+            get
+            {
+                return WasConnected;
+            }
+        }
 #endif
 
         public static DataController Instance;
@@ -76,13 +82,7 @@ namespace StoryEngine
             Instance = this;
             state = STATE.AWAKE;
         }
-        public bool Connected
-        {
-            get
-            {
-                return WasConnected;
-            }
-        }
+       
 
         void Start()
         {
