@@ -45,6 +45,18 @@ namespace StoryEngine.UI
 
         }
 
+        public InterFace(Canvas _canvas, string _name = "Unnamed")
+        {
+
+            canvasObject = _canvas.gameObject;
+            name = _name;
+
+            mapping = Mapping.Empty;
+
+            Initvars();
+
+        }
+
         void Initvars()
         {
 
