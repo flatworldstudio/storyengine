@@ -32,7 +32,7 @@ namespace StoryEngine.UI
 
         public Plane plane;
         public UiCam3D uiCam3D;
-     //   public Vector2 anchorPosition;
+        //   public Vector2 anchorPosition;
 
         public InterFace(GameObject _canvasObject, string _name = "Unnamed")
         {
@@ -54,7 +54,7 @@ namespace StoryEngine.UI
             uiButtons = new Dictionary<string, Button>();
             selectedObjects = new List<GameObject>();
 
-       //     anchorPosition = Vector2.zero;
+            //     anchorPosition = Vector2.zero;
 
         }
 
@@ -146,7 +146,7 @@ namespace StoryEngine.UI
         public string[] getButtonNames()
         {
 
-            return  uiButtons.Select(item => ""+item.Key ).ToArray();
+            return uiButtons.Select(item => "" + item.Key).ToArray();
 
             ////return test.ToArray<string>();
 
@@ -166,6 +166,15 @@ namespace StoryEngine.UI
             uiButtons.Add(button.name, button);
             button.InterFace = this;// cross ref.
 
+        }
+
+        public StoryEngine.UI.Button GetButton(string _name)
+        {
+            StoryEngine.UI.Button result = null;
+
+            uiButtons.TryGetValue(_name, out result);
+
+            return result;
         }
 
     }
@@ -188,13 +197,13 @@ namespace StoryEngine.UI
 
 
 
-   
 
-//    /*!
-//* \brief
-//* Holds ui info to pass onto handlers.
-//* 
-//*/
+
+    //    /*!
+    //* \brief
+    //* Holds ui info to pass onto handlers.
+    //* 
+    //*/
     //public class UIArgs : EventArgs
     //{
 
