@@ -14,20 +14,34 @@ namespace StoryEngine
 * Takes a text document and parses it into connected StoryPoint objects.
 */
 
-    public class Script
+   static public class Script
     {
-        string ID = "Script";
+      static  string ID = "Script";
 
-        List<string> manuscript;
-      //  public bool isReady;
+        static List<string> manuscript;
+
+        static public string flattened = ""; // this is stripped of line endings, for checking purposes (eg hash)
 
         // Copy these into every class for easy debugging.
-        void Log(string _m) => StoryEngine.Log.Message(_m, ID);
-        void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
-        void Error(string _m) => StoryEngine.Log.Error(_m, ID);
-        void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
+        static void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        static void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        static void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        static void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
 
+        static public void Mount(TextAsset _asset)
+        {
+            parse(_asset.text);
+            }
+
+        static public void Mount(string _filename)
+        {
+            string text = Load(_filename);
+            parse(text);
+
+        }
+
+        /*
         public Script(TextAsset _asset)
         {
 
@@ -46,31 +60,36 @@ namespace StoryEngine
             //isReady = true;
 
         }
-        int __idcount;
+        */
 
-        string GetId()
+        static int __idcount;
+
+        static string GetId()
         {
             __idcount++;
 
             return __idcount.ToString("x8"); ;
         }
 
-        void parse(string _text)
+        static void parse(string _text)
         {
             __idcount = 0;
-
+            flattened = "";
 
             manuscript = new List<string>();
             string[] lines = _text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
 
             for (int i = 0; i < lines.Length; i++)
             {
+                flattened += " "+lines[i];
                 if (!isComment(lines[i]))
                     manuscript.Add(lines[i]);
             }
 
             if (manuscript.Count == 0)
                 Error("Script has no lines.");
+
+            Log(flattened);
 
             GENERAL.storyPoints = new Dictionary<string, StoryPoint>();
             Dictionary<string, StoryPoint> storyLines = new Dictionary<string, StoryPoint>();
@@ -270,9 +289,9 @@ namespace StoryEngine
 
         }
 
-        string l;
+        static string l;
 
-        string isStoryLine(int i)
+        static string isStoryLine(int i)
         {
             l = manuscript[i];
 
@@ -293,7 +312,7 @@ namespace StoryEngine
 
         }
 
-        string isStoryLabel(int i)
+        static string isStoryLabel(int i)
         {
 
             l = manuscript[i];
@@ -316,7 +335,7 @@ namespace StoryEngine
 
         }
 
-        string isStoryPoint(int i)
+        static string isStoryPoint(int i)
         {
             l = manuscript[i];
 
@@ -346,7 +365,7 @@ namespace StoryEngine
 
         }
 
-        private bool isComment(string line)
+        static private bool isComment(string line)
         {
 
             string comment = "//";
@@ -361,7 +380,7 @@ namespace StoryEngine
 
 
 
-        private string getElementFromLine(string line, int i)
+        static private string getElementFromLine(string line, int i)
         {
             string[] split = splitLine(line);
             if (split.Length > i)
@@ -375,7 +394,7 @@ namespace StoryEngine
             }
         }
 
-        private string[] getTask(string line)
+        static private string[] getTask(string line)
         {
             string[] s;
 
@@ -400,7 +419,7 @@ namespace StoryEngine
 
 
 
-        private string[] splitLine(string line)
+        static private string[] splitLine(string line)
         {
             Char delimiter = ' ';
             string[] r = line.Split(delimiter);
@@ -408,7 +427,7 @@ namespace StoryEngine
         }
 
 
-        private string Load(string fileName)
+        static private string Load(string fileName)
         {
 
             TextAsset mytxtData = (TextAsset)Resources.Load(fileName);

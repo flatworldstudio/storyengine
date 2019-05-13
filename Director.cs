@@ -509,7 +509,9 @@ namespace StoryEngine
 
         public void loadScript(TextAsset _asset)
         {
-            Script theScript = new Script(_asset);
+            //Script theScript = new Script(_asset);
+
+            Script.Mount(_asset);
 
             //while (!theScript.isReady)
             //{
@@ -522,8 +524,9 @@ namespace StoryEngine
 
         public void loadScript(string fileName)
         {
-            Script theScript = new Script(fileName);
+          //  Script theScript = new Script(fileName);
 
+            Script.Mount(fileName);
             //while (!theScript.isReady)
             //{
 
