@@ -601,7 +601,10 @@ namespace StoryEngine
                             {
                                 if (foundServer())
                                 {
-                                    Log("Found broadcast server " + networkBroadcast.serverAddress);
+                                    Log("Found broadcast server " + networkBroadcast.serverAddress+" key " + networkBroadcast.broadcastKey);
+                                   
+
+
 
                                     stopBroadcast();
 
