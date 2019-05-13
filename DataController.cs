@@ -603,9 +603,6 @@ namespace StoryEngine
                                 {
                                     Log("Found broadcast server " + networkBroadcast.serverAddress+" key " + networkBroadcast.broadcastKey);
                                    
-
-
-
                                     stopBroadcast();
 
                                     task.setCallBack("serverfound");
