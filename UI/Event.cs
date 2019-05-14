@@ -210,8 +210,32 @@ namespace StoryEngine.UI
             // if we're on macos or windows
             px = x;
             py = y;
-            x = Input.mousePosition.x;
-            y = Input.mousePosition.y;
+
+            Vector2 abs = Input.mousePosition;
+
+       
+
+#if UNITY_STANDALONE_WIN
+            // on windows standalone we have a decent way of finding out which display we're on
+            Vector2 absolute = Input.mousePosition;
+            Vector3 relative = Display.RelativeMouseAt(abs);
+     //       GameObject.Find("Environment").GetComponent<Text>().text = "" + absolute.ToString()+" "+relative.ToString();
+
+            // relative = abs;
+#else
+     
+             Vector3 relative = abs;
+
+#endif
+
+#if UNITY_EDITOR
+            relative = abs;
+
+#endif
+
+            x = relative.x;
+            y = relative.y;
+
             dx = x - px;
             dy = y - py;
            
@@ -285,7 +309,7 @@ namespace StoryEngine.UI
 #endif
 
 
-#if UNITY_IOS 
+#if UNITY_IOS
 
             // if we're on ios
 
@@ -493,12 +517,17 @@ namespace StoryEngine.UI
             GraphicRaycaster gfxRayCaster = plane.interFace.canvasObject.GetComponent<GraphicRaycaster>();
 
             //Create the PointerEventData with null for the EventSystem
+        
 
-            PointerEventData pointerEventData = new PointerEventData(null);
-
+         //   PointerEventData pointerEventData = new PointerEventData(null);
+            PointerEventData pointerEventData = new PointerEventData(GameObject.Find("EventSystem").GetComponent<EventSystem>());
             //Set required parameters, in this case, mouse position
 
             pointerEventData.position = uiPosition;
+
+
+
+
 
             //uiPosition-=_plane.interFace.GetAnchorOffset();
 
