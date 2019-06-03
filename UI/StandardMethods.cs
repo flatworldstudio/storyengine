@@ -86,7 +86,7 @@ namespace StoryEngine.UI
 
             if (ui.isSpringing)
             {
-               
+
                 bool springing = apply2Dsprings(target, constraint, ui.springIndex);
 
                 if (ui.isSpringing && springing == false)
@@ -97,7 +97,7 @@ namespace StoryEngine.UI
             }
         }
 
-static bool apply2Dsprings(GameObject target, Constraint constraint, int springIndex)
+        static bool apply2Dsprings(GameObject target, Constraint constraint, int springIndex)
         {
             // apply springs to gui object. returns true if it did anything.
             bool result = false;
@@ -199,7 +199,7 @@ static bool apply2Dsprings(GameObject target, Constraint constraint, int springI
         }
 
         // --------------------------------------------   3D    ----------------------------------------------------------------------
-                
+
         /*!\brief Dolly a 3d camera in and out by argument dd */
 
         public static void LongitudinalCamera(object sender, UIArgs uxArgs)
@@ -322,7 +322,7 @@ static bool apply2Dsprings(GameObject target, Constraint constraint, int springI
 
         }
 
-       /*!\brief Rotate a camera around its interest using pitch and yaw. */
+        /*!\brief Rotate a camera around its interest using pitch and yaw. */
 
         static public void OrbitCamera(object sender, UIArgs uxArgs)
         {
@@ -368,7 +368,7 @@ static bool apply2Dsprings(GameObject target, Constraint constraint, int springI
         public static void someAction(object sender, UIArgs uxArgs)
         {
             Log("Debug action called.");
-         }
+        }
 
 
 
@@ -506,7 +506,7 @@ void HullClamp{
             {
 
                 // object was selected, deselect
-             //   uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.defaultMat;
+                //   uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.defaultMat;
                 interFace.selectedObjects.Remove(uxArgs.uiEvent.target3D);
 
             }
@@ -514,7 +514,7 @@ void HullClamp{
             {
 
                 // object was not selected, select
-           //     uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.editMat;
+                //     uxArgs.uiEvent.target3D.GetComponent<MeshRenderer>().material = interFace.editMat;
                 interFace.selectedObjects.Add(uxArgs.uiEvent.target3D);
 
             }
@@ -545,12 +545,12 @@ void HullClamp{
 
                 //Verbose("Tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callback);
             }
-}
+        }
 
 
         public static void stopControls(object sender, UIArgs uxArgs)
         {
-         
+
             InterFace interFace = uxArgs.uiEvent.plane.interFace;
             setTargetBrightness(interFace.getButtonNames(), 0.75f, interFace);
 

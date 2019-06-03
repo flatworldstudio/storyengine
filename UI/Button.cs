@@ -32,8 +32,8 @@ namespace StoryEngine.UI
         public InterFace InterFace;
 
         public Image image;
-         Color color;
-         float brightness, targetBrightness, stepBrightness;
+        Color color;
+        float brightness, targetBrightness, stepBrightness;
 
         Vector2 lastPosition, deltaPosition;
         float lastAngle, deltaAngle;
@@ -52,17 +52,37 @@ namespace StoryEngine.UI
         public Button(string _name)
         {
             Initialise(_name);
-            constraint =  Constraint.none;
+            constraint = Constraint.none;
             dragTarget = gameObject;
             lastPosition = Vector2.zero;
             orthoDragging = false;
         }
 
+        public Button(string _name, bool locked)
+        {
+            Initialise(_name);
+
+            if (locked)
+            {
+                constraint = null;
+                dragTarget = null;
+            }
+            else
+            {
+                constraint = Constraint.none;
+                dragTarget = gameObject;
+            }
+
+            lastPosition = Vector2.zero;
+            orthoDragging = false;
+        }
+
+
         public Button(string _name, GameObject _dragTarget)
         {
             Initialise(_name);
             dragTarget = _dragTarget;
-            constraint =  Constraint.none;
+            constraint = Constraint.none;
             lastPosition = Vector2.zero;
             orthoDragging = false;
         }
@@ -113,9 +133,9 @@ namespace StoryEngine.UI
 
             if (gameObject != null)
             {
-              
-                image = gameObject.GetComponent<Image>();
-                ApplyBrightness();
+
+               image = gameObject.GetComponent<Image>();
+             //   ApplyBrightness();
 
                 //if (image != null)
                 //{
@@ -139,7 +159,7 @@ namespace StoryEngine.UI
 
         }
 
-        public void AddConstraint (Constraint _constraint)
+        public void AddConstraint(Constraint _constraint)
         {
             constraint = _constraint;
         }
@@ -155,7 +175,7 @@ namespace StoryEngine.UI
             constraintVertical = _constraintVertical;
 
             orthoDragging = true;
-       
+
         }
 
 
@@ -166,7 +186,7 @@ namespace StoryEngine.UI
             onTap = DefaultBlink;
         }
 
-        public void SetTargetBrightness (float _value)
+        public void SetTargetBrightness(float _value)
         {
             targetBrightness = _value;
             Controller.instance.AddAnimatingButton(this);
@@ -197,7 +217,7 @@ namespace StoryEngine.UI
 
         public void DefaultBlink()
         {
-           
+
             brightness = 1f;
             targetBrightness = 0.75f;
             stepBrightness = 0.25f;
@@ -301,7 +321,7 @@ namespace StoryEngine.UI
         public void ApplyBrightness()
         {
 
-         
+
 
             if (brightness < targetBrightness)
             {
@@ -324,16 +344,16 @@ namespace StoryEngine.UI
                 }
             }
 
-            if (Mathf.Approximately(brightness,targetBrightness))
+            if (Mathf.Approximately(brightness, targetBrightness))
             {
                 Controller.instance.RemoveAnimatingButton(this);
-               
+
             }
 
             if (image != null)
                 image.color = brightness * color;
             //else
-                //Log("no image");
+            //Log("no image");
         }
     }
 }

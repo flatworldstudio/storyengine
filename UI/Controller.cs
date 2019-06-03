@@ -223,11 +223,18 @@ namespace StoryEngine.UI
                 // the active event just ended. set inert and springing to true.
 
                 activeUiEvent.touch = TOUCH.NONE;
+
+               // if (activeUiEvent.action==ACTION.)
+
                 activeUiEvent.isInert = true;
 
                 if (activeUiEvent.targetButton != null)
                 {
-                    activeUiEvent.isSpringing = true;
+                    if (activeUiEvent.targetButton.GetDragTarget() != null)
+                    {
+                        activeUiEvent.isSpringing = true;
+                    }
+                  
 
                     // If we were dragging an ortho button, we want an event on the other direction to spring.
 
@@ -272,7 +279,7 @@ namespace StoryEngine.UI
                     // tap must only be executed once, after that it becomes an inert singledrag event.
 
                     activeUiEvent.action = ACTION.SINGLEDRAG;
-                    Verbose("tap -> singledrag");
+                    Log("tap -> singledrag");
                     //Debug.Log("tap -> singledrag");
 
                 }
@@ -406,8 +413,8 @@ namespace StoryEngine.UI
 
                 case ACTION.TAP:
 
-                    ui.action = ACTION.SINGLEDRAG;
-
+                    ui.action = ACTION.SINGLEDRAG; 
+                    
                     if (ui.target2D != null)
                         interFace.tap_2d(this, args);
                     else if (ui.target3D != null)
@@ -436,7 +443,7 @@ namespace StoryEngine.UI
                         }
 
                     }
-                    //Verbose("singledrag");
+              //      Verbose("singledrag");
                     args.delta = new Vector3(ui.scaledDx, ui.scaledDy, 0);
 
                     if (ui.target2D != null)
@@ -445,6 +452,11 @@ namespace StoryEngine.UI
                         interFace.single_3d(this, args);
                     else
                         interFace.single_none(this, args);
+
+                   // interFace.AddMapping
+
+              //      ui.isInert = false;
+              //    ui.isSpringing = false;
 
                     break;
 
