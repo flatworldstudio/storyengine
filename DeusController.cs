@@ -17,7 +17,7 @@ namespace StoryEngine
         string ID = "DeusController";
         public static DeusController Instance;
 
-        public GameObject DeusCanvas, PointerBlock;
+        public GameObject DeusPointers, PointerBlock;
 
         //public int Width;
          //GameObject StoryEngineObject;
@@ -31,6 +31,7 @@ namespace StoryEngine
 
         //   public bool storyBoard;
 
+        float scale = 1;
         int PointerdisplayBuffer = 24;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
@@ -77,14 +78,14 @@ namespace StoryEngine
             }
 
 
-            if (DeusCanvas == null)
+            if (DeusPointers == null)
             {
                 Warning("DeusCanvas not found.");
             }
             else
             {
 
-                DeusCanvas.SetActive(false);
+                DeusPointers.SetActive(false);
 
             }
 
@@ -97,6 +98,7 @@ namespace StoryEngine
                 //
             }
 
+           
 
         }
 
@@ -148,7 +150,7 @@ namespace StoryEngine
 
                         case "debugon":
 
-                            DeusCanvas.SetActive(true);
+                            DeusPointers.SetActive(true);
 
                             task.signOff(ID);
                             taskList.RemoveAt(t);
@@ -157,7 +159,7 @@ namespace StoryEngine
 
                         case "debugoff":
 
-                            DeusCanvas.SetActive(false);
+                            DeusPointers.SetActive(false);
                             task.signOff(ID);
                             taskList.RemoveAt(t);
                             break;
@@ -166,7 +168,7 @@ namespace StoryEngine
                         case "toggledebug":
                         case "debugtoggle":
 
-                            DeusCanvas.SetActive(!DeusCanvas.activeSelf);
+                            DeusPointers.SetActive(!DeusPointers.activeSelf);
                             task.signOff(ID);
                             taskList.RemoveAt(t);
                             break;
@@ -282,7 +284,7 @@ namespace StoryEngine
 
 
 
-
+            PositionPointerBlocks();
 
         }
 
@@ -343,7 +345,7 @@ namespace StoryEngine
 
         void createNewPointerUi(StoryPointer targetPointer)
         {
-            if (PointerBlock == null || DeusCanvas == null)
+            if (PointerBlock == null || DeusPointers == null)
             {
                 Warning("Can't make pointerblock, null reference.");
                 return;
@@ -352,7 +354,7 @@ namespace StoryEngine
             GameObject newPointerUi;
 
             newPointerUi = Instantiate(PointerBlock);
-            newPointerUi.transform.SetParent(DeusCanvas.transform,false);
+            newPointerUi.transform.SetParent(DeusPointers.transform,false);
 
             targetPointer.pointerObject = newPointerUi;
             targetPointer.pointerTextObject = newPointerUi.transform.Find("textObject").gameObject;
@@ -378,13 +380,44 @@ namespace StoryEngine
             targetPointer.position = p;
 
             // Place it on the canvas
-
-            int row = p / PointerDisplayCols;
+            /*
+           int row = p / PointerDisplayCols;
             int col = p % PointerDisplayCols;
-            float scale = 1f / PointerDisplayCols;
 
-            targetPointer.pointerObject.GetComponent<RectTransform>().localPosition = scale * new Vector3(PointerDisplayCols /2f* -1024f+512f+col*1024f, PointerDisplayRows/2f* 512f-256f-row*512f, 0);
-            targetPointer.pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, scale);
+        //    float scale = 1f / PointerDisplayCols;
+
+            //DeusPointers.GetComponent<RectTransform>().localScale= new Vector3(scale, scale, scale);
+
+           targetPointer.pointerObject.GetComponent<RectTransform>().localPosition = new Vector3(col*Screen.width,-row*384,0);
+    */
+        }
+
+
+        void PositionPointerBlocks()
+        {
+
+            scale = 1f / PointerDisplayCols;
+
+            DeusPointers.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, scale);
+
+            if (PointerBlock == null || DeusPointers == null)
+            {
+                Warning("Can't make pointerblock, null reference.");
+                return;
+            }
+
+            for (int p = 0; p < PointerdisplayBuffer; p++)
+            {
+
+                if (pointerPositions[p] != null)
+                {
+                    int row = p / PointerDisplayCols;
+                    int col = p % PointerDisplayCols;
+                    pointerPositions[p].pointerObject.GetComponent<RectTransform>().localPosition = new Vector3(col * Screen.width, -row * 384, 0);
+
+                }
+
+            }
 
         }
 
@@ -472,6 +505,7 @@ namespace StoryEngine
             handleTasks();
             //		handleUi ();
             updateTaskDisplays();
+
 
         }
     }

@@ -46,7 +46,7 @@ namespace StoryEngine
         bool sending = false;
 
         bool serving = false;
-         public bool Connected
+        public bool Connected
         {
             get
             {
@@ -82,7 +82,7 @@ namespace StoryEngine
             Instance = this;
             state = STATE.AWAKE;
         }
-       
+
 
         void Start()
         {
@@ -94,11 +94,11 @@ namespace StoryEngine
 #if !SOLO
             NetworkObjectInit();
 
-            if (DeusController.Instance.DeusCanvas != null && NetworkStatusObjectRef != null)
+            if (DeusController.Instance.DeusPointers != null && NetworkStatusObjectRef != null)
             {
                 // Instantiate network status object for debugging
                 GameObject ns = Instantiate(NetworkStatusObjectRef);
-                ns.transform.SetParent(DeusController.Instance.DeusCanvas.transform, false);
+                ns.transform.SetParent(DeusController.Instance.DeusPointers.transform, false);
                 BufferStatusIn = ns.transform.Find("BufferIn").gameObject;
                 BufferStatusOut = ns.transform.Find("BufferOut").gameObject;
 
@@ -601,8 +601,8 @@ namespace StoryEngine
                             {
                                 if (foundServer())
                                 {
-                                    Log("Found broadcast server " + networkBroadcast.serverAddress+" key " + networkBroadcast.broadcastKey);
-                                   
+                                    Log("Found broadcast server " + networkBroadcast.serverAddress + " key " + networkBroadcast.broadcastKey);
+
                                     stopBroadcast();
 
                                     task.setCallBack("serverfound");
@@ -741,7 +741,7 @@ namespace StoryEngine
             taskList.AddRange(theTasks);
         }
 
-      
+
 #if !SOLO
 
         void NetworkObjectInit()
@@ -790,14 +790,14 @@ namespace StoryEngine
                 Verbose("Stopping broadcast");
                 stopBroadcast();
             }
-           
+
 
             if (networkManager != null && networkManager.client != null)
             {
                 Verbose("Stopping networkclient.");
                 StopNetworkClient();
             }
-          
+
 
             // Server side shutdown.
 
