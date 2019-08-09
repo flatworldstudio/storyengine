@@ -45,6 +45,11 @@ namespace StoryEngine.UI
 
         }
 
+        public Button[] GetButtons()
+        {
+            return uiButtons.Values.ToArray();
+        }
+
         public InterFace(Canvas _canvas, string _name = "Unnamed")
         {
 

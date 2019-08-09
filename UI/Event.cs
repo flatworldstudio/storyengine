@@ -71,6 +71,14 @@ namespace StoryEngine.UI
 
         }
 
+        public bool IsActiveDragTarget(Button _button)
+        {
+
+            return targetButton != null && targetButton.HasDragTarget(_button);
+
+
+        }
+
         public float scaledDx
         {
             get
@@ -80,6 +88,14 @@ namespace StoryEngine.UI
 
         }
 
+        public Vector2 scaledSpeed
+        {
+            get
+            {
+                return new Vector2(scaledDx, scaledDy);
+
+            }
+        }
 
         public float scaledDy
         {
@@ -158,47 +174,47 @@ namespace StoryEngine.UI
             return result;
         }
 
-        public void Inertia()
-        {
+        //public void Inertia()
+        //{
 
-            if (isInert)
-            {
+        //    if (isInert)
+        //    {
 
-                float iVel = 0f;
-                Vector2 iVec = Vector2.zero;
+        //        float iVel = 0f;
+        //        Vector2 iVec = Vector2.zero;
 
-                // Dampen double touch distance inertia.
+        //        // Dampen double touch distance inertia.
 
-                if (Mathf.Abs(dd) < 0.5f)
-                    dd = 0;
-                else
-                    dd = Mathf.SmoothDamp(dd, 0, ref iVel, 0.075f);
-
-
-                // Dampen touch motion inertia.
-
-                Vector2 deltavec = new Vector2(dx, dy);
-
-                if (deltavec.magnitude < 0.25f)
-                {
-                    dx = 0;
-                    dy = 0;
-                }
-                else
-                {
-                    deltavec = Vector2.SmoothDamp(deltavec, Vector2.zero, ref iVec, 0.075f);
-                    dx = deltavec.x;
-                    dy = deltavec.y;
-                }
+        //        if (Mathf.Abs(dd) < 0.5f)
+        //            dd = 0;
+        //        else
+        //            dd = Mathf.SmoothDamp(dd, 0, ref iVel, 0.075f);
 
 
-                if (Mathf.Approximately(dx, 0f) && Mathf.Approximately(dy, 0f) && Mathf.Approximately(dd, 0f))
-                {
-                    isInert = false;
-                }
+        //        // Dampen touch motion inertia.
 
-            }
-        }
+        //        Vector2 deltavec = new Vector2(dx, dy);
+
+        //        if (deltavec.magnitude < 0.25f)
+        //        {
+        //            dx = 0;
+        //            dy = 0;
+        //        }
+        //        else
+        //        {
+        //            deltavec = Vector2.SmoothDamp(deltavec, Vector2.zero, ref iVec, 0.075f);
+        //            dx = deltavec.x;
+        //            dy = deltavec.y;
+        //        }
+
+
+        //        if (Mathf.Approximately(dx, 0f) && Mathf.Approximately(dy, 0f) && Mathf.Approximately(dd, 0f))
+        //        {
+        //            isInert = false;
+        //        }
+
+        //    }
+        //}
 
         public void GetUserActivity()
         {
@@ -549,9 +565,9 @@ namespace StoryEngine.UI
 
 
                 if (plane.interFace.uiButtons.TryGetValue(target2D.transform.name, out Button checkButton))
-                    Verbose("targeting button: " + checkButton.name + " in interface: " + plane.interFace.name);
+                    Log("targeting button: " + checkButton.name + " in interface: " + plane.interFace.name);
                 else
-                    Verbose("Targeting object2d: " + target2D.name + " in interface: " + plane.interFace.name);
+                    Log("Targeting object2d: " + target2D.name + " in interface: " + plane.interFace.name);
 
                 targetButton = checkButton;
 

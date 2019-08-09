@@ -33,170 +33,181 @@ namespace StoryEngine.UI
             if (uxArgs.uiEvent.targetButton == null)
                 return;
 
-            GameObject dragTarget = uxArgs.uiEvent.targetButton.GetDragTarget(uxArgs.uiEvent.direction);
-            Constraint constraint = uxArgs.uiEvent.targetButton.GetConstraint(uxArgs.uiEvent.direction);
+            Button dragTarget = uxArgs.uiEvent.targetButton.GetDragTarget(uxArgs.uiEvent.direction);
 
-            if (dragTarget == null || constraint == null)
-                return; // don't drag if no target or constraint availabe.
 
-            Translate2D(dragTarget, uxArgs.delta, constraint, uxArgs.uiEvent);
+            if (dragTarget == null) return;
+
+            Constraint constraint = dragTarget.GetConstraint();
+            
+            Vector2 delta = uxArgs.delta;
+            Vector2 deltaacc = Vector2.zero;
+
+            Translate2D(dragTarget, ref delta, ref deltaacc, constraint);
 
         }
 
-        static void Translate2D(GameObject target, Vector2 delta, Constraint constraint, Event ui)
+
+
+      public  static void Translate2D(Button target, ref Vector2 delta, ref Vector2 deltaacc, Constraint constraint)
         {
-            Vector3 anchor = target.GetComponent<RectTransform>().anchoredPosition;
+            Vector3 anchor = target.gameObject.GetComponent<RectTransform>().anchoredPosition;
             anchor.y += delta.y;
             anchor.x += delta.x;
 
-            if (constraint.hardClamp)
+            if (constraint != null)
             {
-                if (anchor.x < constraint.hardClampMin.x)
+                if (constraint.hardClamp)
                 {
-                    anchor.x = constraint.hardClampMin.x;
-                    ui.BounceHorizontal();
-                }
-                else if (anchor.x > constraint.hardClampMax.x)
-                {
-                    anchor.x = constraint.hardClampMax.x;
-                    ui.BounceHorizontal();
-                }
-                if (anchor.y < constraint.hardClampMin.y)
-                {
-                    anchor.y = constraint.hardClampMin.y;
-                    ui.BounceVertical();
-                }
-                else if (anchor.y > constraint.hardClampMax.y)
-                {
-                    anchor.y = constraint.hardClampMax.y;
-                    ui.BounceVertical();
-                }
-            }
-
-            if (constraint.radiusClamp)
-            {
-                Vector2 relativePosition = new Vector2(anchor.x, anchor.y) - constraint.anchor;
-                float magnitude = relativePosition.magnitude;
-                magnitude = Mathf.Clamp(magnitude, constraint.radiusClampMin, constraint.radiusClampMax);
-                relativePosition = relativePosition.normalized * magnitude;
-                anchor = constraint.anchor + relativePosition;
-            }
-
-            target.GetComponent<RectTransform>().anchoredPosition = anchor;
-
-            if (ui.isSpringing)
-            {
-
-                bool springing = apply2Dsprings(target, constraint, ui.springIndex);
-
-                if (ui.isSpringing && springing == false)
-                {
-                    ui.isSpringing = false;
-                    ui.springIndex = -1;
-                }
-            }
-        }
-
-        static bool apply2Dsprings(GameObject target, Constraint constraint, int springIndex)
-        {
-            // apply springs to gui object. returns true if it did anything.
-            bool result = false;
-            Vector3 anchor = target.GetComponent<RectTransform>().anchoredPosition;
-
-            if (constraint.edgeSprings)
-            {
-                result = true;
-                float eVel0 = 0;
-                float eVel1 = 0;
-                float eVel2 = 0;
-                float eVel3 = 0;
-
-                if (anchor.x < constraint.edgeSpringMin.x)
-                {
-                    anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMin.x, ref eVel0, 0.15f);
-                }
-                else if (anchor.x > constraint.edgeSpringMax.x)
-                {
-                    anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMax.x, ref eVel1, 0.15f);
-                }
-
-                if (anchor.y < constraint.edgeSpringMin.y)
-                {
-                    anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMin.y, ref eVel2, 0.15f);
-                }
-                else if (anchor.y > constraint.edgeSpringMax.y)
-                {
-                    anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMax.y, ref eVel3, 0.15f);
-                }
-
-                float maxVel = Mathf.Max(Mathf.Abs(eVel0), Mathf.Abs(eVel1), Mathf.Abs(eVel2), Mathf.Abs(eVel3));
-
-                if (maxVel < 1f)
-                {
-                    // maxvel 0 implies springs not actually doing anything, so return should be false
-                    result = false;
-
-                }
-            }
-
-            if (constraint.springs)
-            {
-
-                result = true;
-                int closestSpring = -1;
-                float closest = 9999999999f;
-
-
-
-                if (springIndex >= 0)
-                {
-
-                    closestSpring = springIndex;
-
-                }
-                else
-                {
-
-                    for (int i = 0; i < constraint.springPositions.Length; i++)
+                    if (anchor.x < constraint.hardClampMin.x)
                     {
-
-                        // find nearest spring
-
-                        Vector3 theSpringPosition = constraint.springPositions[i];
-                        float distance = Vector2.Distance(anchor, theSpringPosition);
-                        if (distance < closest)
-                        {
-                            closest = distance;
-                            closestSpring = i;
-                        }
+                        //    Log("min");
+                        anchor.x = constraint.hardClampMin.x;
+                        delta.x *= -0.5f;
+                        deltaacc.x *= -0.5f;
+                        //   ui.BounceHorizontal();
                     }
-
+                    else if (anchor.x > constraint.hardClampMax.x)
+                    {
+                        anchor.x = constraint.hardClampMax.x;
+                        //     Log("max");
+                        //     ui.BounceHorizontal();
+                        delta.x *= -0.5f;
+                        deltaacc.x *= -0.5f;
+                    }
+                    if (anchor.y < constraint.hardClampMin.y)
+                    {
+                        anchor.y = constraint.hardClampMin.y;
+                        delta.y *= -0.5f;
+                        deltaacc.y *= -0.5f;
+                        //       ui.BounceVertical();
+                    }
+                    else if (anchor.y > constraint.hardClampMax.y)
+                    {
+                        anchor.y = constraint.hardClampMax.y;
+                        delta.y *= -0.5f;
+                        deltaacc.y *= -0.5f;
+                        //       ui.BounceVertical();
+                    }
                 }
 
-                float eVel0 = 0;
-                float eVel1 = 0;
-
-                anchor.x = Mathf.SmoothDamp(anchor.x, constraint.springPositions[closestSpring].x, ref eVel0, 0.15f);
-                anchor.y = Mathf.SmoothDamp(anchor.y, constraint.springPositions[closestSpring].y, ref eVel1, 0.15f);
-
-                float maxVel = Mathf.Max(Mathf.Abs(eVel0), Mathf.Abs(eVel1));
-
-                //              float maxVel = Mathf.Max (eVel0, eVel1);
-                //              if (maxVel > 0f && maxVel < 1f) {
-
-                if (maxVel < 1f)
+                if (constraint.radiusClamp)
                 {
-                    // Note that speed is per second. So 1 pixel per second. Maybe look at dx dy since last time. 
-                    // Also, last is not per se deltatime ago.
-
-                    // maxvel 0 implies springs not actually doing anything, so return should be false
-                    result = false;
+                    Vector2 relativePosition = new Vector2(anchor.x, anchor.y) - constraint.anchor;
+                    float magnitude = relativePosition.magnitude;
+                    magnitude = Mathf.Clamp(magnitude, constraint.radiusClampMin, constraint.radiusClampMax);
+                    relativePosition = relativePosition.normalized * magnitude;
+                    anchor = constraint.anchor + relativePosition;
                 }
-            }
-            target.GetComponent<RectTransform>().anchoredPosition = anchor;
 
-            return result;
+            }
+            
+
+            target.gameObject.GetComponent<RectTransform>().anchoredPosition = anchor;
+
+
         }
+
+        //static bool apply2Dsprings(GameObject target, Constraint constraint, int springIndex)
+        //{
+        //    // apply springs to gui object. returns true if it did anything.
+        //    bool result = false;
+        //    Vector3 anchor = target.GetComponent<RectTransform>().anchoredPosition;
+
+        //    if (constraint.edgeSprings)
+        //    {
+        //        result = true;
+        //        float eVel0 = 0;
+        //        float eVel1 = 0;
+        //        float eVel2 = 0;
+        //        float eVel3 = 0;
+
+        //        if (anchor.x < constraint.edgeSpringMin.x)
+        //        {
+        //            anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMin.x, ref eVel0, 0.15f);
+        //        }
+        //        else if (anchor.x > constraint.edgeSpringMax.x)
+        //        {
+        //            anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMax.x, ref eVel1, 0.15f);
+        //        }
+
+        //        if (anchor.y < constraint.edgeSpringMin.y)
+        //        {
+        //            anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMin.y, ref eVel2, 0.15f);
+        //        }
+        //        else if (anchor.y > constraint.edgeSpringMax.y)
+        //        {
+        //            anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMax.y, ref eVel3, 0.15f);
+        //        }
+
+        //        float maxVel = Mathf.Max(Mathf.Abs(eVel0), Mathf.Abs(eVel1), Mathf.Abs(eVel2), Mathf.Abs(eVel3));
+
+        //        if (maxVel < 1f)
+        //        {
+        //            // maxvel 0 implies springs not actually doing anything, so return should be false
+        //            result = false;
+
+        //        }
+        //    }
+
+        //    if (constraint.springs)
+        //    {
+
+        //        result = true;
+        //        int closestSpring = -1;
+        //        float closest = 9999999999f;
+
+
+
+        //        if (springIndex >= 0)
+        //        {
+
+        //            closestSpring = springIndex;
+
+        //        }
+        //        else
+        //        {
+
+        //            for (int i = 0; i < constraint.springPositions.Length; i++)
+        //            {
+
+        //                // find nearest spring
+
+        //                Vector3 theSpringPosition = constraint.springPositions[i];
+        //                float distance = Vector2.Distance(anchor, theSpringPosition);
+        //                if (distance < closest)
+        //                {
+        //                    closest = distance;
+        //                    closestSpring = i;
+        //                }
+        //            }
+
+        //        }
+
+        //        float eVel0 = 0;
+        //        float eVel1 = 0;
+
+        //        anchor.x = Mathf.SmoothDamp(anchor.x, constraint.springPositions[closestSpring].x, ref eVel0, 0.15f);
+        //        anchor.y = Mathf.SmoothDamp(anchor.y, constraint.springPositions[closestSpring].y, ref eVel1, 0.15f);
+
+        //        float maxVel = Mathf.Max(Mathf.Abs(eVel0), Mathf.Abs(eVel1));
+
+        //        //              float maxVel = Mathf.Max (eVel0, eVel1);
+        //        //              if (maxVel > 0f && maxVel < 1f) {
+
+        //        if (maxVel < 1f)
+        //        {
+        //            // Note that speed is per second. So 1 pixel per second. Maybe look at dx dy since last time. 
+        //            // Also, last is not per se deltatime ago.
+
+        //            // maxvel 0 implies springs not actually doing anything, so return should be false
+        //            result = false;
+        //        }
+        //    }
+        //    target.GetComponent<RectTransform>().anchoredPosition = anchor;
+
+        //    return result;
+        //}
 
         // --------------------------------------------   3D    ----------------------------------------------------------------------
 

@@ -56,13 +56,15 @@ namespace StoryEngine.UI
 
         // ------------------------------------ MAIN UPDATE METHOD -------------------------------------------------------------------
 
-        // Checks and applies user interaction. Keeps a stack of ui events to allow for inertia, springing.
+        // Checks and applies user interaction. 
 
         /*!\brief Main method to be called to run user interaction, returns callback.
          * 
-         * Keeps a stack of ui Event objects to allow for intertia and springing.
+        
          * Always has 1 active ui Event that contains current user activity
+         * inertia and springing is handled by buttons themselves.
                    */
+
 
 
 
@@ -70,16 +72,25 @@ namespace StoryEngine.UI
         {
             cycle = (cycle + 1) % 1000;
 
-            UserCallBack callBack = new UserCallBack();
+            // Move all buttons.
 
-            int stackSize = uiEventStack.Count;
+            foreach (Plane plane in _layout.GetPlanes())
+            {
+                foreach (Button button in plane.interFace.GetButtons())
+                {
+                    if (!activeUiEvent.IsActiveDragTarget(button)) button.Move();
+
+                }
+            }
+
+
+            UserCallBack callBack = new UserCallBack();
+                  
 
             activeUiEvent.GetUserActivity(); // get (unscaled) mouse movement, touches, taps
 
 
-            //activeUiEvent.plane = _layout.FindPlaneByPoint(activeUiEvent.position); // get the plane the user is active in
-
-            // If a user touch/click just began, set targets and remove any old event targeting the same objects. 
+            // If a user touch/click just began, set targets. 
 
             if (activeUiEvent.touch == TOUCH.BEGAN)
             {
@@ -88,123 +99,14 @@ namespace StoryEngine.UI
                 //Debug.Log("targeting "+activeUiEvent.plane.address);
 
                 activeUiEvent.SetTargets();
-
-                int e = uiEventStack.Count - 1;
-
-                while (e >= 0)
-                {
-
-                    Event oldEvent = uiEventStack[e];
-
-                    if (oldEvent != activeUiEvent)
-                    {
-
-                        bool removeOld = false;
-
-                        if (activeUiEvent.targetButton != null)
-                        {
-
-                            //  we check all the new events button targets against the actual single target of the check event.
-
-                            if (oldEvent.targetButton != null && activeUiEvent.targetButton.HasDragTarget(oldEvent.targetButton.GetDragTarget(oldEvent.direction)))
-
-                            {
-
-                                removeOld = true;
-                                //         Debug.Log("Removing ui event targeting the same dragtarget");
-
-                            }
-
-
-                        }
-                        else if (activeUiEvent.target3D != null)
-                        {
-
-                            // if same 3d target, remove old.
-
-                            if (oldEvent.target3D == activeUiEvent.target3D)
-                            {
-
-                                removeOld = true;
-                            }
-
-
-                        }
-                        else
-                        {
-
-                            // if both have no targets at all, remove old. 
-
-                            if (oldEvent.targetButton == null && oldEvent.target2D == null && oldEvent.target3D == null)
-                            {
-
-                                removeOld = true;
-
-                            }
-
-                        }
-                        if (removeOld)
-                        {
-
-                            uiEventStack.RemoveAt(e);
-
-                        }
-
-                    }
-
-                    e--;
-                }
-
+                                
             }
 
             // When we get user activity from mouse/touch we get screen coordinates.
             // Before we start applying drag etc to object, we need to scale the delta values.
 
-            //float scale = (activeUiEvent.plane.interFace)
-            //activeUiEvent.CorrectForCanvasScale();
-
-            // now handle the stack of ui events. this way, events can play out (inertia, springing) while the user starts new interaction.
-            // create empty callback object
-
-
-            int i = 0;
-            //Log("events "+uiEventStack.Count);
-            while (i < uiEventStack.Count)
-            {
-
-                Event uiEvent = uiEventStack[i];
-
-                //			Log.Message ( "handling event stack of size " + uiEventStack.Count);
-
-                processUiEvent(uiEvent);
-
-                // If an old event is no longer inert or springing, remove it.
-
-                if (uiEvent != activeUiEvent && uiEvent.isInert == false && uiEvent.isSpringing == false)
-                {
-
-                    uiEventStack.RemoveAt(i);
-                  Verbose("Removing event, total left " + uiEventStack.Count);
-
-
-
-
-                    i--;
-
-                }
-
-                i++;
-
-            }
-            //foreach (Event e in uiEventStack)
-            //{
-            //    if (e.target2D != null)
-            //        Verbose("event button " + e.target2D.name);
-            //    else
-            //        Verbose("event without target ");
-
-            //}
-
+            processUiEvent(activeUiEvent);
+                        
 
             if (activeUiEvent.callback != "")
             {
@@ -216,98 +118,31 @@ namespace StoryEngine.UI
                 //Debug.Log ("callbackResult: " +  callBack.label);
 
             }
-
+            
             if (activeUiEvent.touch == TOUCH.ENDED)
             {
 
                 // the active event just ended. set inert and springing to true.
 
                 activeUiEvent.touch = TOUCH.NONE;
-
-               // if (activeUiEvent.action==ACTION.)
-
-                activeUiEvent.isInert = true;
-
+                
                 if (activeUiEvent.targetButton != null)
                 {
-                    if (activeUiEvent.targetButton.GetDragTarget() != null)
-                    {
-                        activeUiEvent.isSpringing = true;
-                    }
+
+                    activeUiEvent.targetButton.BeginInertia(activeUiEvent.scaledSpeed, activeUiEvent.direction);
                   
-
-                    // If we were dragging an ortho button, we want an event on the other direction to spring.
-
-                    //if (activeUiEvent.targetButton.orthoDragging)
-                    //{
-                    //    if (activeUiEvent.direction != DIRECTION.FREE)
-                    //    {
-                    //        //    Debug.Log("adding springing event for " + (activeUiEvent.direction == DIRECTION.HORIZONTAL ? "vertical" :"horizontal"));
-
-                    //        Event springEvent = activeUiEvent.clone();
-
-                    //        springEvent.direction = activeUiEvent.direction == DIRECTION.HORIZONTAL ? DIRECTION.VERTICAL : DIRECTION.HORIZONTAL;
-                    //        springEvent.isSpringing = true;
-                    //        springEvent.action = ACTION.SINGLEDRAG;
-                    //        Verbose("cloning event for springing");
-                    //         uiEventStack.Add(springEvent);
-
-                    //    }
-                    //    else
-                    //    {
-
-                    //        //     Debug.Log("touch ended, ortho button, direction free");
-
-                    //        // Direction was never set. We'll create springing events for both direcionts.
-                    //        // ??? direction not set means it didn't go anywhere??
-                    //        //activeUiEvent.direction = DIRECTION.HORIZONTAL;
-
-                    //        //Event springEvent = activeUiEvent.clone();
-
-                    //        //springEvent.direction = DIRECTION.VERTICAL;
-
-                    //        //Verbose("cloning event for ortho springing");
-                    //        //uiEventStack.Add(springEvent);
-
-                    //    }
-                    //}
                 }
 
-                if (activeUiEvent.action == ACTION.TAP)
-                {
-
-                    // tap must only be executed once, after that it becomes an inert singledrag event.
-
-                    activeUiEvent.action = ACTION.SINGLEDRAG;
-                    Log("tap -> singledrag");
-                    //Debug.Log("tap -> singledrag");
-
-                }
-
+                
                 // Create a new uievent to catch the next interaction 
 
-                Event newEvent = new Event();
-                uiEventStack.Add(newEvent);
-                activeUiEvent = newEvent;
+                activeUiEvent = new Event();
 
-                Verbose("added new event");
+                // Verbose("added new event");
             }
+                       
 
-            int stackSizeNew = uiEventStack.Count;
-
-            if (stackSize != stackSizeNew)
-            {
-
-                //			Log.Message ( cycle + " Event stack size changed: " + stackSizeNew);
-
-            }
-
-            if (stackSizeNew > 10)
-                Warning("Ui event stack exceeds 10, potential overflow.");
-
-
-
-            AnimateButtons();
+            AnimateButtons(); 
 
             return callBack;
 
@@ -320,7 +155,7 @@ namespace StoryEngine.UI
 
             while (i >= 0)
             {
-              
+
                 Button button = AnimatingButtons[i];
                 button.ApplyBrightness();
 
@@ -344,8 +179,9 @@ namespace StoryEngine.UI
 
         }
 
-
+        
         /*!\brief Move a Button to a given spring position.*/
+        /*
         public void setSpringTarget(Button _button, int index, DIRECTION dir = DIRECTION.FREE)
 
         //public void setSpringTarget(Button button, int index, DIRECTION dir = DIRECTION.FREE)
@@ -375,7 +211,7 @@ namespace StoryEngine.UI
 
             }
 
-            Log("Adding a springing event for spring, button "+_button.name);
+            Log("Adding a springing event for spring, button " + _button.name);
 
             Event springEvent = new Event();
 
@@ -390,7 +226,7 @@ namespace StoryEngine.UI
             uiEventStack.Add(springEvent);
 
         }
-
+        */
         // ------------------------------------------------------------------------------------------------------------------------------------------
 
         void processUiEvent(Event ui)
@@ -413,8 +249,8 @@ namespace StoryEngine.UI
 
                 case ACTION.TAP:
 
-                    ui.action = ACTION.SINGLEDRAG; 
-                    
+                    ui.action = ACTION.SINGLEDRAG;
+
                     if (ui.target2D != null)
                         interFace.tap_2d(this, args);
                     else if (ui.target3D != null)
@@ -434,16 +270,16 @@ namespace StoryEngine.UI
                         if (Mathf.Abs(ui.scaledDx) > Mathf.Abs(ui.scaledDy))
                         {
                             ui.direction = DIRECTION.HORIZONTAL;
-                            Verbose("Locking to drag horizontally");
+                            Log("Locking to drag horizontally");
                         }
                         if (Mathf.Abs(ui.scaledDx) < Mathf.Abs(ui.scaledDy))
                         {
                             ui.direction = DIRECTION.VERTICAL;
-                            Verbose("Locking to drag vertically");
+                            Log("Locking to drag vertically");
                         }
 
                     }
-              //      Verbose("singledrag");
+                    //      Verbose("singledrag");
                     args.delta = new Vector3(ui.scaledDx, ui.scaledDy, 0);
 
                     if (ui.target2D != null)
@@ -453,10 +289,10 @@ namespace StoryEngine.UI
                     else
                         interFace.single_none(this, args);
 
-                   // interFace.AddMapping
+                    // interFace.AddMapping
 
-              //      ui.isInert = false;
-              //    ui.isSpringing = false;
+                    //      ui.isInert = false;
+                    //    ui.isSpringing = false;
 
                     break;
 
@@ -481,7 +317,7 @@ namespace StoryEngine.UI
             }
 
 
-            ui.Inertia();
+            //   ui.Inertia();
 
         }
 

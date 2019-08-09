@@ -18,6 +18,12 @@ namespace StoryEngine.UI
         Plane rootPlane;
         List<Plane> AllPlanes;
 
+        public Plane[] GetPlanes()
+        {
+            return AllPlanes.ToArray();
+
+        }
+
         /*! \brief Basic constructor creates root Plane and a list of planes.  */
 
         public Layout()

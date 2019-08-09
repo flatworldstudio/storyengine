@@ -21,11 +21,12 @@ namespace StoryEngine.UI
         public string name;
         public string callback;
         public GameObject gameObject;
-        GameObject dragTarget, dragTargetHorizontal, dragTargetVertical;
+
+        Button dragTargetButton, dragTargetButtonHor, dragTargetButtonVer;
 
         public OnTap onTap;
 
-        Constraint constraint, constraintHorizontal, constraintVertical;
+        Constraint constraint;
 
         public bool orthoDragging;
 
@@ -38,119 +39,314 @@ namespace StoryEngine.UI
         Vector2 lastPosition, deltaPosition;
         float lastAngle, deltaAngle;
 
+        Vector2 speed=Vector2.zero;
+        Vector2 currentacc = Vector2.zero;
+        float eVel0 = 0;
+        float eVel1 = 0;
+        float eVel2 = 0;
+        float eVel3 = 0;
+
+        float vx = 0;
+        float vy = 0;
+
+        int SpringIndex = -1;
+
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
         void Log(string message) => StoryEngine.Log.Message(message, ID);
         void Warning(string message) => StoryEngine.Log.Warning(message, ID);
         void Error(string message) => StoryEngine.Log.Error(message, ID);
         void Verbose(string message) => StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
+          
 
-        //public Button()
-        //{
-        //    lastPosition = Vector2.zero;
-        //}
-
-        public Button(string _name)
+        public void AddDragTarget (Button _target)
         {
-            Initialise(_name);
-            constraint = Constraint.none;
-            dragTarget = gameObject;
-            lastPosition = Vector2.zero;
+            dragTargetButton = _target;
             orthoDragging = false;
         }
 
-        public Button(string _name, bool locked)
+        public void AddDragTargets(Button _hor,Button _ver)
         {
-            Initialise(_name);
+            dragTargetButtonHor = _hor;
+            dragTargetButtonVer = _ver;
+            orthoDragging = true;
+        }
 
-            if (locked)
+        public void BeginInertia(Vector2 _speed,DIRECTION _direction)
+        {
+            // inertia applies to what we were dragging
+
+            switch (_direction)
             {
-                constraint = null;
-                dragTarget = null;
+               
+                case DIRECTION.HORIZONTAL:
+                    _speed.y = 0;
+                    if (dragTargetButtonHor != null) dragTargetButtonHor.SetSpeed(_speed);
+                    if (dragTargetButtonVer != null) dragTargetButtonVer.SetSpeed(Vector2.zero);
+
+                    break;
+
+                case DIRECTION.VERTICAL:
+                    _speed.x = 0;
+                    if (dragTargetButtonHor != null) dragTargetButtonHor.SetSpeed(Vector2.zero);
+                    if (dragTargetButtonVer != null) dragTargetButtonVer.SetSpeed(_speed);
+
+                    break;
+
+                case DIRECTION.FREE:
+                default:
+
+                    if (dragTargetButton != null) dragTargetButton.SetSpeed(_speed);
+                   
+                    break;
+
+
+            }
+        
+
+
+        }
+
+        public void SetSpeed (Vector2 _speed)
+        {
+            currentacc = Vector2.zero;
+            speed = _speed;
+             eVel0 = 0;
+             eVel1 = 0;
+             eVel2 = 0;
+             eVel3 = 0;
+            vx = 0;
+            vy = 0;
+            SpringIndex = -1;
+        }
+
+        public void Move()
+        {
+           
+            speed = Vector2.SmoothDamp(speed, Vector2.zero, ref currentacc, 0.25f);
+
+            // Passing in both speed and acceleration for bouncing. So speed gets inversed, so does current acc.
+
+            if (orthoDragging)
+            {
+                if (speed.x < float.Epsilon)
+                {
+                    Methods.Translate2D(this, ref speed,ref currentacc, constraint);
+                }
+
+                if (speed.y < float.Epsilon)
+                {
+                   Methods.Translate2D(this, ref speed,ref currentacc, constraint);
+                }
+                
             }
             else
             {
-                constraint = Constraint.none;
-                dragTarget = gameObject;
+                Methods.Translate2D(this, ref speed, ref currentacc, constraint);
             }
 
-            lastPosition = Vector2.zero;
-            orthoDragging = false;
+            // Spring
+            if (constraint == null) return;
+            
+            Vector3 anchor = gameObject.GetComponent<RectTransform>().anchoredPosition;
+
+            if (constraint.edgeSprings)
+            {
+                //Log("spring");
+
+                if (anchor.x < constraint.edgeSpringMin.x)
+                {
+                    anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMin.x, ref eVel0, 0.25f);
+                }
+                else if (anchor.x > constraint.edgeSpringMax.x)
+                {
+                    anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMax.x, ref eVel1, 0.25f);
+                }
+
+                if (anchor.y < constraint.edgeSpringMin.y)
+                {
+                   
+                    anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMin.y, ref eVel2, 0.25f);
+                }
+
+                else if (anchor.y > constraint.edgeSpringMax.y)
+                {
+                    anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMax.y, ref eVel3, 0.25f);
+                }
+               
+            }
+
+            if (constraint.springs)
+            {
+                              
+                int closestSpring = -1;
+                float closest = 9999999999f;
+                
+
+                if (SpringIndex >= 0)
+                {
+                    // there is a target index we're moving to
+                    closestSpring = SpringIndex;
+
+                }
+                else
+                {
+
+                    for (int i = 0; i < constraint.springPositions.Length; i++)
+                    {
+
+                        // find nearest spring
+
+                        Vector3 theSpringPosition = constraint.springPositions[i];
+                        float distance = Vector2.Distance(anchor, theSpringPosition);
+                        if (distance < closest)
+                        {
+                            closest = distance;
+                            closestSpring = i;
+                        }
+                    }
+
+                }
+                
+                anchor.x = Mathf.SmoothDamp(anchor.x, constraint.springPositions[closestSpring].x, ref vx, 0.25f);
+                anchor.y = Mathf.SmoothDamp(anchor.y, constraint.springPositions[closestSpring].y, ref vy, 0.25f);
+                            
+            }
+
+            gameObject.GetComponent<RectTransform>().anchoredPosition = anchor;
         }
 
+        public Button (GameObject _object)
+        {
+            InitialiseByObject(_object);
+            
+        }
+
+        public Button(string _name)
+        {
+            Warning("broken");
+        }
 
         public Button(string _name, GameObject _dragTarget)
         {
-            Initialise(_name);
-            dragTarget = _dragTarget;
-            constraint = Constraint.none;
-            lastPosition = Vector2.zero;
-            orthoDragging = false;
+            Warning("broken");
         }
+        //public Button(string _name)
+        //{
+        //    Initialise(_name);
+        //    constraint = Constraint.none;
+        //    dragTarget = gameObject;
+        //    lastPosition = Vector2.zero;
+        //    orthoDragging = false;
+        //}
 
-        public Button(string _name, GameObject _dragTarget, Constraint _constraint)
-        {
-            Initialise(_name);
-            dragTarget = _dragTarget;
-            constraint = _constraint;
-            lastPosition = Vector2.zero;
-            orthoDragging = false;
-        }
+        //public Button(string _name, bool locked)
+        //{
+        //    Initialise(_name);
 
-        public Button(string _name, GameObject _dragTargetHorizontal, Constraint _constraintHorizontal, GameObject _dragTargetVertical, Constraint _constraintVertical)
-        {
-            Initialise(_name);
+        //    if (locked)
+        //    {
+        //        constraint = null;
+        //        dragTarget = null;
+        //    }
+        //    else
+        //    {
+        //        constraint = Constraint.none;
+        //        dragTarget = gameObject;
+        //    }
 
-            // Button with differentiated constraints for horizontal and vertical dragging. Dragging will snap to initial direction.
+        //    lastPosition = Vector2.zero;
+        //    orthoDragging = false;
+        //}
 
-            constraint = Constraint.none;
-            dragTarget = gameObject;
 
-            dragTargetHorizontal = _dragTargetHorizontal;
-            constraintHorizontal = _constraintHorizontal;
+        //public Button(string _name, GameObject _dragTarget)
+        //{
+        //    Initialise(_name);
+        //    dragTarget = _dragTarget;
+        //    constraint = Constraint.none;
+        //    lastPosition = Vector2.zero;
+        //    orthoDragging = false;
+        //}
 
-            dragTargetVertical = _dragTargetVertical;
-            constraintVertical = _constraintVertical;
+        //public Button(string _name, GameObject _dragTarget, Constraint _constraint)
+        //{
+        //    Initialise(_name);
+        //    dragTarget = _dragTarget;
+        //    constraint = _constraint;
+        //    lastPosition = Vector2.zero;
+        //    orthoDragging = false;
+        //}
 
-            orthoDragging = true;
+        //public Button(string _name, GameObject _dragTargetHorizontal, Constraint _constraintHorizontal, GameObject _dragTargetVertical, Constraint _constraintVertical)
+        //{
+        //    Initialise(_name);
 
-            lastPosition = Vector2.zero;
-        }
+        //    // Button with differentiated constraints for horizontal and vertical dragging. Dragging will snap to initial direction.
 
-        void Initialise(string _name)
+        //    constraint = Constraint.none;
+        //    dragTarget = gameObject;
+
+        //    dragTargetHorizontal = _dragTargetHorizontal;
+        //    constraintHorizontal = _constraintHorizontal;
+
+        //    dragTargetVertical = _dragTargetVertical;
+        //    constraintVertical = _constraintVertical;
+
+        //    orthoDragging = true;
+
+        //    lastPosition = Vector2.zero;
+        //}
+
+        //void Initialise(string _name)
+        //{
+        //    callback = "";
+        //    name = _name;
+        //    color = new Color(1, 1, 1, 1);
+        //    brightness = 1f;
+        //    targetBrightness = 1f;
+        //    stepBrightness = 1f / 0.25f;
+
+        //    gameObject = GameObject.Find(_name);
+
+
+        //    //image = gameObject.GetComponent<Image>();
+
+
+        //    if (gameObject != null)
+        //    {
+
+        //        image = gameObject.GetComponent<Image>();
+        //        //   ApplyBrightness();
+
+        //        //if (image != null)
+        //        //{
+        //        //    image.color = brightness * color;
+        //        //}
+        //    }
+        //    else
+        //    {
+        //        // catch exception
+        //        Error("Gameobject not found: " + _name);
+        //    }
+
+        //    //   onTap = DefaultBlink;
+        //}
+
+        void InitialiseByObject(GameObject _object)
         {
             callback = "";
-            name = _name;
+            gameObject = _object;
+            name = gameObject.name;
             color = new Color(1, 1, 1, 1);
             brightness = 1f;
             targetBrightness = 1f;
             stepBrightness = 1f / 0.25f;
 
-            gameObject = GameObject.Find(_name);
+            image = gameObject.GetComponent<Image>();
 
-
-            //image = gameObject.GetComponent<Image>();
-
-
-            if (gameObject != null)
-            {
-
-               image = gameObject.GetComponent<Image>();
-             //   ApplyBrightness();
-
-                //if (image != null)
-                //{
-                //    image.color = brightness * color;
-                //}
-            }
-            else
-            {
-                // catch exception
-                Error("Gameobject not found: " + _name);
-            }
-
-            //   onTap = DefaultBlink;
+            Log("created button " + name);
+   
         }
-
 
         public void AddCallback(string _callBack)
         {
@@ -166,21 +362,25 @@ namespace StoryEngine.UI
 
         public void AddOrthoConstraints(GameObject _dragTargetHorizontal, Constraint _constraintHorizontal, GameObject _dragTargetVertical, Constraint _constraintVertical)
         {
-            constraint = Constraint.none;
-
-            dragTargetHorizontal = _dragTargetHorizontal;
-            constraintHorizontal = _constraintHorizontal;
-
-            dragTargetVertical = _dragTargetVertical;
-            constraintVertical = _constraintVertical;
-
-            orthoDragging = true;
-
+            Warning("broken");
         }
+            //public void AddOrthoConstraints(GameObject _dragTargetHorizontal, Constraint _constraintHorizontal, GameObject _dragTargetVertical, Constraint _constraintVertical)
+            //{
+            //    constraint = Constraint.none;
+
+            //    dragTargetHorizontal = _dragTargetHorizontal;
+            //    constraintHorizontal = _constraintHorizontal;
+
+            //    dragTargetVertical = _dragTargetVertical;
+            //    constraintVertical = _constraintVertical;
+
+            //    orthoDragging = true;
+
+            //}
 
 
 
-        public void AddDefaultBlink()
+            public void AddDefaultBlink()
         {
             SetBrightness(0.75f);
             onTap = DefaultBlink;
@@ -235,34 +435,49 @@ namespace StoryEngine.UI
         }
 
 
-        public GameObject GetDragTarget(DIRECTION dir = DIRECTION.FREE)
+        public Button GetDragTarget(DIRECTION dir )
         {
             // Retrieve drag target object based on drag direction
 
             switch (dir)
             {
                 case DIRECTION.HORIZONTAL:
-                    return dragTargetHorizontal;
+                    return dragTargetButtonHor;
 
                 case DIRECTION.VERTICAL:
-                    return dragTargetVertical;
+                    return dragTargetButtonVer;
 
                 case DIRECTION.FREE:
                 default:
-                    return dragTarget;
+                    return dragTargetButton;
 
             }
         }
 
-        public bool HasDragTarget(GameObject target)
+        //public bool HasDragTarget(GameObject target)
+        //{
+
+        //    // Check if this button targets a given gameobject as its dragtargets.
+
+        //    if (!orthoDragging && dragTarget == target)
+        //        return true;
+
+        //    if (orthoDragging && (dragTargetHorizontal == target || dragTargetVertical == target))
+        //        return true;
+
+        //    return false;
+
+        //}
+
+        public bool HasDragTarget(Button target)
         {
 
-            // Check if this button targets a given gameobject as its dragtargets.
+            // Check if this button targets a given button as its dragtargets.
 
-            if (!orthoDragging && dragTarget == target)
+            if (!orthoDragging && dragTargetButton == target)
                 return true;
 
-            if (orthoDragging && (dragTargetHorizontal == target || dragTargetVertical == target))
+            if (orthoDragging && (dragTargetButtonHor == target || dragTargetButtonVer == target))
                 return true;
 
             return false;
@@ -270,30 +485,41 @@ namespace StoryEngine.UI
         }
 
 
-        public Constraint GetConstraint(DIRECTION dir = DIRECTION.FREE)
+        public Constraint GetConstraint()
         {
             // Retrieve  constraint  based on drag direction
 
-            switch (dir)
-            {
-                case DIRECTION.HORIZONTAL:
-                    return constraintHorizontal;
-
-                case DIRECTION.VERTICAL:
-                    return constraintVertical;
-
-                case DIRECTION.FREE:
-                default:
+          
                     return constraint;
 
-            }
+            
         }
+
+        //public Constraint GetConstraint(DIRECTION dir = DIRECTION.FREE)
+        //{
+        //    // Retrieve  constraint  based on drag direction
+
+        //    switch (dir)
+        //    {
+        //        case DIRECTION.HORIZONTAL:
+        //            return constraintHorizontal;
+
+        //        case DIRECTION.VERTICAL:
+        //            return constraintVertical;
+
+        //        case DIRECTION.FREE:
+        //        default:
+        //            return constraint;
+
+        //    }
+        //}
 
 
         public float GetDeltaAngle()
         {
 
-            Vector3 anchor = dragTarget.GetComponent<RectTransform>().anchoredPosition;
+            Warning("this may be broken");
+            Vector3 anchor = dragTargetButton.gameObject.GetComponent<RectTransform>().anchoredPosition;
             Vector2 relativePosition = new Vector2(anchor.x, anchor.y) - constraint.anchor;
 
             float angle = Mathf.Atan2(relativePosition.y, relativePosition.x);
@@ -307,7 +533,7 @@ namespace StoryEngine.UI
 
         public Vector2 GetDeltaPosition()
         {
-
+            Warning("this may be broken");
             deltaPosition.x = gameObject.transform.position.x - lastPosition.x;
             deltaPosition.y = gameObject.transform.position.y - lastPosition.y;
 
@@ -315,6 +541,13 @@ namespace StoryEngine.UI
             lastPosition.y = gameObject.transform.position.y;
 
             return deltaPosition;
+        }
+
+        public void SetSpringTarget (int _index)
+        {
+
+            SpringIndex = _index;
+
         }
 
 
