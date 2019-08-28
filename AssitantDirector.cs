@@ -37,7 +37,12 @@ namespace StoryEngine
 
         public static AssitantDirector Instance;
 
+        [Header("Log levels")]
         public LOGLEVEL DefaultLogLevel;/*!< \brief Set this value in Unity Editor */
+        public LOGLEVEL DirectorLogLevel;
+        public LOGLEVEL ADLogLevel;
+        public LOGLEVEL DataControllerLogLevel;
+
 
         string ID = "AD";
 
@@ -80,6 +85,11 @@ namespace StoryEngine
 
             //UUID.setIdentity();
             //Verbose("Identity stamp " + UUID.identity);
+
+            StoryEngine.Log.SetModuleLevel("Director", DirectorLogLevel);
+            StoryEngine.Log.SetModuleLevel("AD", ADLogLevel);
+            StoryEngine.Log.SetModuleLevel("DataController", DataControllerLogLevel);
+
 
             GENERAL.AUTHORITY = AUTHORITY.LOCAL;
             theDirector = new Director();

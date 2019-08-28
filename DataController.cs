@@ -46,7 +46,7 @@ namespace StoryEngine
         bool sending = false;
 
         bool serving = false;
-         public bool Connected
+        public bool Connected
         {
             get
             {
@@ -82,7 +82,7 @@ namespace StoryEngine
             Instance = this;
             state = STATE.AWAKE;
         }
-       
+
 
         void Start()
         {
@@ -148,8 +148,8 @@ namespace StoryEngine
                     //networkManager.client.Send(stringCode, msg);
                     //Verbose("Sending message to server: " + value);
 
-               //    NetworkTransport.s();
-                   
+                    //    NetworkTransport.s();
+
 
                     NetworkObjectShutdown();
 
@@ -601,12 +601,21 @@ namespace StoryEngine
                             {
                                 if (foundServer())
                                 {
-                                    Log("Found broadcast server " + networkBroadcast.serverAddress+" key " + networkBroadcast.broadcastKey);
-                                   
+
                                     stopBroadcast();
 
+                                    string message = networkBroadcast.serverMessage;
+                                    char[] param = { '\0' };
+                                    string[] split = message.Split(param);
+                                    
+                                    task.SetStringValue("persistantData", split[0]);
+
                                     task.setCallBack("serverfound");
+
                                     listening = false;
+
+                                    Log("Found broadcast server: " + networkBroadcast.serverAddress + " key: " + networkBroadcast.broadcastKey + " message: "+split[0]);
+
 
                                     done = true;
                                 }
@@ -741,7 +750,7 @@ namespace StoryEngine
             taskList.AddRange(theTasks);
         }
 
-      
+
 #if !SOLO
 
         void NetworkObjectInit()
@@ -790,14 +799,14 @@ namespace StoryEngine
                 Verbose("Stopping broadcast");
                 stopBroadcast();
             }
-           
+
 
             if (networkManager != null && networkManager.client != null)
             {
                 Verbose("Stopping networkclient.");
                 StopNetworkClient();
             }
-          
+
 
             // Server side shutdown.
 
