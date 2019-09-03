@@ -35,7 +35,13 @@ namespace StoryEngine.IO
 
             string[] list = Directory.GetFiles(_path);
 
-            return list;
+            List<string> Cleaned = new List<string>();
+            for (int l = 0; l < list.Length; l++)
+            {
+                if (!list[l].Contains("DS_Store")) Cleaned.Add(list[l]);
+            }
+            
+            return Cleaned.ToArray() ;
 
         }
 
