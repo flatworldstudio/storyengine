@@ -89,7 +89,7 @@ namespace StoryEngine
             if (manuscript.Count == 0)
                 Error("Script has no lines.");
 
-            Log(flattened);
+        //    Verbose(flattened);
 
             GENERAL.storyPoints = new Dictionary<string, StoryPoint>();
             Dictionary<string, StoryPoint> storyLines = new Dictionary<string, StoryPoint>();
