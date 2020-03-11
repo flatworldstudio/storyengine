@@ -165,8 +165,9 @@ namespace StoryEngine
             __pointer = null;
 
             setDefaults();
-
-            GENERAL.ALLTASKS.Add(this);
+        //    GENERAL.ALLTASKS.Add(this);
+            GENERAL.AddTask(this);
+           
 
         }
 
@@ -185,7 +186,8 @@ namespace StoryEngine
             scope = _scope;
 
             setDefaults();
-            GENERAL.ALLTASKS.Add(this);
+        //    GENERAL.ALLTASKS.Add(this);
+            GENERAL.AddTask(this);
 
         }
 

@@ -69,6 +69,20 @@ namespace StoryEngine
         static void Error(string _m) => StoryEngine.Log.Error(_m, ID);
         static void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
+        public static void AddTask(StoryTask task)
+        {
+            ALLTASKS.Add(task);
+
+            if (task.Instruction == "end")
+            {
+                Log("Encountered end task, removing pointer " + task.Pointer.currentPoint.StoryLine);
+
+                GENERAL.ALLPOINTERS.Remove(task.Pointer);
+
+            }
+
+        }
+
         public static void AddPointer(StoryPointer pointer)
         {
 

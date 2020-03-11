@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 
 using Random = UnityEngine.Random;
+using UnityEngine.Events;
 
 
 #if !SOLO
@@ -16,6 +17,8 @@ namespace StoryEngine
 {
     public delegate bool TaskHandler(StoryTask theTask);
     public delegate void NewTasksEvent(object sender, TaskArgs e);
+//    public newtaskev
+   //public 
 
     /*!
      * \brief
@@ -47,6 +50,8 @@ namespace StoryEngine
         string ID = "AD";
 
         public event NewTasksEvent newTasksEvent;
+        private NewTasksEventUnity newTasksEventUnity;
+
 
         Director theDirector;
         string launchStoryline;
@@ -74,8 +79,14 @@ namespace StoryEngine
 
         void Awake()
 		{
-            Instance=this; 
-		}
+            Instance=this;
+            if (newTasksEventUnity == null)
+            {
+                newTasksEventUnity = new NewTasksEventUnity();
+            }
+            theDirector = new Director();
+            GENERAL.ALLTASKS = new List<StoryTask>();
+        }
 
 
 		void Start()
@@ -92,8 +103,9 @@ namespace StoryEngine
 
 
             GENERAL.AUTHORITY = AUTHORITY.LOCAL;
-            theDirector = new Director();
-            GENERAL.ALLTASKS = new List<StoryTask>();
+          
+
+          
 
             #if !SOLO
             StoryUpdateStack = new List<StoryUpdate>();
@@ -353,8 +365,10 @@ namespace StoryEngine
 
                     if (newTasks.Count > 0)
                     {
+                        if (newTasksEventUnity != null) newTasksEventUnity.Invoke(newTasks);
+                        if (newTasksEvent != null) newTasksEvent(this, new TaskArgs(newTasks)); // trigger the event, if there are any listeners
 
-                        DistributeTasks(new TaskArgs(newTasks)); // if any new tasks call an event, passing on the list of tasks to any handlers listening
+                      //  DistributeTasks(new TaskArgs(newTasks)); // if any new tasks call an event, passing on the list of tasks to any handlers listening
                     }
 
                     break;
@@ -506,7 +520,17 @@ namespace StoryEngine
 
                         Log("Populated pointer " + updatePointer.currentPoint.StoryLine + " with task " + updateTask.Instruction);
 
-                        DistributeTasks(new TaskArgs(updateTask));
+                   //     DistributeTasks(new TaskArgs(updateTask));
+
+                        List<StoryTask> newTasks = new List<StoryTask>();
+                        newTasks.Add(updateTask);
+
+                   //     if (newTasksEvent != null) newTasksEvent(this, new TaskArgs(updateTask)); // trigger the event, if there are any listeners
+
+                        if (newTasksEvent != null) newTasksEvent(this, new TaskArgs(newTasks)); // trigger the event, if there are any listeners
+
+                        if (newTasksEventUnity != null) newTasksEventUnity.Invoke(newTasks);
+
 
                     }
                 }
@@ -1014,31 +1038,85 @@ namespace StoryEngine
         public int eventHandlerCount()
         {
 
+            int count = 0;
+
+
             if (newTasksEvent != null)
             {
 
-                return newTasksEvent.GetInvocationList().Length;
+                count+= newTasksEvent.GetInvocationList().Length;
 
             }
-            else
+
+            if (newTasksEventUnity != null)
             {
 
-                return 0;
+                count += newTasksListenerUnityCount;
+
             }
 
+            return count;
         }
 
-        // Invoke event;
+        int newTasksListenerUnityCount = 0;
 
-        protected virtual void DistributeTasks(TaskArgs e)
+        public void AddNewTasksListenerUnity(UnityAction<List<StoryTask>> call)
         {
+            Verbose("Adding unity event listener.");
+            newTasksEventUnity.AddListener(call);
+            newTasksListenerUnityCount++;
+			// it seems unity can't count its event listeners, so we'll have to do that here.
 
-            if (newTasksEvent != null)
-                newTasksEvent(this, e); // trigger the event, if there are any listeners
+			Verbose("Unity event listener count " + newTasksListenerUnityCount);
 
         }
+
+        public void RemoveNewTasksListenerUnity(UnityAction<List<StoryTask>> call)
+        {
+			Verbose("Removing unity event listener.");
+            newTasksEventUnity.RemoveListener(call);
+            newTasksListenerUnityCount--;
+			// it seems unity can't count its event listeners, so we'll have to do that here.
+
+
+			Verbose("Unity event listener count " + newTasksListenerUnityCount);
+        }
+
+
+
+        //// Invoke event;
+
+        //protected virtual void DistributeTasks(TaskArgs e)
+        //{
+
+        //    if (newTasksEvent != null)
+        //        newTasksEvent(this, e); // trigger the event, if there are any listeners
+
+        //}
 
     }
+    //[System.Serializable]
+    //public class TaskList
+    //{
+    //    List<StoryTask> theTasks;
+    //}
+
+    //[System.Serializable]
+    //public class MyIntEvent : UnityEvent<TaskList>
+
+    //{
+    //}
+
+
+    [System.Serializable]
+    public class NewTasksEventUnity : UnityEvent<List<StoryTask>>
+    {
+
+
+    }
+
+
+
 
     /*!
 * \brief

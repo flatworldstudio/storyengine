@@ -421,13 +421,13 @@ namespace StoryEngine
 
                 StoryTask task = taskList[t];
 
-                if (task.Instruction == "end")
-                {
-                    Log("Encountered end task, removing pointer " + task.Pointer.currentPoint.StoryLine);
+                //if (task.Instruction == "end")
+                //{
+                //    Log("Encountered end task, removing pointer " + task.Pointer.currentPoint.StoryLine);
 
-                    GENERAL.ALLPOINTERS.Remove(task.Pointer);
+                //    GENERAL.ALLPOINTERS.Remove(task.Pointer);
 
-                }
+                //}
 
                 if (!GENERAL.ALLTASKS.Exists(at => at == task))
                 {
