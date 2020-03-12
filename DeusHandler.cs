@@ -359,6 +359,12 @@ namespace StoryEngine
         void newTasksHandlerUnity(List<StoryTask> theTasks)
         {
             taskList.AddRange(theTasks);
+
+            foreach (StoryTask task in theTasks)
+            {
+                task.signOn(ID);
+            }
+
         }
 
 

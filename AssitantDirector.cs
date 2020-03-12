@@ -45,7 +45,8 @@ namespace StoryEngine
         public LOGLEVEL DirectorLogLevel;
         public LOGLEVEL ADLogLevel;
         public LOGLEVEL DataControllerLogLevel;
-
+        public LOGLEVEL ControllerLogLevel;
+        public LOGLEVEL EventLogLevel;
 
         string ID = "AD";
 
@@ -101,6 +102,8 @@ namespace StoryEngine
             StoryEngine.Log.SetModuleLevel("AD", ADLogLevel);
             StoryEngine.Log.SetModuleLevel("DataController", DataControllerLogLevel);
 
+            StoryEngine.Log.SetModuleLevel("Controller", ControllerLogLevel);
+            StoryEngine.Log.SetModuleLevel("Event", EventLogLevel);
 
             GENERAL.AUTHORITY = AUTHORITY.LOCAL;
           
@@ -375,9 +378,9 @@ namespace StoryEngine
 
                 case DIRECTORSTATUS.READY:
 
-                    GENERAL.SIGNOFFS = eventHandlerCount();
+                 int   SIGNOFFS = eventHandlerCount();
 
-                    if (GENERAL.SIGNOFFS == 0)
+                    if (SIGNOFFS == 0)
                     {
 
                         Error("No handlers registred. Pausing director.");
@@ -387,7 +390,7 @@ namespace StoryEngine
                     else
                     {
 
-                        Verbose("" + GENERAL.SIGNOFFS + " handlers registred.");
+                        Verbose("" + SIGNOFFS + " handlers registred at this time.");
 
                         Log("Starting storyline " + launchStoryline);
 
@@ -1062,24 +1065,24 @@ namespace StoryEngine
 
         public void AddNewTasksListenerUnity(UnityAction<List<StoryTask>> call)
         {
-            Verbose("Adding unity event listener.");
+            Log("Adding unity event listener.");
             newTasksEventUnity.AddListener(call);
             newTasksListenerUnityCount++;
-			// it seems unity can't count its event listeners, so we'll have to do that here.
+            // it seems unity can't count its event listeners, so we'll have to do that here.
 
-			Verbose("Unity event listener count " + newTasksListenerUnityCount);
+            Log("Unity event listener count " + newTasksListenerUnityCount);
 
         }
 
         public void RemoveNewTasksListenerUnity(UnityAction<List<StoryTask>> call)
         {
-			Verbose("Removing unity event listener.");
+            Log("Removing unity event listener.");
             newTasksEventUnity.RemoveListener(call);
             newTasksListenerUnityCount--;
-			// it seems unity can't count its event listeners, so we'll have to do that here.
+            // it seems unity can't count its event listeners, so we'll have to do that here.
 
 
-			Verbose("Unity event listener count " + newTasksListenerUnityCount);
+            Log("Unity event listener count " + newTasksListenerUnityCount);
         }
 
 

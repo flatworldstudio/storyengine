@@ -456,7 +456,11 @@ namespace StoryEngine.UI
         {
 
             if (plane == null || plane.interFace == null)
+            {
+                Verbose("plane or interface null");
                 return;
+            }
+              
 
 
             // finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
@@ -465,20 +469,23 @@ namespace StoryEngine.UI
 
             Vector2 uiPosition = new Vector2(x, y);
 
- 
+            Verbose("uipos: " + uiPosition.ToString());
+
 
             // Sometimes an offset is needed, ie when using indirect cameras and rendertextures.
             //    Vector2 uiPositionOffset = uiPosition - plane.interFace.GetAnchorOffset();
           //  Log("screen " + uiPosition);
 
             Vector2 uiPositionOffset =  plane.GetOffsetPosition(uiPosition);
+            Verbose("uiPositionOffset: " + uiPositionOffset.ToString());
 
-       //     Log("offset " + uiPositionOffset);
 
-          //  RectTransformUtility.ScreenPointToLocalPointInRectangle(rect,)
+            //     Log("offset " + uiPositionOffset);
 
-       //     Canvas[] c = GetComponentsInParent<Canvas>();
-       //    Canvas topmost = c[c.Length - 1];
+            //  RectTransformUtility.ScreenPointToLocalPointInRectangle(rect,)
+
+            //     Canvas[] c = GetComponentsInParent<Canvas>();
+            //    Canvas topmost = c[c.Length - 1];
 
             //    plane.transform.root.GetComponent<Canvas>();
 
@@ -520,6 +527,7 @@ namespace StoryEngine.UI
         
 
          //   PointerEventData pointerEventData = new PointerEventData(null);
+
             PointerEventData pointerEventData = new PointerEventData(GameObject.Find("EventSystem").GetComponent<EventSystem>());
             //Set required parameters, in this case, mouse position
 
@@ -541,6 +549,7 @@ namespace StoryEngine.UI
 
             if (results.Count > 0)
             {
+                Verbose("targeting something");
 
                 target2D = results[0].gameObject;
 

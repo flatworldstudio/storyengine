@@ -50,7 +50,11 @@ namespace StoryEngine
 
         public SCOPE scope;
 
-        int signoffs;
+        //int signoffs;
+
+        List<string> signedOn;
+        //List<string> signedOff;
+
 
         TASKSTATUS status;
 
@@ -194,7 +198,9 @@ namespace StoryEngine
         void setDefaults()
         {
 
-            signoffs = 0;
+//            signoffs = 0;
+            signedOn = new List<string>();
+        //    signedOff = new List<string>();
 
             taskIntValues = new Dictionary<string, int>();
             taskFloatValues = new Dictionary<string, float>();
@@ -1075,13 +1081,17 @@ namespace StoryEngine
 
         public void ForceComplete()
         {
-
-
-
-            Debug.Log("Force complete, signoffs still required was " + (GENERAL.SIGNOFFS - signoffs));
-
-            signoffs = GENERAL.SIGNOFFS;
+            Warning("Force complete, signoffs still required was " +signedOn.Count);
+            signedOn.Clear();
+            //signoffs = GENERAL.SIGNOFFS;
             complete();
+
+
+
+            //Warning("Force complete, signoffs still required was " + (GENERAL.SIGNOFFS - signoffs));
+
+            //signoffs = GENERAL.SIGNOFFS;
+            //complete();
 
 
 
@@ -1143,9 +1153,44 @@ namespace StoryEngine
 
         }
 
-        public void signOff(String fromMe)
+        public void signOn (string fromMe)
+        {
+            if (signedOn.Exists(x => x == fromMe))
+            {
+                Warning(Instruction+ " trying to sign off more than once: " +fromMe);
+               
+
+            }
+            else
+            {
+                signedOn.Add(fromMe);
+                Verbose(Instruction + " signing on " + fromMe);
+            }
+
+        }
+
+        public void signOff(string fromMe)
         {
 
+            if (signedOn.Exists(x => x == fromMe))
+            {
+                signedOn.Remove(fromMe);
+                Verbose(Instruction + " signing off " + fromMe);
+
+            }
+            else
+            {
+                Warning(Instruction + " trying to sign off but never signed on: "+fromMe);
+            }
+
+
+            if (signedOn.Count == 0)
+            {
+                Verbose("No more signed on " + Instruction);
+                complete();
+            }
+
+            /*
             if (GENERAL.SIGNOFFS == 0)
             {
                 Warning("Trying to signoff on a task with 0 required signoffs.");
@@ -1161,6 +1206,8 @@ namespace StoryEngine
                 complete();
 
             }
+            */
+
 
         }
 

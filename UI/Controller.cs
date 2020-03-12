@@ -83,9 +83,13 @@ namespace StoryEngine.UI
 
             if (activeUiEvent.touch == TOUCH.BEGAN)
             {
+
                 activeUiEvent.plane = _layout.FindPlaneByPoint(activeUiEvent.position); // get the plane the user is active in by screen coordinates
 
-                //Debug.Log("targeting "+activeUiEvent.plane.address);
+                if (activeUiEvent.plane != null)
+                {
+                    Log("targeting interface " + activeUiEvent.plane.interFace.name);
+                }
 
                 activeUiEvent.SetTargets();
 
@@ -168,7 +172,9 @@ namespace StoryEngine.UI
 
 
             int i = 0;
+
             //Log("events "+uiEventStack.Count);
+
             while (i < uiEventStack.Count)
             {
 
