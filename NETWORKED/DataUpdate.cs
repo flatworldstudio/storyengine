@@ -4,243 +4,21 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-#if !SOLO
 using UnityEngine.Networking;
-#endif
+
 
 namespace StoryEngine.Network
 {
-#if !SOLO
-
-    /*!
-* \brief
-* Holds update data for changes in StoryPointer and StoryTask objects.
-*/
-
-    public class StoryUpdate : MessageBase
-    {
-
-#if LOGVERBOSE
-        public string DebugLog;
-#endif
-
-        public List<PointerUpdateBundled> pointerUpdates;
-        public List<TaskUpdateBundled> taskUpdates;
-
-        public StoryUpdate() : base()
-        {
-            // Extended constructor.
-
-#if LOGVERBOSE
-            DebugLog = "Created storyupdate. \n";
-#endif
-
-            pointerUpdates = new List<PointerUpdateBundled>();
-            taskUpdates = new List<TaskUpdateBundled>();
-
-        }
-
-        public bool AnythingToSend()
-        {
-
-            return (pointerUpdates.Count > 0 || taskUpdates.Count > 0);
-
-        }
-
-        public bool GetPointerUpdate(out PointerUpdateBundled pointerUpdate)
-        {
-
-            int count = pointerUpdates.Count;
-
-            if (count > 0)
-            {
-                pointerUpdate = pointerUpdates[count - 1];
-                pointerUpdates.RemoveAt(count - 1);
-                return true;
-            }
-            pointerUpdate = null;
-            return false;
-
-        }
-
-        public bool GetTaskUpdate(out TaskUpdateBundled taskUpdate)
-        {
-
-            int count = taskUpdates.Count;
-
-            if (count > 0)
-            {
-                taskUpdate = taskUpdates[count - 1];
-                taskUpdates.RemoveAt(count - 1);
-                return true;
-            }
-
-            taskUpdate = null;
-            return false;
-
-        }
-
-        public void AddStoryPointerUpdate(PointerUpdateBundled pointerUpdateMessage)
-        {
-
-            pointerUpdates.Add(pointerUpdateMessage);
-
-#if LOGVERBOSE
-            DebugLog += "Added pointer update. \n";
-#endif
-
-        }
-
-        public void AddTaskUpdate(TaskUpdateBundled taskUpdateMessage)
-        {
-
-            taskUpdates.Add(taskUpdateMessage);
-
-#if LOGVERBOSE
-            DebugLog += "Added task update. \n";
-#endif
-
-        }
-
-        public override void Deserialize(NetworkReader reader)
-        {
-
-
-            Int16 count = reader.ReadInt16();
-
-            //Debug.Log("pointer updates "+count);
-
-            for (int n = 0; n < count; n++)
-            {
-
-                pointerUpdates.Add(new PointerUpdateBundled());
-
-#if LOGVERBOSE
-                DebugLog += pointerUpdates[n].Deserialize(ref reader);
-#else
-                pointerUpdates[n].Deserialize(ref reader);
-#endif
-
-            }
-
-            // Task updates next. First get the number of messages, then deserialise them.
-
-            count = reader.ReadInt16();
-
-            //Debug.Log("task updates "+count);
-
-            for (int n = 0; n < count; n++)
-            {
-
-                taskUpdates.Add(new TaskUpdateBundled());
-
-#if LOGVERBOSE
-                DebugLog += taskUpdates[n].Deserialize(ref reader);
-#else
-                taskUpdates[n].Deserialize(ref reader);
-#endif
-
-            }
-
-        }
-
-        public override void Serialize(NetworkWriter writer)
-        {
-
-            // Pointer updates first. First write the number of messages, then serialise them.
-
-            Int16 count = (Int16)pointerUpdates.Count;
-
-            writer.Write(count);
-
-            for (int i = 0; i < count; i++)
-            {
-
-#if LOGVERBOSE
-                DebugLog += pointerUpdates[i].Serialize(ref writer);
-#else
-                pointerUpdates[i].Serialize(ref writer);
-#endif
-
-            }
-
-            // Task updates next. First write the number of messages, then serialise them.
-            count = (Int16)taskUpdates.Count;
-
-            writer.Write(count);
-
-            for (int i = 0; i < count; i++)
-            {
-
-#if LOGVERBOSE
-                DebugLog += taskUpdates[i].Serialize(ref writer);
-#else
-                taskUpdates[i].Serialize(ref writer);
-#endif
-
-            }
-
-            //Debug.Log("serialised " +DebugLog);
-
-        }
-
-    }
-
-    /*!
-* \brief
-* Holds update data for changes in StoryPointer object
-* 
-* # Effectively, updates are only sent to kill a pointer.
-*/
-
-    public class PointerUpdateBundled
-    {
-
-        // only has a string, because we just telling clients kill this storyline.
-
-        public string StoryLineName;
-
-        public string Deserialize(ref NetworkReader reader)
-        {
-
-            StoryLineName = reader.ReadString();
-
-#if LOGVERBOSE
-            string DebugLog = "Deserialising pointer update.";
-            DebugLog += "Storyline: " + StoryLineName;
-            return DebugLog;
-#else
-            return "";
-#endif
-
-        }
-
-        public string Serialize(ref NetworkWriter writer)
-        {
-            writer.Write(StoryLineName);
-
-#if LOGVERBOSE
-            string DebugLog = "Serialising pointer update.";
-            DebugLog += "Storyline: " + StoryLineName;
- return DebugLog;
-#else
-            return "";
-#endif
-
-        }
-
-    }
-
 
     /*!
 * \brief
 * Holds update data for changes in StoryTask object
 */
 
-    public class TaskUpdateBundled
+    public class DataUpdate
     {
 
-        public string pointID;
+        string pointID = "";
 
         public List<string> updatedIntNames;
         public List<Int32> updatedIntValues;
@@ -276,7 +54,7 @@ namespace StoryEngine.Network
         public string debug;
 #endif
 
-        public TaskUpdateBundled() : base()
+        public DataUpdate() : base()
         {
 
             updatedIntNames = new List<string>();
@@ -747,7 +525,6 @@ namespace StoryEngine.Network
     }
 
    
-#endif
 
 
 

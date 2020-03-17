@@ -87,6 +87,7 @@ namespace StoryEngine
             }
             theDirector = new Director();
             GENERAL.ALLTASKS = new List<StoryTask>();
+            GENERAL.ALLDATA = new List<StoryData>();
         }
 
 
@@ -1080,8 +1081,7 @@ namespace StoryEngine
             newTasksEventUnity.RemoveListener(call);
             newTasksListenerUnityCount--;
             // it seems unity can't count its event listeners, so we'll have to do that here.
-
-
+            
             Log("Unity event listener count " + newTasksListenerUnityCount);
         }
 

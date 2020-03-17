@@ -28,7 +28,7 @@ namespace StoryEngine
    * 
    * AssistantDirector generates StoryTask objects from the StoryPointer objects updated by the director.
    */
-    
+
     public class Director
     {
         string ID = "Director";
@@ -64,18 +64,42 @@ namespace StoryEngine
 
         /*! Creates a new storypointer with a given scope and adds it to the pointerstack. */
 
-        public void NewStoryLine(string _name, SCOPE _scope=SCOPE.LOCAL)
+        public void NewStoryLine(string _name, SCOPE _scope = SCOPE.LOCAL)
         {
             if (_name == "")
             {
                 Warning("New storyline name is empty.");
                 return;
             }
+            Log("new storyline " + _name);
 
             StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
             //pointer.scope = _scope;
         }
-      
+
+        /*! Creates a new storypointer, if the storyline doesn't exist, with a given scope and adds it to the pointerstack. */
+
+        public void NewStoryLineExclusive(string _name, SCOPE _scope = SCOPE.LOCAL)
+        {
+            if (_name == "")
+            {
+                Warning("New storyline name is empty.");
+                return;
+            }
+            Log("new storyline " + _name);
+
+            if (GENERAL.GetPointerForStoryline(_name) == null)
+            {
+                StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+            }
+            else
+            {
+                Log("Storyline already running, you called exclusive.");
+            }
+
+
+            //pointer.scope = _scope;
+        }
 
         //public void NewStoryLine(string _name)
         //{
@@ -101,10 +125,10 @@ namespace StoryEngine
                 // For consistency of network logic, local pointers that were killed are disposed here.
                 // Global pointers are disposed by the AD, after updating clients about them.
 
-                if (sp.scope==SCOPE.LOCAL &&  sp.GetStatus() == POINTERSTATUS.KILLED)
+                if (sp.scope == SCOPE.LOCAL && sp.GetStatus() == POINTERSTATUS.KILLED)
                 {
-                               
-                   Log("Removing pointer: " + sp.currentPoint.StoryLine);
+
+                    Log("Removing pointer: " + sp.currentPoint.StoryLine);
                     GENERAL.ALLPOINTERS.RemoveAt(p);
 
                 }
@@ -494,7 +518,7 @@ namespace StoryEngine
 
                 }
 
-            
+
 
             }
             else
@@ -524,7 +548,7 @@ namespace StoryEngine
 
         public void loadScript(string fileName)
         {
-          //  Script theScript = new Script(fileName);
+            //  Script theScript = new Script(fileName);
 
             Script.Mount(fileName);
             //while (!theScript.isReady)
@@ -536,7 +560,7 @@ namespace StoryEngine
 
         }
 
-    
+
 
         void moveToNextPoint(StoryPointer thePointer)
         {

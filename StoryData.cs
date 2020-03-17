@@ -4,60 +4,41 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
-#if !SOLO
-
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 using StoryEngine.Network;
 
-#endif
-
 namespace StoryEngine
 {
 
-    public enum TASKTYPE
-    {
-
-        // is END still a thign?
-        BASIC,
-        ROUTING,
-        END
-
-    }
-
-    public enum TASKSTATUS
-    {
-        ACTIVE,
-        COMPLETE,
-
-    }
-
     /*!
 * \brief
-* Holds a task and variables associated with that task.
-* 
-* Task variables are updated across the network by the AssistantDirector.
+* Holds a range of serialisable variables. To serve as base for storytask and storystate.
+
 */
 
-    public class StoryTask : StoryData
+    public class StoryData
     {
+        readonly string ID = "StoryData";
 
-        string ID = "Storytask";
+        public SCOPE scope;
 
+        protected Dictionary<string, Int32> taskIntValues;
+        protected Dictionary<string, float> taskFloatValues;
+        protected Dictionary<string, Quaternion> taskQuaternionValues;
+        protected Dictionary<string, Vector3> taskVector3Values;
+        protected Dictionary<string, string> taskStringValues;
+        protected Dictionary<string, ushort[]> taskUshortValues;
+        protected Dictionary<string, byte[]> taskByteValues;
+        protected Dictionary<string, Vector3[]> taskVector3ArrayValues;
+        protected Dictionary<string, bool[]> taskBoolArrayValues;
+        protected Dictionary<string, string[]> taskStringArrayValues;
 
-        StoryPoint __point;
-        StoryPointer __pointer;
+        public bool modified = false;
+        protected bool allModified = false;
 
-        List<string> signedOn;
-
-        TASKSTATUS status;
-
-        TaskUpdateBundled updateSend, updateReceive;
-
-        int LastUpdateFrame = -1;
-        int UpdatesPerFrame = 0;
-        public int LastUpdatesPerFrame = 0;
-        public int MaxUpdatesPerFrame = 0;
+        protected Dictionary<string, bool> taskValuesChangeMask;
+        protected List<string> changedTaskValue;
 
 
         // Copy these into every class for easy debugging.
@@ -68,131 +49,53 @@ namespace StoryEngine
 
         // ----------------
 
-        public StoryPoint Point
+        public void MarkAllAsModified()
         {
-            get
-            {
-                return __point;
-            }
-            set
-            {
-                Warning("Can't set Point value directly.");
-            }
-        }
-
-        public StoryPointer Pointer
-        {
-            get
-            {
-                return __pointer;
-            }
-            set
-            {
-                __pointer = value;
-                // Warning("Can't set Pointer value directly.");
-            }
+            allModified = true;
+            modified = true;
         }
 
 
-        public string Instruction
-        {
-            get
-            {
-                if (__point == null || __point.Instructions == null || __point.Instructions.Length == 0)
-                    return "";
-                else
-                    return __point.Instructions[0];
-            }
-            set
-            {
-                Warning("Can't set Instruction value directly.");
-            }
-        }
-
-        public string PointID
-        {
-            get
-            {
-                if (__point == null)
-                    return "";
-                else
-                    return __point.ID;
-            }
-            set
-            {
-                Warning("Can't set PointID value directly.");
-            }
-        }
-
-
-        public StoryTask(string _fromPointID, SCOPE _scope) : base(_scope)
+        public StoryData(SCOPE _scope = SCOPE.GLOBAL)
         {
 
-            // Creating a task from a storypoint -> pointer to be created from this task.
-
-            __point = GENERAL.GetStoryPointByID(_fromPointID);
-            scope = _scope;
-            __pointer = null;
-
-            setDefaults();
-            GENERAL.AddTask(this);
-
-
-        }
-
-        public StoryTask(StoryPointer _fromPointer, SCOPE _scope) : base(_scope)
-        {
-
-            // Create a task based on the current storypoint of the pointer.
-            // Note that setting scope is explicit, but in effect the scope of the task is the same as the scope of the pointer.
-
-            __pointer = _fromPointer;
-            __point = __pointer.currentPoint;
-
-            _fromPointer.currentTask = this;
             scope = _scope;
 
             setDefaults();
-            GENERAL.AddTask(this);
 
         }
 
         void setDefaults()
         {
 
-            signedOn = new List<string>();
-            
-            updateSend = new TaskUpdateBundled();
-            updateReceive = new TaskUpdateBundled();
-                       
-            setStatus(TASKSTATUS.ACTIVE);
+            taskIntValues = new Dictionary<string, int>();
+            taskFloatValues = new Dictionary<string, float>();
+            taskQuaternionValues = new Dictionary<string, Quaternion>();
+            taskVector3Values = new Dictionary<string, Vector3>();
+            taskStringValues = new Dictionary<string, string>();
+            taskUshortValues = new Dictionary<string, ushort[]>();
+            taskByteValues = new Dictionary<string, byte[]>();
+            taskVector3ArrayValues = new Dictionary<string, Vector3[]>();
+            taskBoolArrayValues = new Dictionary<string, bool[]>();
+            taskStringArrayValues = new Dictionary<string, string[]>();
+
+            taskValuesChangeMask = new Dictionary<string, bool>();
 
         }
 
-        public void LoadPersistantData(StoryPointer referencePointer)
-        {
 
-            SetStringValue("persistantData", referencePointer.persistantData);
-
-        }
-
-#if !SOLO
-
-
-        public TaskUpdateBundled GetUpdateBundled()
+        public DataUpdate GetDataUpdate()
         {
             // Bundled approach.
 
-            TaskUpdateBundled msg = new TaskUpdateBundled();
-
-            msg.pointID = PointID;
+            DataUpdate msg = new DataUpdate();
 
             string[] intNames = taskIntValues.Keys.ToArray();
 
             foreach (string intName in intNames)
             {
 
-                if (taskValuesChangeMask[intName] || base.allModified)
+                if (taskValuesChangeMask[intName] || allModified)
                 {
 
                     msg.updatedIntNames.Add(intName);
@@ -404,245 +307,8 @@ namespace StoryEngine
         }
 
 
-
-        /*
-        public TaskUpdate GetUpdateMessage()
+        public void ApplyDataUpdate(DataUpdate update, bool changeMask = false)
         {
-
-            TaskUpdate msg = new TaskUpdate();
-
-            msg.pointID = pointID;
-
-            msg.updatedIntNames = new List<string>();
-            msg.updatedIntValues = new List<Int32>();
-            msg.updatedFloatNames = new List<string>();
-            msg.updatedFloatValues = new List<float>();
-            msg.updatedQuaternionNames = new List<string>();
-            msg.updatedQuaternionValues = new List<Quaternion>();
-            msg.updatedVector3Names = new List<string>();
-            msg.updatedVector3Values = new List<Vector3>();
-            msg.updatedStringNames = new List<string>();
-            msg.updatedStringValues = new List<string>();
-            msg.updatedUshortNames = new List<string>();
-            msg.updatedUshortValues = new List<ushort[]>();
-
-            msg.updatedByteNames = new List<string>();
-            msg.updatedByteValues = new List<byte[]>();
-
-            string[] intNames = taskIntValues.Keys.ToArray();
-
-            foreach (string intName in intNames)
-            {
-
-                if (taskValuesChangeMask[intName] || allModified)
-                {
-
-                    msg.updatedIntNames.Add(intName);
-
-                    taskValuesChangeMask[intName] = false;
-
-                    int intValue;
-
-                    if (taskIntValues.TryGetValue(intName, out intValue))
-                        msg.updatedIntValues.Add(intValue);
-
-                }
-
-            }
-
-            string[] floatNames = taskFloatValues.Keys.ToArray();
-
-            foreach (string floatName in floatNames)
-            {
-
-                if (taskValuesChangeMask[floatName] || allModified)
-                {
-
-                    msg.updatedFloatNames.Add(floatName);
-
-                    taskValuesChangeMask[floatName] = false;
-
-                    float floatValue;
-
-                    if (taskFloatValues.TryGetValue(floatName, out floatValue))
-                        msg.updatedFloatValues.Add(floatValue);
-
-                }
-
-            }
-
-            string[] quaternionNames = taskQuaternionValues.Keys.ToArray();
-
-            foreach (string quaternionName in quaternionNames)
-            {
-
-                if (taskValuesChangeMask[quaternionName] || allModified)
-                {
-
-                    msg.updatedQuaternionNames.Add(quaternionName);
-
-                    taskValuesChangeMask[quaternionName] = false;
-
-                    Quaternion quaternionValue;
-
-                    if (taskQuaternionValues.TryGetValue(quaternionName, out quaternionValue))
-                        msg.updatedQuaternionValues.Add(quaternionValue);
-
-                }
-
-            }
-
-            string[] vector3Names = taskVector3Values.Keys.ToArray();
-
-            foreach (string vector3Name in vector3Names)
-            {
-
-                if (taskValuesChangeMask[vector3Name] || allModified)
-                {
-
-                    msg.updatedVector3Names.Add(vector3Name);
-
-                    taskValuesChangeMask[vector3Name] = false;
-
-                    Vector3 vector3Value;
-
-                    if (taskVector3Values.TryGetValue(vector3Name, out vector3Value))
-                        msg.updatedVector3Values.Add(vector3Value);
-
-                }
-
-            }
-
-            string[] stringNames = taskStringValues.Keys.ToArray();
-
-            foreach (string stringName in stringNames)
-            {
-
-                if (taskValuesChangeMask[stringName] || allModified)
-                {
-
-                    msg.updatedStringNames.Add(stringName);
-
-                    taskValuesChangeMask[stringName] = false;
-
-                    string stringValue;
-
-                    if (taskStringValues.TryGetValue(stringName, out stringValue))
-                        msg.updatedStringValues.Add(stringValue);
-
-                }
-
-            }
-
-            string[] ushortNames = taskUshortValues.Keys.ToArray();
-
-            foreach (string ushortName in ushortNames)
-            {
-
-                if (taskValuesChangeMask[ushortName] || allModified)
-                {
-
-                    msg.updatedUshortNames.Add(ushortName);
-
-                    taskValuesChangeMask[ushortName] = false;
-
-                    ushort[] ushortValue;
-
-                    if (taskUshortValues.TryGetValue(ushortName, out ushortValue))
-                        msg.updatedUshortValues.Add(ushortValue);
-
-                }
-
-            }
-
-            string[] byteNames = taskByteValues.Keys.ToArray();
-
-            foreach (string byteName in byteNames)
-            {
-
-                if (taskValuesChangeMask[byteName] || allModified)
-                {
-
-                    msg.updatedByteNames.Add(byteName);
-
-                    taskValuesChangeMask[byteName] = false;
-
-                    byte[] byteValue;
-
-                    if (taskByteValues.TryGetValue(byteName, out byteValue))
-                        msg.updatedByteValues.Add(byteValue);
-
-                }
-
-            }
-
-            allModified = false;
-
-            return msg;
-
-        }
-*/
-        string UpdateFrequency = "";
-
-        public void ApplyUpdateMessage(TaskUpdateBundled update, bool changeMask = false)
-        {
-
-            //		Log.Message ("Applying network task update.");
-
-            //		if (update.updatedIntNames.Contains ("status")) {
-            //			Log.Message ("incoming task status change, setting pointerstatus to taskupdated.", LOGLEVEL.VERBOSE);
-            //
-            //			pointer.SetStatus (POINTERSTATUS.TASKUPDATED);
-            //		}
-
-            //if (description == "userstream")
-            //{
-
-            //    int CurrentFrame = Time.frameCount;
-
-            //    if (CurrentFrame - LastUpdateFrame==0)
-            //    {
-
-            //        UpdatesPerFrame++;
-
-
-            //    }
-            //    if (CurrentFrame - LastUpdateFrame==1){
-            //        // we're in the next frame
-            //        UpdateFrequency += "" + UpdatesPerFrame;
-
-            //        UpdatesPerFrame = 1;
-
-            //    }
-
-            //    if (CurrentFrame - LastUpdateFrame>1){
-            //        // we've skipped a frame
-
-            //        for (int f=LastUpdateFrame+1 ;f<CurrentFrame;f++){
-            //            UpdateFrequency += "" + 0;
-
-            //        }
-
-
-
-            //        UpdatesPerFrame = 1;
-
-            //    }
-
-
-
-
-
-            //    if (UpdateFrequency.Length > 30)
-            //    {
-            //        Debug.Log("update pattern:" + UpdateFrequency);
-            //        setStringValue("debug",UpdateFrequency);
-            //        UpdateFrequency = "";
-            //    }
-            //    LastUpdateFrame = CurrentFrame;
-            //}
-            //MaxUpdatesPerFrame = Mathf.Max(MaxUpdatesPerFrame, UpdatesPerFrame);
-
 
 
 
@@ -723,17 +389,17 @@ namespace StoryEngine
 
         }
 
-#endif
+
 
         public void SetIntValue(string valueName, Int32 value)
         {
 
             taskIntValues[valueName] = value;
 
-#if !SOLO
+
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
+
 
         }
 
@@ -754,10 +420,10 @@ namespace StoryEngine
 
             taskStringValues[valueName] = value;
 
-#if !SOLO
+
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
+
 
         }
 
@@ -778,10 +444,9 @@ namespace StoryEngine
 
             taskFloatValues[valueName] = value;
 
-#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
+
 
         }
 
@@ -802,10 +467,9 @@ namespace StoryEngine
 
             taskUshortValues[valueName] = value;
 
-#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
+
 
         }
 
@@ -826,10 +490,8 @@ namespace StoryEngine
 
             taskByteValues[valueName] = value;
 
-#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
 
         }
 
@@ -851,10 +513,9 @@ namespace StoryEngine
 
             taskVector3Values[valueName] = value;
 
-#if !SOLO
+
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
 
         }
 
@@ -875,10 +536,8 @@ namespace StoryEngine
 
             taskVector3ArrayValues[valueName] = value;
 
-#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
 
         }
 
@@ -899,10 +558,8 @@ namespace StoryEngine
 
             taskBoolArrayValues[valueName] = value;
 
-#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
 
         }
 
@@ -923,10 +580,8 @@ namespace StoryEngine
 
             taskStringArrayValues[valueName] = value;
 
-#if !SOLO
             taskValuesChangeMask[valueName] = true;
             modified = true;
-#endif
 
         }
 
@@ -963,195 +618,6 @@ namespace StoryEngine
             }
 
             return true;
-
-        }
-
-        void SetPointerToUpdated()
-        {
-
-            switch (GENERAL.AUTHORITY)
-            {
-
-                case AUTHORITY.GLOBAL:
-                    //		case SCOPE.SOLO:
-
-                    // we're the global server or running solo so we can trigger the pointer. regardless of the task's scope.
-
-                    Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
-
-                    break;
-
-                case AUTHORITY.LOCAL:
-
-                    // we're a local client. only if the task is local do we trigger the pointer.
-
-                    if (scope == SCOPE.LOCAL)
-                    {
-
-                        Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
-
-                    }
-
-                    break;
-
-                default:
-
-
-                    break;
-
-
-
-            }
-
-
-
-        }
-
-        public void setStatus(TASKSTATUS theStatus)
-        {
-
-            status = theStatus;
-            SetPointerToUpdated();
-
-        }
-
-        public TASKSTATUS getStatus()
-        {
-
-            return status;
-
-        }
-
-
-        public void ForceComplete()
-        {
-            Warning("Force complete, signoffs still required was " + signedOn.Count);
-            signedOn.Clear();
-            //signoffs = GENERAL.SIGNOFFS;
-            complete();
-
-
-
-            //Warning("Force complete, signoffs still required was " + (GENERAL.SIGNOFFS - signoffs));
-
-            //signoffs = GENERAL.SIGNOFFS;
-            //complete();
-
-
-
-        }
-
-
-
-
-        void complete()
-        {
-
-            if (getStatus() != TASKSTATUS.COMPLETE)
-            {
-
-                // make sure a task is only completed once.
-
-                setStatus(TASKSTATUS.COMPLETE);
-
-            }
-            else
-            {
-
-                Warning("A task was completed more than once.");
-
-            }
-
-        }
-
-        public void setCallBack(string theCallBackPoint)
-        {
-
-            SetStringValue("callBackPoint", theCallBackPoint);
-
-        }
-
-        public void clearCallBack()
-        {
-
-            SetStringValue("callBackPoint", "");
-
-        }
-
-        public string getCallBack()
-        {
-
-            string value;
-
-            if (GetStringValue("callBackPoint", out value))
-            {
-
-                return value;
-
-            }
-            else
-            {
-
-                return ("");
-            }
-
-        }
-
-        public void signOn(string fromMe)
-        {
-            if (signedOn.Exists(x => x == fromMe))
-            {
-                Warning(Instruction + " trying to sign off more than once: " + fromMe);
-
-
-            }
-            else
-            {
-                signedOn.Add(fromMe);
-                Verbose(Instruction + " signing on " + fromMe);
-            }
-
-        }
-
-        public void signOff(string fromMe)
-        {
-
-            if (signedOn.Exists(x => x == fromMe))
-            {
-                signedOn.Remove(fromMe);
-                Verbose(Instruction + " signing off " + fromMe);
-
-            }
-            else
-            {
-                Warning(Instruction + " trying to sign off but never signed on: " + fromMe);
-            }
-
-
-            if (signedOn.Count == 0)
-            {
-                Verbose("No more signed on " + Instruction);
-                complete();
-            }
-
-            /*
-            if (GENERAL.SIGNOFFS == 0)
-            {
-                Warning("Trying to signoff on a task with 0 required signoffs.");
-            }
-
-            signoffs++;
-
-            //			Debug.Log ("SIGNOFFS "+fromMe + description + " signoffs: " + signoffs + " of " + signoffsRequired);
-
-            if (signoffs == GENERAL.SIGNOFFS)
-            {
-
-                complete();
-
-            }
-            */
-
 
         }
 

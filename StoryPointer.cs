@@ -42,10 +42,10 @@ namespace StoryEngine
         POINTERSTATUS status;
         public string persistantData;
 
-        public Text deusText;
-        public Text deusTextSuper;
-        public GameObject pointerObject, pointerTextObject;
-        public int position;
+      //  public Text deusText;
+    //    public Text deusTextSuper;
+    //    public GameObject pointerObject, pointerTextObject;
+   //     public int position;
 
         //public bool modified;
 

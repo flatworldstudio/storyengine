@@ -55,6 +55,8 @@ namespace StoryEngine
         public static Dictionary<string, StoryPoint> storyPoints;
         public static List<StoryPointer> ALLPOINTERS;
         public static List<StoryTask> ALLTASKS;
+        public static List<StoryData> ALLDATA;
+
 
         public static bool isPauzed = false;
         public static bool hasFocus = true;
@@ -68,6 +70,13 @@ namespace StoryEngine
         static void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
         static void Error(string _m) => StoryEngine.Log.Error(_m, ID);
         static void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
+
+
+        public static void AddData (StoryData data)
+        {
+            ALLDATA.Add(data);
+            Log("Adding data");
+        }
 
         public static void AddTask(StoryTask task)
         {
