@@ -17,10 +17,36 @@ namespace StoryEngine
 
 */
 
+
+    public enum DATASTATE
+
+    {
+        NEUTRAL,
+        AUTHORITY,
+        NEEDSUPDATE
+    }
+
+
     public class StoryData
     {
-        readonly string ID = "StoryData";
+        string _ID = "";
 
+        //   Guid GUID;
+
+        public string ID
+        {
+            get
+            {
+                return _ID;
+            }
+            set
+            {
+                if (_ID == "")
+                    _ID = value;
+                else
+                    Warning("Cannot change ID, are you sure that is your intention?");
+            }
+        }
         public SCOPE scope;
 
         protected Dictionary<string, Int32> taskIntValues;
@@ -34,11 +60,16 @@ namespace StoryEngine
         protected Dictionary<string, bool[]> taskBoolArrayValues;
         protected Dictionary<string, string[]> taskStringArrayValues;
 
-        public bool modified = false;
-        protected bool allModified = false;
+        //       public Dictionary<string, DATASTATE> Participants; // ip address
 
-        protected Dictionary<string, bool> taskValuesChangeMask;
-        protected List<string> changedTaskValue;
+
+        public bool modified = false;
+        //   protected bool allModified = false;
+
+        protected Dictionary<string, string> taskValuesChangeMask;
+
+        List<string> changeLog;
+        //    protected List<string> changedTaskValue;
 
 
         // Copy these into every class for easy debugging.
@@ -51,22 +82,59 @@ namespace StoryEngine
 
         public void MarkAllAsModified()
         {
-            allModified = true;
+            //     allModified = true;
             modified = true;
         }
 
 
-        public StoryData(SCOPE _scope = SCOPE.GLOBAL)
+        public StoryData(string _id, SCOPE _scope = SCOPE.LOCAL)
         {
 
+            //      GUID = Guid.NewGuid(); // to be used over network
+            ID = _id;
             scope = _scope;
-
             setDefaults();
 
         }
+        //public void AddParticipant(string _ip)
+        //{
+        //    Participants.Add(_ip, DATASTATE.NEUTRAL);
+        //}
+
+        //public string GetParticipants()
+        //{
+        //    string r = "";
+        //    string[] ips = Participants.Keys.ToArray<string>();
+        //    for (int p = 0; p < ips.Length; p++)
+        //    {
+        //        r += ips[p] + " ";
+        //        switch (Participants[ips[p]])
+        //        {
+        //            case DATASTATE.NEUTRAL:
+        //                r += "neutral";
+        //                break;
+        //            case DATASTATE.AUTHORITY:
+        //                r += "authority";
+        //                break;
+        //            case DATASTATE.NEEDSUPDATE:
+        //                r += "needsupdate";
+        //                break;
+        //            default:
+        //                break;
+
+        //        }
+        //        r += "\n";
+        //    }
+
+        //    return r;
+
+
+
+        //}
 
         void setDefaults()
         {
+            //    Participants = new Dictionary<string, DATASTATE>();
 
             taskIntValues = new Dictionary<string, int>();
             taskFloatValues = new Dictionary<string, float>();
@@ -79,14 +147,13 @@ namespace StoryEngine
             taskBoolArrayValues = new Dictionary<string, bool[]>();
             taskStringArrayValues = new Dictionary<string, string[]>();
 
-            taskValuesChangeMask = new Dictionary<string, bool>();
-
+            taskValuesChangeMask = new Dictionary<string, string>();
+            changeLog = new List<string>();
         }
 
-
-        public DataUpdate GetDataUpdate()
+        public DataUpdate GetDataUpdateFor(string target)
         {
-            // Bundled approach.
+            // Get changes for a target, so any changes NOT made by said target.
 
             DataUpdate msg = new DataUpdate();
 
@@ -94,13 +161,14 @@ namespace StoryEngine
 
             foreach (string intName in intNames)
             {
+                // If mask isn't void and isn't the target, then it is changed but not by the target, implying it should be told about it.
 
-                if (taskValuesChangeMask[intName] || allModified)
+                if (taskValuesChangeMask[intName] != "" && taskValuesChangeMask[intName] != target)
                 {
 
                     msg.updatedIntNames.Add(intName);
 
-                    taskValuesChangeMask[intName] = false;
+                    taskValuesChangeMask[intName] = "";
 
                     int intValue;
 
@@ -116,12 +184,12 @@ namespace StoryEngine
             foreach (string floatName in floatNames)
             {
 
-                if (taskValuesChangeMask[floatName] || allModified)
+                if (taskValuesChangeMask[floatName] != target && taskValuesChangeMask[floatName] != target)
                 {
 
                     msg.updatedFloatNames.Add(floatName);
 
-                    taskValuesChangeMask[floatName] = false;
+                    taskValuesChangeMask[floatName] = "";
 
                     float floatValue;
 
@@ -137,12 +205,12 @@ namespace StoryEngine
             foreach (string quaternionName in quaternionNames)
             {
 
-                if (taskValuesChangeMask[quaternionName] || allModified)
+                if (taskValuesChangeMask[quaternionName] != "" && taskValuesChangeMask[quaternionName] != target)
                 {
 
                     msg.updatedQuaternionNames.Add(quaternionName);
 
-                    taskValuesChangeMask[quaternionName] = false;
+                    taskValuesChangeMask[quaternionName] = "";
 
                     Quaternion quaternionValue;
 
@@ -158,12 +226,12 @@ namespace StoryEngine
             foreach (string vector3Name in vector3Names)
             {
 
-                if (taskValuesChangeMask[vector3Name] || allModified)
+                if (taskValuesChangeMask[vector3Name] != "" && taskValuesChangeMask[vector3Name] != target)
                 {
 
                     msg.updatedVector3Names.Add(vector3Name);
 
-                    taskValuesChangeMask[vector3Name] = false;
+                    taskValuesChangeMask[vector3Name] = "";
 
                     Vector3 vector3Value;
 
@@ -179,12 +247,12 @@ namespace StoryEngine
             foreach (string stringName in stringNames)
             {
 
-                if (taskValuesChangeMask[stringName] || allModified)
+                if (taskValuesChangeMask[stringName] != "" && taskValuesChangeMask[stringName] != target)
                 {
 
                     msg.updatedStringNames.Add(stringName);
 
-                    taskValuesChangeMask[stringName] = false;
+                    taskValuesChangeMask[stringName] = "";
 
                     string stringValue;
 
@@ -200,12 +268,12 @@ namespace StoryEngine
             foreach (string ushortName in ushortNames)
             {
 
-                if (taskValuesChangeMask[ushortName] || allModified)
+                if (taskValuesChangeMask[ushortName] != "" && taskValuesChangeMask[ushortName] != target)
                 {
 
                     msg.updatedUshortNames.Add(ushortName);
 
-                    taskValuesChangeMask[ushortName] = false;
+                    taskValuesChangeMask[ushortName] = "";
 
                     ushort[] ushortValue;
 
@@ -221,12 +289,12 @@ namespace StoryEngine
             foreach (string byteName in byteNames)
             {
 
-                if (taskValuesChangeMask[byteName] || allModified)
+                if (taskValuesChangeMask[byteName] != "" && taskValuesChangeMask[byteName] != target)
                 {
 
                     msg.updatedByteNames.Add(byteName);
 
-                    taskValuesChangeMask[byteName] = false;
+                    taskValuesChangeMask[byteName] = "";
 
                     byte[] byteValue;
 
@@ -242,12 +310,12 @@ namespace StoryEngine
             foreach (string vector3ArrayName in vector3ArrayNames)
             {
 
-                if (taskValuesChangeMask[vector3ArrayName] || allModified)
+                if (taskValuesChangeMask[vector3ArrayName] != "" && taskValuesChangeMask[vector3ArrayName] != "")
                 {
 
                     msg.updatedVector3ArrayNames.Add(vector3ArrayName);
 
-                    taskValuesChangeMask[vector3ArrayName] = false;
+                    taskValuesChangeMask[vector3ArrayName] = "";
 
                     Vector3[] vector3ArrayValue;
 
@@ -263,12 +331,12 @@ namespace StoryEngine
             foreach (string boolArrayName in boolArrayNames)
             {
 
-                if (taskValuesChangeMask[boolArrayName] || allModified)
+                if (taskValuesChangeMask[boolArrayName] != "" && taskValuesChangeMask[boolArrayName] != target)
                 {
 
                     msg.updatedBoolArrayNames.Add(boolArrayName);
 
-                    taskValuesChangeMask[boolArrayName] = false;
+                    taskValuesChangeMask[boolArrayName] = "";
 
                     bool[] boolArrayValue;
 
@@ -284,12 +352,12 @@ namespace StoryEngine
             foreach (string stringArrayName in stringArrayNames)
             {
 
-                if (taskValuesChangeMask[stringArrayName] || allModified)
+                if (taskValuesChangeMask[stringArrayName] != "" && taskValuesChangeMask[stringArrayName] != target)
                 {
 
                     msg.updatedStringArrayNames.Add(stringArrayName);
 
-                    taskValuesChangeMask[stringArrayName] = false;
+                    taskValuesChangeMask[stringArrayName] = "";
 
                     string[] stringArrayValue;
 
@@ -300,14 +368,236 @@ namespace StoryEngine
 
             }
 
-            allModified = false;
+            //     allModified = false;
+
+            return msg;
+
+        }
+
+        public DataUpdate GetDataUpdate()
+        {
+            // Bundled approach.
+
+            DataUpdate msg = new DataUpdate();
+
+            string[] intNames = taskIntValues.Keys.ToArray();
+
+            foreach (string intName in intNames)
+            {
+
+                if (taskValuesChangeMask[intName] != "")
+                {
+
+                    msg.updatedIntNames.Add(intName);
+
+                    taskValuesChangeMask[intName] = "";
+
+                    int intValue;
+
+                    if (taskIntValues.TryGetValue(intName, out intValue))
+                        msg.updatedIntValues.Add(intValue);
+
+                }
+
+            }
+
+            string[] floatNames = taskFloatValues.Keys.ToArray();
+
+            foreach (string floatName in floatNames)
+            {
+
+                if (taskValuesChangeMask[floatName] != "")
+                {
+
+                    msg.updatedFloatNames.Add(floatName);
+
+                    taskValuesChangeMask[floatName] = "";
+
+                    float floatValue;
+
+                    if (taskFloatValues.TryGetValue(floatName, out floatValue))
+                        msg.updatedFloatValues.Add(floatValue);
+
+                }
+
+            }
+
+            string[] quaternionNames = taskQuaternionValues.Keys.ToArray();
+
+            foreach (string quaternionName in quaternionNames)
+            {
+
+                if (taskValuesChangeMask[quaternionName] != "")
+                {
+
+                    msg.updatedQuaternionNames.Add(quaternionName);
+
+                    taskValuesChangeMask[quaternionName] = "";
+
+                    Quaternion quaternionValue;
+
+                    if (taskQuaternionValues.TryGetValue(quaternionName, out quaternionValue))
+                        msg.updatedQuaternionValues.Add(quaternionValue);
+
+                }
+
+            }
+
+            string[] vector3Names = taskVector3Values.Keys.ToArray();
+
+            foreach (string vector3Name in vector3Names)
+            {
+
+                if (taskValuesChangeMask[vector3Name] != "")
+                {
+
+                    msg.updatedVector3Names.Add(vector3Name);
+
+                    taskValuesChangeMask[vector3Name] = "";
+
+                    Vector3 vector3Value;
+
+                    if (taskVector3Values.TryGetValue(vector3Name, out vector3Value))
+                        msg.updatedVector3Values.Add(vector3Value);
+
+                }
+
+            }
+
+            string[] stringNames = taskStringValues.Keys.ToArray();
+
+            foreach (string stringName in stringNames)
+            {
+
+                if (taskValuesChangeMask[stringName] != "")
+                {
+
+                    msg.updatedStringNames.Add(stringName);
+
+                    taskValuesChangeMask[stringName] = "";
+
+                    string stringValue;
+
+                    if (taskStringValues.TryGetValue(stringName, out stringValue))
+                        msg.updatedStringValues.Add(stringValue);
+
+                }
+
+            }
+
+            string[] ushortNames = taskUshortValues.Keys.ToArray();
+
+            foreach (string ushortName in ushortNames)
+            {
+
+                if (taskValuesChangeMask[ushortName] != "")
+                {
+
+                    msg.updatedUshortNames.Add(ushortName);
+
+                    taskValuesChangeMask[ushortName] = "";
+
+                    ushort[] ushortValue;
+
+                    if (taskUshortValues.TryGetValue(ushortName, out ushortValue))
+                        msg.updatedUshortValues.Add(ushortValue);
+
+                }
+
+            }
+
+            string[] byteNames = taskByteValues.Keys.ToArray();
+
+            foreach (string byteName in byteNames)
+            {
+
+                if (taskValuesChangeMask[byteName] != "")
+                {
+
+                    msg.updatedByteNames.Add(byteName);
+
+                    taskValuesChangeMask[byteName] = "";
+
+                    byte[] byteValue;
+
+                    if (taskByteValues.TryGetValue(byteName, out byteValue))
+                        msg.updatedByteValues.Add(byteValue);
+
+                }
+
+            }
+
+            string[] vector3ArrayNames = taskVector3ArrayValues.Keys.ToArray();
+
+            foreach (string vector3ArrayName in vector3ArrayNames)
+            {
+
+                if (taskValuesChangeMask[vector3ArrayName] != "")
+                {
+
+                    msg.updatedVector3ArrayNames.Add(vector3ArrayName);
+
+                    taskValuesChangeMask[vector3ArrayName] = "";
+
+                    Vector3[] vector3ArrayValue;
+
+                    if (taskVector3ArrayValues.TryGetValue(vector3ArrayName, out vector3ArrayValue))
+                        msg.updatedVector3ArrayValues.Add(vector3ArrayValue);
+
+                }
+
+            }
+
+            string[] boolArrayNames = taskBoolArrayValues.Keys.ToArray();
+
+            foreach (string boolArrayName in boolArrayNames)
+            {
+
+                if (taskValuesChangeMask[boolArrayName] != "")
+                {
+
+                    msg.updatedBoolArrayNames.Add(boolArrayName);
+
+                    taskValuesChangeMask[boolArrayName] = "";
+
+                    bool[] boolArrayValue;
+
+                    if (taskBoolArrayValues.TryGetValue(boolArrayName, out boolArrayValue))
+                        msg.updatedBoolArrayValues.Add(boolArrayValue);
+
+                }
+
+            }
+
+            string[] stringArrayNames = taskStringArrayValues.Keys.ToArray();
+
+            foreach (string stringArrayName in stringArrayNames)
+            {
+
+                if (taskValuesChangeMask[stringArrayName] != "")
+                {
+
+                    msg.updatedStringArrayNames.Add(stringArrayName);
+
+                    taskValuesChangeMask[stringArrayName] = "";
+
+                    string[] stringArrayValue;
+
+                    if (taskStringArrayValues.TryGetValue(stringArrayName, out stringArrayValue))
+                        msg.updatedStringArrayValues.Add(stringArrayValue);
+
+                }
+
+            }
+
+            //   allModified = false;
 
             return msg;
 
         }
 
 
-        public void ApplyDataUpdate(DataUpdate update, bool changeMask = false)
+        public void ApplyDataUpdate(DataUpdate update, string changeMask = "")
         {
 
 
@@ -389,16 +679,38 @@ namespace StoryEngine
 
         }
 
+        void AddChangeToLog(string valueName, string changer)
+        {
+            changeLog.Insert(0, changer + " changed " + valueName);
 
+            if (changeLog.Count > 5)
+            {
+                changeLog.RemoveAt(changeLog.Count-1);
+                //Log("log size " + changeLog.Count);
+            }
 
-        public void SetIntValue(string valueName, Int32 value)
+        }
+
+        public string GetChangeLog()
+        {
+            string log = "";
+
+            for (int l = 0; l < changeLog.Count; l++)
+            {
+                log += changeLog[l] + "\n";
+            }
+            return log;
+        }
+
+        public void SetIntValue(string valueName, Int32 value, string changer = "local")
         {
 
             taskIntValues[valueName] = value;
 
-
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
+
+            AddChangeToLog(valueName, changer);
 
 
         }
@@ -415,13 +727,13 @@ namespace StoryEngine
 
         }
 
-        public void SetStringValue(string valueName, string value)
+        public void SetStringValue(string valueName, string value, string changer = "local")
         {
 
             taskStringValues[valueName] = value;
 
 
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
 
 
@@ -439,14 +751,15 @@ namespace StoryEngine
 
         }
 
-        public void SetFloatValue(string valueName, float value)
+        public void SetFloatValue(string valueName, float value, string changer = "local")
         {
 
             taskFloatValues[valueName] = value;
 
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
 
+            AddChangeToLog(valueName, changer);
 
         }
 
@@ -462,12 +775,12 @@ namespace StoryEngine
 
         }
 
-        public void SetUshortValue(string valueName, ushort[] value)
+        public void SetUshortValue(string valueName, ushort[] value, string changer = "local")
         {
 
             taskUshortValues[valueName] = value;
 
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
 
 
@@ -485,12 +798,12 @@ namespace StoryEngine
 
         }
 
-        public void SetByteValue(string valueName, byte[] value)
+        public void SetByteValue(string valueName, byte[] value, string changer = "local")
         {
 
             taskByteValues[valueName] = value;
 
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
 
         }
@@ -508,13 +821,13 @@ namespace StoryEngine
         }
 
 
-        public void SetVector3Value(string valueName, Vector3 value)
+        public void SetVector3Value(string valueName, Vector3 value, string changer = "local")
         {
 
             taskVector3Values[valueName] = value;
 
 
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
 
         }
@@ -531,12 +844,12 @@ namespace StoryEngine
 
         }
 
-        public void SetVector3ArrayValue(string valueName, Vector3[] value)
+        public void SetVector3ArrayValue(string valueName, Vector3[] value, string changer = "local")
         {
 
             taskVector3ArrayValues[valueName] = value;
 
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
 
         }
@@ -553,12 +866,11 @@ namespace StoryEngine
 
         }
 
-        public void SetBoolArrayValue(string valueName, bool[] value)
+        public void SetBoolArrayValue(string valueName, bool[] value, string changer = "local")
         {
 
             taskBoolArrayValues[valueName] = value;
-
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
 
         }
@@ -575,12 +887,11 @@ namespace StoryEngine
 
         }
 
-        public void SetStringArrayValue(string valueName, string[] value)
+        public void SetStringArrayValue(string valueName, string[] value, string changer = "local")
         {
 
             taskStringArrayValues[valueName] = value;
-
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
 
         }
@@ -597,15 +908,12 @@ namespace StoryEngine
 
         }
 
-        public void SetQuaternionValue(string valueName, Quaternion value)
+        public void SetQuaternionValue(string valueName, Quaternion value, string changer = "local")
         {
 
             taskQuaternionValues[valueName] = value;
-
-#if !SOLO
-            taskValuesChangeMask[valueName] = true;
+            taskValuesChangeMask[valueName] = changer;
             modified = true;
-#endif
 
         }
 

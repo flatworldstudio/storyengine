@@ -147,6 +147,8 @@ namespace StoryEngine
 //    return message;
 
 //}
+
+            /*
 #if !SOLO
 
         public PointerUpdateBundled GetUpdate()
@@ -164,24 +166,25 @@ namespace StoryEngine
 
         //updateMessageSend.storyPointID= currentPoint.ID;
 
-            /*
-            updateMessageSend.storyPointID = currentPoint.ID;
+//            
+//            updateMessageSend.storyPointID = currentPoint.ID;
 
-            if (status == POINTERSTATUS.KILLED)
-            {
-                updateMessageSend.killed = true;
+//            if (status == POINTERSTATUS.KILLED)
+//            {
+//                updateMessageSend.killed = true;
 
-            } else{
+//            } else{
                 
-                updateMessageSend.killed = false;
+//                updateMessageSend.killed = false;
 
-            }
-*/
+//            }
+//
             return updateMessageSend;
 
         }
 
 #endif
+    */
 
         public void SetLocal (){
             scope = SCOPE.LOCAL;

@@ -7,7 +7,7 @@ namespace StoryEngine.Samples.Simple
     public class SetHandler : MonoBehaviour
     {
 
-        public SetController setController;
+   //     public SetController setController;
         readonly string ID = "SetHandler: ";
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
@@ -25,7 +25,7 @@ namespace StoryEngine.Samples.Simple
 
         void Start()
         {
-            setController.addTaskHandler(TaskHandler);
+  //          setController.addTaskHandler(TaskHandler);
 
         }
 

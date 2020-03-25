@@ -50,9 +50,9 @@ namespace StoryEngine.Network
         public List<string> updatedStringArrayNames;
         public List<string[]> updatedStringArrayValues;
 
-#if LOGVERBOSE
+
         public string debug;
-#endif
+
 
         public DataUpdate() : base()
         {
@@ -92,7 +92,7 @@ namespace StoryEngine.Network
         public string Deserialize(ref NetworkReader reader)
         {
 #if LOGVERBOSE
-            debug = "Task update deserialing.";
+            debug = "Data update deserialing.";
 #endif
             // Custom deserialisation.
 
@@ -356,6 +356,7 @@ namespace StoryEngine.Network
             // Custom serialisation.
 
 #if LOGVERBOSE
+         
             debug = "Serialising: ";
 #endif
 

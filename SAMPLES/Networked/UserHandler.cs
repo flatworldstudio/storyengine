@@ -10,7 +10,7 @@ namespace StoryEngine.Samples.Networked
     public class UserHandler : MonoBehaviour
     {
 
-        public UserController userController;
+   //     public UserController userController;
         readonly string ID = "UserHandler: ";
 
         public Canvas UserCanvas;
@@ -34,7 +34,7 @@ namespace StoryEngine.Samples.Networked
 
         void Start()
         {
-            userController.addTaskHandler(TaskHandler);
+     //       userController.addTaskHandler(TaskHandler);
 
         }
 

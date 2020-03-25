@@ -138,8 +138,9 @@ namespace StoryEngine
 
                     // pointer needs evaluating. but we only do this if pointer is local OR if pointer is global and we are the server
 
-                    if ((sp.scope == SCOPE.GLOBAL && GENERAL.AUTHORITY == AUTHORITY.GLOBAL) || (sp.scope == SCOPE.LOCAL))
-                    {
+            //        if ((sp.scope == SCOPE.GLOBAL && GENERAL.AUTHORITY == AUTHORITY.GLOBAL) || (sp.scope == SCOPE.LOCAL))
+                        if ((sp.scope == SCOPE.GLOBAL && true) || (sp.scope == SCOPE.LOCAL))
+                        {
 
                         pointerStack.Add(sp);
 

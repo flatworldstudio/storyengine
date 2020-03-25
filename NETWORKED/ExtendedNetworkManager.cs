@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
@@ -36,7 +37,7 @@ namespace StoryEngine.Network
         string ID = "NetworkManager";
         //public GameObject NetworkInfoPrefab;
 
-     //   const short connectionMessageCode = 1001;
+        //   const short connectionMessageCode = 1001;
         List<string> __connectedAddresses;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
@@ -59,17 +60,6 @@ namespace StoryEngine.Network
             StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
         }
 
-
-        //void OnApplicationQuit()
-        //{
-        //    if (client != null)
-        //        StopNetworkClient();
-
-        //    if (NetworkServer.active)
-        //        StopNetworkServer();
-
-        //}
-
         // Client methods.
 
         public OnStartClientDelegate onStartClientDelegate;
@@ -80,7 +70,7 @@ namespace StoryEngine.Network
 
         public void StartNetworkClient(string server)
         {
-
+            Verbose("Starting as client.");
             networkAddress = server;
             StartClient();
 
@@ -88,7 +78,7 @@ namespace StoryEngine.Network
 
         public override void OnStartClient(NetworkClient theClient)
         {
-            Verbose("Started as Client.");
+            Verbose("Started as client.");
 
             if (onStartClientDelegate != null)
                 onStartClientDelegate(theClient);
@@ -97,7 +87,7 @@ namespace StoryEngine.Network
 
         public void StopNetworkClient()
         {
-
+            Verbose("Stopping as client.");
             StopClient();
 
         }
@@ -105,7 +95,7 @@ namespace StoryEngine.Network
         public override void OnStopClient()
         {
 
-            Verbose("Stopped as Client.");
+            Verbose("Stopped as client.");
 
             if (onStopClientDelegate != null)
                 onStopClientDelegate();
@@ -145,17 +135,10 @@ namespace StoryEngine.Network
 
         public void StartNetworkServer()
         {
-            Log("Starting as Server");
+            Verbose("Starting as server");
             StartServer();
             __connectedAddresses = new List<string>();
 
-        }
-
-        public void StopNetworkServer()
-        {
-            Verbose("Stopping as Server.");
-            StopServer();
-            __connectedAddresses.Clear();
         }
 
         public override void OnStartServer()
@@ -168,6 +151,14 @@ namespace StoryEngine.Network
 
         }
 
+        public void StopNetworkServer()
+        {
+            Verbose("Stopping as Server.");
+            StopServer();
+            __connectedAddresses.Clear();
+        }
+
+
         public override void OnStopServer()
         {
             Verbose("Stopped as Server");
@@ -179,8 +170,9 @@ namespace StoryEngine.Network
 
         public override void OnServerConnect(NetworkConnection connection)
         {
-            Verbose("Remote client connected.");
-      //      Debug.Log("client connecct");
+            Verbose("Remote client connected from " + connection.address + " at id " + connection.connectionId);
+
+            //      Debug.Log("client connecct");
 
             GetConnectedAddresses();
 
@@ -189,11 +181,65 @@ namespace StoryEngine.Network
 
         }
 
+        public NetworkConnection[] GetConnectedClients()
+        {
+            NetworkConnection[] current = NetworkServer.connections.ToArray();
+            List<NetworkConnection> connected = new List<NetworkConnection>();
+
+
+            for (int c = 0; c < current.Length; c++)
+            {
+
+                if (current[c] != null && current[c].isConnected)
+                {
+
+                    if (connected.Exists(x => x.address == current[c].address))
+                    {
+                        Warning("Multiple connections with same address, skipping duplicate but this may cause connectivity issues.");
+                    }
+                    else
+                    {
+                        connected.Add(current[c]);
+                    }
+
+                }
+
+            }
+            return connected.ToArray();
+
+
+        }
+
+
+        public string ConnectedClientList()
+        {
+            NetworkConnection[] current = NetworkServer.connections.ToArray();
+            string l = "Current clients: " + current.Length + "\n";
+
+
+            for (int c = 0; c < current.Length; c++)
+            {
+                l += c + ": ";
+                if (current[c] != null)
+                {
+                    l += current[c].address + " id " + current[c].connectionId + " connected " + current[c].isConnected;
+                }
+                // if (current[c].address != null) l += current[c].address;
+
+                l += "\n";
+                //    l += current[c].address + " id " + current[c].connectionId + " connected " + current[c].isConnected + "\n";
+            }
+            return l;
+
+
+        }
+
         public override void OnServerDisconnect(NetworkConnection connection)
         {
-            Verbose("Remote client disconnected.");
+            Verbose("Remote client disconnected from "+connection.address);
 
-            GetConnectedAddresses();
+            Verbose(ConnectedClientList());
+           // GetConnectedAddresses();
 
             if (onServerDisconnectDelegate != null)
                 onServerDisconnectDelegate(connection);
@@ -222,7 +268,7 @@ namespace StoryEngine.Network
             NetworkServer.connections.CopyTo(connections, 0);
 
             __connectedAddresses.Clear();
-        //    List<string> addresses = new List<string>();
+            //    List<string> addresses = new List<string>();
 
             for (int c = 0; c < connections.Length; c++)
             {
@@ -231,7 +277,7 @@ namespace StoryEngine.Network
 
             }
 
-        //    __connectedAddresses    = addresses;
+            //    __connectedAddresses    = addresses;
 
         }
 

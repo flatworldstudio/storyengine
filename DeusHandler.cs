@@ -68,7 +68,7 @@ namespace StoryEngine
 
         public Item(StoryPointer sp, GameObject prefab)
         {
-            Debug.Log("creating item");
+            //  Debug.Log("creating item");
 
             __type = TYPE.POINTER;
             __sp = sp;
@@ -115,17 +115,6 @@ namespace StoryEngine
 
         }
 
-        //public static Item EMPTY
-        //{
-        //    get
-        //    {
-        //        return new Item() { __type = TYPE.NONE };
-        //    }
-        //}
-
-
-
-
 
 
     }
@@ -151,7 +140,7 @@ namespace StoryEngine
         public int PointerDisplayCols;
         public int PointerDisplayRows;
 
-
+        public static DeusHandler Instance;
         //  int PointerdisplayBuffer = 24;
 
 
@@ -164,7 +153,7 @@ namespace StoryEngine
 
         void Awake()
         {
-
+            Instance = this;
 
         }
 
@@ -291,43 +280,38 @@ namespace StoryEngine
 
             }
 
-         //   Log("datacount " + GENERAL.ALLDATA.Count);
+            //   Log("datacount " + GENERAL.ALLDATA.Count);
 
             // Go over all data objects and plot them into our diplay
-            
+
             for (int i = 0; i < GENERAL.ALLDATA.Count; i++)
             {
 
                 StoryData data = GENERAL.ALLDATA[i];
 
-
-
                 if (!itemList.Exists(x => x.StoryData == data))
                 {
-                   Log("addin gitem");
-                   Item ni = new Item(data, PointerBlock);
-                   ni.displayObject.transform.SetParent(DeusCanvas.transform, false);
+                    //    Log("addin gitem");
+                    Item ni = new Item(data, PointerBlock);
+                    ni.displayObject.transform.SetParent(DeusCanvas.transform, false);
 
-                   itemList.Add(ni);
+                    itemList.Add(ni);
 
                 }
 
             }
-            
+
             // Go over all items backwards and remove any
 
             for (int i = itemList.Count - 1; i >= 0; i--)
             {
-
                 if (itemList[i].TimeOut != 0 && itemList[i].TimeOut < Time.time)
                 {
                     Destroy(itemList[i].displayObject);
                     itemList.RemoveAt(i);
                 }
 
-
             }
-
 
             // Go over all display items and update them.
 
@@ -341,7 +325,6 @@ namespace StoryEngine
 
                 item.displayObject.GetComponent<RectTransform>().localPosition = scale * new Vector3(PointerDisplayCols / 2f * -1024f + 512f + col * 1024f, PointerDisplayRows / 2f * 512f - 256f - row * 512f, 0);
                 item.displayObject.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, scale);
-
 
                 switch (item.Type)
                 {
@@ -360,9 +343,9 @@ namespace StoryEngine
                         if (theTask.Instruction != "wait" && theTask.Instruction != "end")
                         {
 
-                            string displayText = theTask.scope == SCOPE.GLOBAL ? "G| " : "L| ";
+                            //    string displayText = theTask.scope == SCOPE.GLOBAL ? "G| " : "L| ";
 
-                            displayText = displayText + theTask.Instruction + " | ";
+                            string displayText = theTask.Instruction;
 
                             // If a task has a value for "debug" we display it along with task description.
 
@@ -371,7 +354,7 @@ namespace StoryEngine
                             if (theTask.GetStringValue("debug", out debugText))
                             {
 
-                                displayText = displayText + debugText;
+                                displayText = displayText + " | " + debugText;
 
                             }
 
@@ -388,8 +371,8 @@ namespace StoryEngine
 
                     case Item.TYPE.DATA:
 
-                        item.deusText.text = "data";
-                        item.deusTextSuper.text = "data objects" + GENERAL.ALLDATA.Count;
+                        item.deusText.text = item.StoryData.GetChangeLog();
+                        item.deusTextSuper.text = "data: " + item.StoryData.ID + GENERAL.ALLDATA.Count;
 
                         break;
                     default:
@@ -397,188 +380,13 @@ namespace StoryEngine
                 }
 
 
-
-
             }
-
-
-
-            // Go over all display pointers and see if they're still alive.
-            /*
-            for (int i = pointerList.Count - 1; i >= 0; i--)
-            {
-
-
-
-                StoryPointer pointer = pointerList[i];
-
-                if (!GENERAL.ALLPOINTERS.Contains(pointer))
-                {
-
-                    Verbose("Destroying ui for pointer for storyline " + pointer.currentPoint.StoryLine);
-
-                    // update first. some pointers reach end in a single go - we want those to be aligned.
-
-                    //				updateTaskDisplay (task);
-
-                    pointerList.Remove(pointer);
-
-                    itemList[pointer.position] = Item.EMPTY;
-
-                    Destroy(pointer.pointerObject);
-
-
-                }
-
-            }
-            */
-
-
 
 
 
 
 
         }
-
-        /*
-        void updateTaskInfo(StoryPointer pointer)
-        {
-
-            StoryTask theTask = pointer.currentTask;
-
-            if (theTask == null || theTask.Pointer.pointerObject == null)
-                return;
-
-            if (theTask.Instruction != "wait")
-            {
-
-                string displayText = theTask.scope == SCOPE.GLOBAL ? "G| " : "L| ";
-
-
-                displayText = displayText + theTask.Instruction + " | ";
-
-                // If a task has a value for "debug" we display it along with task description.
-
-                string debugText;
-
-                if (theTask.GetStringValue("debug", out debugText))
-                {
-
-                    displayText = displayText + debugText;
-
-                }
-
-                theTask.Pointer.deusText.text = displayText;
-                theTask.Pointer.deusTextSuper.text = theTask.Pointer.currentPoint.StoryLine + " " + GENERAL.ALLPOINTERS.Count;
-
-            }
-            else
-            {
-
-                theTask.Pointer.deusTextSuper.text = theTask.Pointer.currentPoint.StoryLine;
-
-            }
-
-        }
-        */
-        void createNewItemDisplay(Item item)
-        {
-            if (PointerBlock == null || DeusCanvas == null)
-            {
-                Warning("Can't make pointerblock, null reference.");
-                return;
-            }
-
-            GameObject newPointerUi;
-
-            newPointerUi = Instantiate(PointerBlock);
-            newPointerUi.transform.SetParent(DeusCanvas.transform, false);
-
-            item.displayObject = newPointerUi;
-            //item.mainTextObject = newPointerUi.transform.Find("textObject").gameObject;
-
-            //item.deusText = newPointerUi.transform.Find("textObject/Text").GetComponent<Text>();
-            //item.deusTextSuper = newPointerUi.transform.Find("textObject/TextSuper").GetComponent<Text>();
-
-            // find empty spot
-
-            //int p = 0;
-            //while (p < PointerdisplayBuffer && itemList[p].Type != Item.TYPE.NONE)
-            //{
-            //    p++;
-            //}
-
-            //if (p == PointerdisplayBuffer)
-            //{
-            //    Warning("Too many pointers to display.");
-            //    p = 0;
-            //}
-
-            //itemList[p].SetPointer(targetPointer);
-            //targetPointer.position = p;
-
-            // Place it on the canvas
-
-            //int row = p / PointerDisplayCols;
-            //int col = p % PointerDisplayCols;
-            //float scale = 1f / PointerDisplayCols;
-
-            //targetPointer.pointerObject.GetComponent<RectTransform>().localPosition = scale * new Vector3(PointerDisplayCols / 2f * -1024f + 512f + col * 1024f, PointerDisplayRows / 2f * 512f - 256f - row * 512f, 0);
-            //targetPointer.pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, scale);
-
-        }
-
-
-
-        /*
-        void createNewPointerUi(StoryPointer targetPointer)
-        {
-            if (PointerBlock == null || DeusCanvas == null)
-            {
-                Warning("Can't make pointerblock, null reference.");
-                return;
-            }
-
-            GameObject newPointerUi;
-
-            newPointerUi = Instantiate(PointerBlock);
-            newPointerUi.transform.SetParent(DeusCanvas.transform, false);
-
-            targetPointer.pointerObject = newPointerUi;
-            targetPointer.pointerTextObject = newPointerUi.transform.Find("textObject").gameObject;
-
-            targetPointer.deusText = newPointerUi.transform.Find("textObject/Text").GetComponent<Text>();
-            targetPointer.deusTextSuper = newPointerUi.transform.Find("textObject/TextSuper").GetComponent<Text>();
-
-            // find empty spot
-
-            //int p = 0;
-            //while (p < PointerdisplayBuffer && itemList[p].Type != Item.TYPE.NONE)
-            //{
-            //    p++;
-            //}
-
-            //if (p == PointerdisplayBuffer)
-            //{
-            //    Warning("Too many pointers to display.");
-            //    p = 0;
-            //}
-
-            ////itemList[p].SetPointer(targetPointer);
-            //targetPointer.position = p;
-
-            //// Place it on the canvas
-
-            //int row = p / PointerDisplayCols;
-            //int col = p % PointerDisplayCols;
-            //float scale = 1f / PointerDisplayCols;
-
-            //targetPointer.pointerObject.GetComponent<RectTransform>().localPosition = scale * new Vector3(PointerDisplayCols / 2f * -1024f + 512f + col * 1024f, PointerDisplayRows / 2f * 512f - 256f - row * 512f, 0);
-            //targetPointer.pointerObject.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, scale);
-
-        }
-        */
 
 
         void handleUi()
