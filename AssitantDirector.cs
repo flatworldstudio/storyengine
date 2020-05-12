@@ -59,8 +59,7 @@ namespace StoryEngine
 
         static public int BufferStatusOut = 0;
         static public int BufferStatusIn = 0;
-
-
+        
 
         // Copy these into every class for easy debugging.
         void Log(string _m) => StoryEngine.Log.Message(_m, ID);
@@ -236,8 +235,8 @@ namespace StoryEngine
 
                             // if a callback was set (somewhere on the network) we act on it only if we are the server or if the task is local.
 
-                            //    if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL || task.scope == SCOPE.LOCAL)
-                            if (true || task.scope == SCOPE.LOCAL)
+                                if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL || task.scope == SCOPE.LOCAL)
+                          //  if (true || task.scope == SCOPE.LOCAL)
                             {
                                 task.Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
                             }
@@ -260,8 +259,8 @@ namespace StoryEngine
 
                                 // If pointer scope is global, we add a task if our own scope is global as well. (If our scope is local, we'll be receiving the task over the network)
 
-                                //      if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL)
-                                if (true)
+                                      if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL)
+                          //      if (true)
                                 {
 
                                     if (pointer.GetStatus() == POINTERSTATUS.NEWTASK)
@@ -589,23 +588,23 @@ namespace StoryEngine
 
         public void AddNewTasksListenerUnity(UnityAction<List<StoryTask>> call)
         {
-            Log("Adding unity event listener.");
+            Verbose("Adding unity event listener.");
             newTasksEventUnity.AddListener(call);
             newTasksListenerUnityCount++;
             // it seems unity can't count its event listeners, so we'll have to do that here.
 
-            Log("Unity event listener count " + newTasksListenerUnityCount);
+            Verbose("Unity event listener count " + newTasksListenerUnityCount);
 
         }
 
         public void RemoveNewTasksListenerUnity(UnityAction<List<StoryTask>> call)
         {
-            Log("Removing unity event listener.");
+            Verbose("Removing unity event listener.");
             newTasksEventUnity.RemoveListener(call);
             newTasksListenerUnityCount--;
             // it seems unity can't count its event listeners, so we'll have to do that here.
 
-            Log("Unity event listener count " + newTasksListenerUnityCount);
+            Verbose("Unity event listener count " + newTasksListenerUnityCount);
         }
 
 

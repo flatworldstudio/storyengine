@@ -156,7 +156,7 @@ namespace StoryEngine.IO
                     StreamReader reader = new StreamReader(_path);
 
                     result = reader.ReadToEnd();
-                    Log(result);
+               //     Log(result);
                     reader.Close();
 
 

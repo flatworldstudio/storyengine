@@ -141,6 +141,12 @@ namespace StoryEngine
             state = STATE.AWAKE;
         }
 
+        public void PassVariables(MountPrefab prefab)
+        {
+
+            ID = prefab.Name;
+
+        }
 
         void Start()
         {
@@ -708,24 +714,46 @@ namespace StoryEngine
 
                 // ---------------------------- SCOPE ----------------------------
 
-                //case "isglobal":
+                case "isglobal":
 
-                //    if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL)
-                //    {
-                //        task.Pointer.scope = SCOPE.GLOBAL;
-                //    }
+                    if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL)
+                    {
+                        task.Pointer.scope = SCOPE.GLOBAL;
+                        Verbose("Setting pointer scope to global: " + task.Pointer.currentPoint.StoryLine);
+                    }
 
-                //    done = true;
-                //    break;
+                    done = true;
+                    break;
 
-                //case "islocal":
+                case "islocal":
 
-                //    task.Pointer.SetLocal();
+                    task.Pointer.SetLocal();
 
-                //    //Verbose("Setting pointer scope to local: " + task.Pointer.currentPoint.StoryLine);
+                    Verbose("Setting pointer scope to local: " + task.Pointer.currentPoint.StoryLine);
 
-                //    done = true;
-                //    break;
+                    done = true;
+                    break;
+
+                case "amhub":
+
+                    GENERAL.AUTHORITY = AUTHORITY.GLOBAL;
+                    Verbose("Setting authority to global");
+                    //     AlertHandler.Log("Launching environment " + SessionSettings.Environment);
+            //      Log("Launching " + Management.UserSettingsHandler.GetActiveModuleName() + ", environment " + StorageSettings.Environment);
+
+                    done = true;
+                    break;
+
+
+                case "amremote":
+
+                    GENERAL.AUTHORITY = AUTHORITY.LOCAL;
+                    Verbose("Setting authority to local");
+                    //    AlertHandler.Log("Launching environment " + SessionSettings.Environment);
+                    //  Log("Launching " + Management.UserSettingsHandler.GetActiveModuleName() + ", environment " + StorageSettings.Environment);
+
+                    done = true;
+                    break;
 
 
                 // ---------------------------- SERVER SIDE ----------------------------
@@ -736,15 +764,19 @@ namespace StoryEngine
 
                     if (!sending)
                     {
-                        //        Log("Starting broadcast server, key " + ConnectionKey + " message " + ConnectionMessage);
+                 
+
                         ModuleInfo mi = SessionData.GetModuleInfo();
+
                         if (mi != null)
                         {
                             startBroadcastServer(mi.Key, mi.ID);
+                            Log("Starting broadcast server, key: " + mi.Key + " message: " + mi.ID);
                         }
                         else
                         {
                             Warning("No module info, starting generic broadcast server.");
+                            Log("key: " + ConnectionKey + " message: " + ConnectionMessage);
                             startBroadcastServer(ConnectionKey, ConnectionMessage);
                         }
 
@@ -753,7 +785,7 @@ namespace StoryEngine
 
                     if (!serving)
                     {
-                        //    Log("Starting network server.");
+                        Log("Starting network server.");
                         startNetworkServer();
                     }
 
