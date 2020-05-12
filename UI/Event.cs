@@ -75,7 +75,7 @@ namespace StoryEngine.UI
         {
             get
             {
-             return dx * plane.Scale;
+                return dx * plane.Scale;
             }
 
         }
@@ -213,13 +213,13 @@ namespace StoryEngine.UI
 
             Vector2 abs = Input.mousePosition;
 
-       
+
 
 #if UNITY_STANDALONE_WIN
             // on windows standalone we have a decent way of finding out which display we're on
             Vector2 absolute = Input.mousePosition;
             Vector3 relative = Display.RelativeMouseAt(abs);
-     //       GameObject.Find("Environment").GetComponent<Text>().text = "" + absolute.ToString()+" "+relative.ToString();
+            //       GameObject.Find("Environment").GetComponent<Text>().text = "" + absolute.ToString()+" "+relative.ToString();
 
             // relative = abs;
 #else
@@ -238,7 +238,7 @@ namespace StoryEngine.UI
 
             dx = x - px;
             dy = y - py;
-           
+
 
             if (Input.GetButton("Fire1"))
             {
@@ -251,7 +251,8 @@ namespace StoryEngine.UI
                     dy = 0;
                     dd = 0;
 
-                } else
+                }
+                else
                 {
                     action = ACTION.SINGLEDRAG;
                     touch = TOUCH.TOUCHING;
@@ -281,7 +282,7 @@ namespace StoryEngine.UI
                 touch = TOUCH.ENDED;
 
                 // Catch double drag simulation to get the correct inertia, a dd value rather than dx/dy 
-              
+
                 if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
                 {
                     // equivalent to doubletouch pinching only
@@ -290,12 +291,12 @@ namespace StoryEngine.UI
                     dx = 0;
                     dy = 0;
                 }
-               
+
 
                 if (wasTap())
                 {
                     action = ACTION.TAP;
-                    }
+                }
                 else
                 {
 
@@ -304,7 +305,7 @@ namespace StoryEngine.UI
                 firstFrame = true;
 
             }
-           
+
 
 #endif
 
@@ -460,7 +461,7 @@ namespace StoryEngine.UI
                 Verbose("plane or interface null");
                 return;
             }
-              
+
 
 
             // finds gameobject (2D and 3D) for possible manipulation, by raycasting. objects are registred in the UiEvent.
@@ -474,9 +475,9 @@ namespace StoryEngine.UI
 
             // Sometimes an offset is needed, ie when using indirect cameras and rendertextures.
             //    Vector2 uiPositionOffset = uiPosition - plane.interFace.GetAnchorOffset();
-          //  Log("screen " + uiPosition);
+            //  Log("screen " + uiPosition);
 
-            Vector2 uiPositionOffset =  plane.GetOffsetPosition(uiPosition);
+            Vector2 uiPositionOffset = plane.GetOffsetPosition(uiPosition);
             Verbose("uiPositionOffset: " + uiPositionOffset.ToString());
 
 
@@ -502,7 +503,7 @@ namespace StoryEngine.UI
 
                 Ray ray = activeCamera.ScreenPointToRay(uiPositionOffset);
 
-             //    ray = activeCamera.ViewportPointToRay(uiPositionOffset);
+                //    ray = activeCamera.ViewportPointToRay(uiPositionOffset);
 
 
                 Debug.DrawRay(ray.origin, 25f * ray.direction, Color.red, 3f, false);
@@ -521,23 +522,13 @@ namespace StoryEngine.UI
 
             // cast a 2d ray in the canvas we're controlling.
 
+
             GraphicRaycaster gfxRayCaster = plane.interFace.canvasObject.GetComponent<GraphicRaycaster>();
-
-            //Create the PointerEventData with null for the EventSystem
-        
-
-         //   PointerEventData pointerEventData = new PointerEventData(null);
 
             PointerEventData pointerEventData = new PointerEventData(GameObject.Find("EventSystem").GetComponent<EventSystem>());
             //Set required parameters, in this case, mouse position
 
             pointerEventData.position = uiPosition;
-
-
-
-
-
-            //uiPosition-=_plane.interFace.GetAnchorOffset();
 
             //Create list to receive all results
 
@@ -545,8 +536,15 @@ namespace StoryEngine.UI
 
             //Raycast it
 
-            gfxRayCaster.Raycast(pointerEventData, results);
-
+            if (gfxRayCaster != null)
+            {
+                gfxRayCaster.Raycast(pointerEventData, results);
+            }
+            else
+            {
+                Warning("No gfx raycaster found.");
+            }
+            
             if (results.Count > 0)
             {
                 Verbose("targeting something");
@@ -556,14 +554,12 @@ namespace StoryEngine.UI
                 //Verbose("Targeting object2d " + target2D.name);
                 // find out if this 2d object is a button.
 
-
                 if (plane.interFace.uiButtons.TryGetValue(target2D.transform.name, out Button checkButton))
                     Verbose("targeting button: " + checkButton.name + " in interface: " + plane.interFace.name);
                 else
                     Verbose("Targeting object2d: " + target2D.name + " in interface: " + plane.interFace.name);
 
                 targetButton = checkButton;
-
 
                 // Set ui event drag target and constraint. We don't have any ortho direction as this point, so we get the 'free dragging' one.
 
