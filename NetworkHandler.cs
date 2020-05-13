@@ -148,6 +148,14 @@ namespace StoryEngine
 
         }
 
+        public void UnMount()
+        {
+            Log("Shutting down network object.");
+
+            NetworkObjectShutdown();
+
+        }
+
         void Start()
         {
 
@@ -770,8 +778,8 @@ namespace StoryEngine
 
                         if (mi != null)
                         {
-                            startBroadcastServer(mi.Key, mi.ID);
-                            Log("Starting broadcast server, key: " + mi.Key + " message: " + mi.ID);
+                            startBroadcastServer(mi.BroadcastKey, mi.ID);
+                            Log("Starting broadcast server, key: " + mi.BroadcastKey + " message: " + mi.ID);
                         }
                         else
                         {
@@ -845,10 +853,17 @@ namespace StoryEngine
 
                     }
                     */
-
-                    NetworkConnection[] connections = networkManager.GetConnectedClients();
-                    task.SetStringValue("debug", "clients: " + connections.Length);
-                    WasConnected = connections.Length > 0;
+                    if (networkManager != null)
+                    {
+                        NetworkConnection[] connections = networkManager.GetConnectedClients();
+                        task.SetStringValue("debug", "clients: " + connections.Length);
+                        WasConnected = connections.Length > 0;
+                    }
+                    else
+                    {
+                        Warning("Network manager not available, cannot monitor connections");
+                    }
+         
 
                     //task.SetStringValue("debug", "clients: " + TrackedConnectedAddresses().Count);
                     //WasConnected = TrackedConnectedAddresses().Count > 0;
@@ -919,8 +934,8 @@ namespace StoryEngine
                         ModuleInfo mi = SessionData.GetModuleInfo();
                         if (mi != null)
                         {
-                            startBroadcastClient(mi.Key);
-                            Log("(Re)starting broadcast listening for key " + mi.Key);
+                            startBroadcastClient(mi.BroadcastKey);
+                            Log("(Re)starting broadcast listening for key " + mi.BroadcastKey);
                         }
                         else
                         {

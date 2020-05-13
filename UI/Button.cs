@@ -120,7 +120,7 @@ namespace StoryEngine.UI
         {
             callback = "";
             name = _name;
-            color = new Color(1, 1, 1, 1);
+        //    color = new Color(1, 1, 1, 1);
             brightness = 1f;
             targetBrightness = 1f;
             stepBrightness = 1f / 0.25f;
@@ -135,7 +135,12 @@ namespace StoryEngine.UI
             {
 
                image = gameObject.GetComponent<Image>();
-             //   ApplyBrightness();
+                if (image != null)
+                {
+                    color = image.color;
+                }
+             //   color = new Color(1, 1, 1, 1);
+                //   ApplyBrightness();
 
                 //if (image != null)
                 //{
