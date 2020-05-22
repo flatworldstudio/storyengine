@@ -86,9 +86,13 @@ namespace StoryEngine.UI
 
                 activeUiEvent.plane = _layout.FindPlaneByPoint(activeUiEvent.position); // get the plane the user is active in by screen coordinates
 
-                if (activeUiEvent.plane != null)
+                if (activeUiEvent.plane != null && activeUiEvent.plane.interFace!=null)
                 {
                     Log("targeting interface " + activeUiEvent.plane.interFace.name);
+                }
+                else
+                {
+                    Log("not targeting any interface");
                 }
 
                 activeUiEvent.SetTargets();
