@@ -100,14 +100,14 @@ namespace StoryEngine
                     }
 
                 }
-                
-                    return "local";
-                
-         //       if (Instance != null && Instance.networkManager != null) return Instance.networkManager.networkAddress;
+
+                return "local";
+
+                //       if (Instance != null && Instance.networkManager != null) return Instance.networkManager.networkAddress;
                 //     Instance.networkManager.NetworkServer;
                 // return      NetworkManager.singleton.networkAddress;
 
-             
+
 
             }
 
@@ -124,7 +124,7 @@ namespace StoryEngine
 
         public List<StoryTask> taskList;
 
-        string ID = "DataHandler";
+        string ID = "NetworkHandler";
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
         void Log(string message) => StoryEngine.Log.Message(message, ID);
@@ -696,6 +696,10 @@ namespace StoryEngine
 
 
                 // ---------------------------- VISUAL DEBUGGING ----------------------------
+
+                //
+
+
                 case "debugon":
 
                     // Show network info.
@@ -741,22 +745,22 @@ namespace StoryEngine
 
                     done = true;
                     break;
-
+                case "setglobalauth":
                 case "amhub":
 
                     GENERAL.AUTHORITY = AUTHORITY.GLOBAL;
-                    Verbose("Setting authority to global");
+                    Log("Setting authority to global");
                     //     AlertHandler.Log("Launching environment " + SessionSettings.Environment);
-            //      Log("Launching " + Management.UserSettingsHandler.GetActiveModuleName() + ", environment " + StorageSettings.Environment);
+                    //      Log("Launching " + Management.UserSettingsHandler.GetActiveModuleName() + ", environment " + StorageSettings.Environment);
 
                     done = true;
                     break;
 
-
+                case "setlocalauth":
                 case "amremote":
 
                     GENERAL.AUTHORITY = AUTHORITY.LOCAL;
-                    Verbose("Setting authority to local");
+                    Log("Setting authority to local");
                     //    AlertHandler.Log("Launching environment " + SessionSettings.Environment);
                     //  Log("Launching " + Management.UserSettingsHandler.GetActiveModuleName() + ", environment " + StorageSettings.Environment);
 
@@ -772,7 +776,7 @@ namespace StoryEngine
 
                     if (!sending)
                     {
-                 
+
 
                         ModuleInfo mi = SessionData.GetModuleInfo();
 
@@ -863,7 +867,7 @@ namespace StoryEngine
                     {
                         Warning("Network manager not available, cannot monitor connections");
                     }
-         
+
 
                     //task.SetStringValue("debug", "clients: " + TrackedConnectedAddresses().Count);
                     //WasConnected = TrackedConnectedAddresses().Count > 0;
