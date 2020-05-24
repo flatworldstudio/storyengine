@@ -37,8 +37,8 @@ namespace StoryEngine
         List<string> TrackedAddresses, NewAddresses;
 
         public GameObject NetworkObjectRef;
-        public GameObject NetworkStatusObjectRef;
-        GameObject BufferStatusIn, BufferStatusOut;
+     //   public GameObject NetworkStatusObjectRef;
+ //       GameObject BufferStatusIn, BufferStatusOut;
 
         const short connectionMessageCode = 1001;
 
@@ -57,6 +57,7 @@ namespace StoryEngine
         bool Broadcasting = false;
 
         bool Serving = false;
+
         public bool Connected
         {
             get
@@ -196,15 +197,15 @@ namespace StoryEngine
 
             NetworkObjectInit();
 
-            if (DeusHandler.Instance.DeusCanvas != null && NetworkStatusObjectRef != null)
-            {
-                // Instantiate network status object for debugging
-                GameObject ns = Instantiate(NetworkStatusObjectRef);
-                ns.transform.SetParent(DeusHandler.Instance.DeusCanvas.transform, false);
-                BufferStatusIn = ns.transform.Find("BufferIn").gameObject;
-                BufferStatusOut = ns.transform.Find("BufferOut").gameObject;
+            //if (DeusHandler.Instance.DeusCanvas != null && NetworkStatusObjectRef != null)
+            //{
+            //    // Instantiate network status object for debugging
+            //    GameObject ns = Instantiate(NetworkStatusObjectRef);
+            //    ns.transform.SetParent(DeusHandler.Instance.DeusCanvas.transform, false);
+            //    BufferStatusIn = ns.transform.Find("BufferIn").gameObject;
+            //    BufferStatusOut = ns.transform.Find("BufferOut").gameObject;
 
-            }
+            //}
 
         }
 
@@ -713,8 +714,8 @@ namespace StoryEngine
 
 
 
-            if (displayNetworkGUIState())
-                SetNetworkIndicators();
+            //if (displayNetworkGUIState())
+            //    SetNetworkIndicators();
 
 
 
@@ -1350,41 +1351,41 @@ namespace StoryEngine
 
         }
 
-        void SetNetworkIndicators()
-        {
-            if (BufferStatusIn == null || BufferStatusOut == null)
-                return;
+        //void SetNetworkIndicators()
+        //{
+        //    if (BufferStatusIn == null || BufferStatusOut == null)
+        //        return;
 
-            BufferStatusIn.SetActive(WasConnected);
-            BufferStatusOut.SetActive(WasConnected);
+        //    BufferStatusIn.SetActive(WasConnected);
+        //    BufferStatusOut.SetActive(WasConnected);
 
-            switch (AssitantDirector.BufferStatusIn)
-            {
-                case 0:
-                    BufferStatusIn.GetComponent<Image>().color = Color.grey;
-                    break;
-                case 1:
-                case 2:
-                    BufferStatusIn.GetComponent<Image>().color = Color.green;
-                    break;
-                default:
-                    BufferStatusIn.GetComponent<Image>().color = Color.cyan;
-                    break;
-            }
-            switch (AssitantDirector.BufferStatusOut)
-            {
-                case 0:
-                    BufferStatusOut.GetComponent<Image>().color = Color.grey;
-                    break;
-                case 1:
-                case 2:
-                    BufferStatusOut.GetComponent<Image>().color = Color.green;
-                    break;
-                default:
-                    BufferStatusOut.GetComponent<Image>().color = Color.cyan;
-                    break;
-            }
-        }
+        //    switch (AssitantDirector.BufferStatusIn)
+        //    {
+        //        case 0:
+        //            BufferStatusIn.GetComponent<Image>().color = Color.grey;
+        //            break;
+        //        case 1:
+        //        case 2:
+        //            BufferStatusIn.GetComponent<Image>().color = Color.green;
+        //            break;
+        //        default:
+        //            BufferStatusIn.GetComponent<Image>().color = Color.cyan;
+        //            break;
+        //    }
+        //    switch (AssitantDirector.BufferStatusOut)
+        //    {
+        //        case 0:
+        //            BufferStatusOut.GetComponent<Image>().color = Color.grey;
+        //            break;
+        //        case 1:
+        //        case 2:
+        //            BufferStatusOut.GetComponent<Image>().color = Color.green;
+        //            break;
+        //        default:
+        //            BufferStatusOut.GetComponent<Image>().color = Color.cyan;
+        //            break;
+        //    }
+        //}
 
 
     }

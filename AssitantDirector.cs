@@ -48,19 +48,10 @@ namespace StoryEngine
 
         Director theDirector;
         string launchStoryline;
-
-
-
-        //    List<StoryUpdate> StoryUpdateStack;
-
-        //    GameObject NetworkObject;
-
-        //  ExtendedNetworkManager networkManager;
-
+        
         static public int BufferStatusOut = 0;
         static public int BufferStatusIn = 0;
-
-
+        
         // Copy these into every class for easy debugging.
         void Log(string _m) => StoryEngine.Log.Message(_m, ID);
         void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
@@ -683,12 +674,7 @@ namespace StoryEngine
 
             }
 
-            else
-            {
-
-                Warning("Dropping update.");
-
-            }
+          
         }
 
 
@@ -699,7 +685,7 @@ namespace StoryEngine
 
 
 
-
+        #region UPDATEMETHODS
 
         //void ApplyStoryUpdate(StoryUpdate storyUpdate)
         //{
@@ -851,7 +837,7 @@ namespace StoryEngine
             }
 
         }
-
+        #endregion
 
 
 

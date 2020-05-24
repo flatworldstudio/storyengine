@@ -130,6 +130,8 @@ namespace StoryEngine
 
         List<StoryTask> taskList;
 
+        public Text FrameRate;
+        public GameObject BufferStatusIn, BufferStatusOut;
 
 
         //List<StoryPointer> pointerList;
@@ -533,10 +535,51 @@ namespace StoryEngine
 
 
             updateTaskDisplays();
-
+            SetIndicators();
         }
 
         //
+
+        void SetIndicators()
+        {
+
+            if (FrameRate != null)
+            {
+                FrameRate.text = "Framerate: " + (Mathf.Round(1f / Time.deltaTime));
+            }
+
+            if (BufferStatusIn != null && BufferStatusOut != null && NetworkHandler.Instance != null)
+            {
+                
+                BufferStatusIn.SetActive(NetworkHandler.Instance.Connected);
+                BufferStatusOut.SetActive(NetworkHandler.Instance.Connected);
+
+                switch (AssitantDirector.BufferStatusIn)
+                {
+                    case 0:
+                        BufferStatusIn.GetComponent<Image>().color = Color.grey;
+                        break;
+                    case 1:
+                        BufferStatusIn.GetComponent<Image>().color = Color.green;
+                        break;
+                    default:
+                        BufferStatusIn.GetComponent<Image>().color = Color.blue;
+                        break;
+                }
+                switch (AssitantDirector.BufferStatusOut)
+                {
+                    case 0:
+                        BufferStatusOut.GetComponent<Image>().color = Color.grey;
+                        break;
+                    case 1:
+                        BufferStatusOut.GetComponent<Image>().color = Color.green;
+                        break;
+                    default:
+                        BufferStatusOut.GetComponent<Image>().color = Color.blue;
+                        break;
+                }
+            }
+        }
 
 
 
