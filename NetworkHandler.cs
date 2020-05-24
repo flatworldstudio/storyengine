@@ -162,6 +162,18 @@ namespace StoryEngine
             BroadcastMessage = message;
         }
 
+        public void SetBroadcastKey(int key)
+        {
+            BroadcastKey = key;
+         
+        }
+
+        public void SetBroadcastMessage( string message)
+        {
+
+            BroadcastMessage = message;
+        }
+
         public void ResetBroadcastInfo()
         { 
             BroadcastKey = 0;
@@ -937,6 +949,7 @@ namespace StoryEngine
                     }
                     else
                     {
+                        /*
                         ModuleInfo mi = SessionData.GetModuleInfo();
                         if (mi != null)
                         {
@@ -948,7 +961,10 @@ namespace StoryEngine
                             startBroadcastClient(BroadcastKey);
                             Log("(Re)starting broadcast listening for key " + BroadcastKey);
                         }
+                        */
 
+                        startBroadcastClient(BroadcastKey);
+                        Log("(Re)starting broadcast listening for key " + BroadcastKey);
 
                         Listening = true;
 
