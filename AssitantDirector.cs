@@ -76,7 +76,7 @@ namespace StoryEngine
             }
             theDirector = new Director();
             GENERAL.ALLTASKS = new List<StoryTask>();
-            GENERAL.ALLDATA = new List<StoryData>();
+          //  GENERAL.ALLDATA = new List<StoryData>();
         }
 
 
@@ -87,7 +87,7 @@ namespace StoryEngine
 
             StoryEngine.Log.SetModuleLevel("Director", DirectorLogLevel);
             StoryEngine.Log.SetModuleLevel("AD", ADLogLevel);
-            StoryEngine.Log.SetModuleLevel("DataController", DataControllerLogLevel);
+     //       StoryEngine.Log.SetModuleLevel("DataController", DataControllerLogLevel);
 
             StoryEngine.Log.SetModuleLevel("Controller", ControllerLogLevel);
             StoryEngine.Log.SetModuleLevel("Event", EventLogLevel);
@@ -442,9 +442,9 @@ namespace StoryEngine
 
                             // Iterate over all data.
 
-                            for (int i = GENERAL.ALLDATA.Count - 1; i >= 0; i--)
+                            for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i--)
                             {
-                                StoryData data = GENERAL.ALLDATA[i];
+                                StoryTask data = GENERAL.ALLTASKS[i];
 
                                 if (data.modified)
                                 {
@@ -496,9 +496,9 @@ namespace StoryEngine
 
                                 // Iterate over all data.
 
-                                for (int i = GENERAL.ALLDATA.Count - 1; i >= 0; i--)
+                                for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i--)
                                 {
-                                    StoryData data = GENERAL.ALLDATA[i];
+                                    StoryTask data = GENERAL.ALLTASKS[i];
 
                                     if (data.modified)
                                     {

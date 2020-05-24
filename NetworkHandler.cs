@@ -733,7 +733,11 @@ namespace StoryEngine
                     if (GENERAL.AUTHORITY == AUTHORITY.GLOBAL)
                     {
                         task.Pointer.scope = SCOPE.GLOBAL;
-                        Verbose("Setting pointer scope to global: " + task.Pointer.currentPoint.StoryLine);
+                        Log("Setting pointer scope to global: " + task.Pointer.currentPoint.StoryLine);
+                    }
+                    else
+                    {
+                        Log("No global authority, not changing pointer scope. " );
                     }
 
                     done = true;
@@ -743,7 +747,7 @@ namespace StoryEngine
 
                     task.Pointer.SetLocal();
 
-                    Verbose("Setting pointer scope to local: " + task.Pointer.currentPoint.StoryLine);
+                    Log("Setting pointer scope to local: " + task.Pointer.currentPoint.StoryLine);
 
                     done = true;
                     break;

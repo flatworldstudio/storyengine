@@ -286,6 +286,7 @@ namespace StoryEngine
 
             // Go over all data objects and plot them into our diplay
 
+            /*
             for (int i = 0; i < GENERAL.ALLDATA.Count; i++)
             {
 
@@ -302,6 +303,8 @@ namespace StoryEngine
                 }
 
             }
+            */
+
 
             // Go over all items backwards and remove any
 
@@ -373,9 +376,10 @@ namespace StoryEngine
 
                     case Item.TYPE.DATA:
 
+                        /*
                         item.deusText.text = item.StoryData.GetChangeLog();
                         item.deusTextSuper.text = "data: " + item.StoryData.ID + GENERAL.ALLDATA.Count;
-
+                        */
                         break;
                     default:
                         break;
