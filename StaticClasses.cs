@@ -51,6 +51,7 @@ namespace StoryEngine
         //public static float pointerRectScalar = 0.5f;
 
         //public static int SIGNOFFS;
+        public static bool Debugging = false;
 
         public static Dictionary<string, StoryPoint> storyPoints;
         public static List<StoryPointer> ALLPOINTERS;

@@ -222,23 +222,25 @@ namespace StoryEngine
 
                 case "debugon":
 
-                    DeusCanvas.SetActive(true);
+                    GENERAL.Debugging = true;
+                    //DeusCanvas.SetActive(true);
 
                     done = true;
                     break;
 
 
                 case "debugoff":
-
-                    DeusCanvas.SetActive(false);
+                    GENERAL.Debugging = false;
+                    //DeusCanvas.SetActive(false);
                     done = true;
                     break;
 
 
                 case "toggledebug":
                 case "debugtoggle":
+                    GENERAL.Debugging = !GENERAL.Debugging;
 
-                    DeusCanvas.SetActive(!DeusCanvas.activeSelf);
+                    //DeusCanvas.SetActive(!DeusCanvas.activeSelf);
                     done = true;
                     break;
 
@@ -481,6 +483,7 @@ namespace StoryEngine
             StoryEngine.Log.SetModuleLevel(ID, LogLevel);
 #endif
 
+            DeusCanvas.SetActive(GENERAL.Debugging);
 
             if (Input.GetKey("escape"))
             {

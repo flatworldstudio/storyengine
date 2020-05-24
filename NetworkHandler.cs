@@ -42,8 +42,8 @@ namespace StoryEngine
 
         const short connectionMessageCode = 1001;
 
-        public string ConnectionMessage = "default";
-        public int ConnectionKey = 1111;
+         string BroadcastMessage = "";
+         int BroadcastKey = 0;
 
 
         const short stringCode = 1002;
@@ -53,10 +53,10 @@ namespace StoryEngine
 
         bool WasConnected = false;
 
-        bool listening = false;
-        bool sending = false;
+        bool Listening = false;
+        bool Broadcasting = false;
 
-        bool serving = false;
+        bool Serving = false;
         public bool Connected
         {
             get
@@ -154,6 +154,18 @@ namespace StoryEngine
 
             NetworkObjectShutdown();
 
+        }
+
+        public void SetBroadcastInfo (int key, string message)
+        {
+            BroadcastKey = key;
+            BroadcastMessage = message;
+        }
+
+        public void ResetBroadcastInfo()
+        { 
+            BroadcastKey = 0;
+            BroadcastMessage = "";
         }
 
         void Start()
@@ -328,7 +340,7 @@ namespace StoryEngine
         {
 
             networkBroadcast.StartClient();
-            listening = true;
+            Listening = true;
         }
 
         public void startBroadcastClient(int _key)
@@ -339,9 +351,9 @@ namespace StoryEngine
 
         public void startBroadcastServer()
         {
-            Verbose("Starting broadcast server.\nKey: " + networkBroadcast.broadcastKey + "\nMessage: " + networkBroadcast.broadcastData);
+      //      Verbose("Starting broadcast server.\nKey: " + networkBroadcast.broadcastKey + "\nMessage: " + networkBroadcast.broadcastData);
             networkBroadcast.StartServer();
-            sending = true;
+            Broadcasting = true;
         }
 
         public void startBroadcastServer(int _key, string _message)
@@ -354,8 +366,8 @@ namespace StoryEngine
         public void stopBroadcast()
         {
             networkBroadcast.Stop();
-            listening = false;
-            sending = false;
+            Listening = false;
+            Broadcasting = false;
         }
 
         #endregion
@@ -364,9 +376,9 @@ namespace StoryEngine
 
         public void startNetworkServer()
         {
-            Verbose("Starting network server.");
+          //  Verbose("Starting network server.");
             networkManager.StartNetworkServer();
-            serving = true;
+            Serving = true;
         }
 
         void onStartServer()
@@ -390,7 +402,7 @@ namespace StoryEngine
         public void stopNetworkServer()
         {
             networkManager.StopNetworkServer();
-            serving = false;
+            Serving = false;
         }
 
 
@@ -629,6 +641,12 @@ namespace StoryEngine
 
 #endif
 
+            
+            // Set debug visibility
+                    displayNetworkGUI(GENERAL.Debugging);
+        
+
+
             int t = 0;
 
             while (t < taskList.Count)
@@ -695,35 +713,7 @@ namespace StoryEngine
             {
 
 
-                // ---------------------------- VISUAL DEBUGGING ----------------------------
-
-                //
-
-
-                case "debugon":
-
-                    // Show network info.
-
-                    displayNetworkGUI(true);
-                    done = true;
-                    break;
-
-                case "debugoff":
-
-                    // Hide network info.
-
-                    displayNetworkGUI(false);
-                    done = true;
-                    break;
-
-                case "toggledebug":
-
-                    // Toggle network info.
-
-                    displayNetworkGUI(!displayNetworkGUIState());
-                    done = true;
-                    break;
-
+         
                 // ---------------------------- SCOPE ----------------------------
 
                 case "isglobal":
@@ -774,28 +764,40 @@ namespace StoryEngine
 
                     // Start broadcast and network server if not already going.
 
-                    if (!sending)
+                    if (!Broadcasting)
                     {
 
 
-                        ModuleInfo mi = SessionData.GetModuleInfo();
-
-                        if (mi != null)
+                        if (BroadcastKey==0 || BroadcastMessage==null || BroadcastMessage.Length == 0)
                         {
-                            startBroadcastServer(mi.BroadcastKey, mi.ID);
-                            Log("Starting broadcast server, key: " + mi.BroadcastKey + " message: " + mi.ID);
+                            // no info on how to configure broadcasterver
+
+                            Warning("No broadcast info, not starting broadcastserver.");
                         }
                         else
                         {
-                            Warning("No module info, starting generic broadcast server.");
-                            Log("key: " + ConnectionKey + " message: " + ConnectionMessage);
-                            startBroadcastServer(ConnectionKey, ConnectionMessage);
+                            startBroadcastServer(BroadcastKey,BroadcastMessage);
+                            Log("Starting broadcast server, key: " + BroadcastKey + " message: " + BroadcastMessage);
                         }
+
+                        //ModuleInfo mi = SessionData.GetModuleInfo();
+
+                        //if (mi != null)
+                        //{
+                        //    startBroadcastServer(mi.BroadcastKey, mi.ID);
+                        //    Log("Starting broadcast server, key: " + mi.BroadcastKey + " message: " + mi.ID);
+                        //}
+                        //else
+                        //{
+                        //    Warning("No module info, starting generic broadcast server.");
+                        //    Log("key: " + ConnectionKey + " message: " + ConnectionMessage);
+                        //    startBroadcastServer(ConnectionKey, ConnectionMessage);
+                        //}
 
 
                     }
 
-                    if (!serving)
+                    if (!Serving)
                     {
                         Log("Starting network server.");
                         startNetworkServer();
@@ -840,10 +842,10 @@ namespace StoryEngine
 #endif
 
 
-                    /*
+                    
                     // Watch for new clients. Stays live indefinitely.
 
-                    if (serving && NewTrackedAddresses())
+                    if (Serving && NewTrackedAddresses())
                     {
                         // new addresses connected since last call
 
@@ -856,7 +858,7 @@ namespace StoryEngine
                         task.setCallBack("addclient");
 
                     }
-                    */
+                    
                     if (networkManager != null)
                     {
                         NetworkConnection[] connections = networkManager.GetConnectedClients();
@@ -884,24 +886,24 @@ namespace StoryEngine
                 //    break;
 
 
-                //case "pushglobaltasks":
+                case "pushglobaltasks":
 
-                //    // go over all pointers  and mark everything as modified
-                //    // that way it'll get sent.
-                //    // with single client apps this is ok, but for multiple clients we need something more advanced
+                    // go over all pointers  and mark everything as modified
+                    // that way it'll get sent.
+                    // with single client apps this is ok, but for multiple clients we need something more advanced
 
-                //    Log("Pushing global tasks.");
+                    Log("Pushing global tasks.");
 
-                //    foreach (StoryTask theTask in GENERAL.ALLTASKS)
-                //    {
-                //        if (theTask.scope == SCOPE.GLOBAL)
-                //        {
-                //            theTask.MarkAllAsModified();
-                //        }
-                //    }
+                    foreach (StoryTask theTask in GENERAL.ALLTASKS)
+                    {
+                        if (theTask.scope == SCOPE.GLOBAL)
+                        {
+                            theTask.MarkAllAsModified();
+                        }
+                    }
 
-                //    done = true;
-                //    break;
+                    done = true;
+                    break;
 
                 // ---------------------------- CLIENT SIDE ----------------------------
 
@@ -910,7 +912,7 @@ namespace StoryEngine
                     if (NetworkObject == null || state == STATE.PAUSED)
                         break;
 
-                    if (listening)
+                    if (Listening)
                     {
                         if (foundServer())
                         {
@@ -925,7 +927,7 @@ namespace StoryEngine
 
                             task.setCallBack("serverfound");
 
-                            listening = false;
+                            Listening = false;
 
                             Log("Found broadcast server: " + networkBroadcast.serverAddress + " key: " + networkBroadcast.broadcastKey + " message: " + split[0]);
 
@@ -943,12 +945,12 @@ namespace StoryEngine
                         }
                         else
                         {
-                            startBroadcastClient(ConnectionKey);
-                            Log("(Re)starting broadcast listening for key " + ConnectionKey);
+                            startBroadcastClient(BroadcastKey);
+                            Log("(Re)starting broadcast listening for key " + BroadcastKey);
                         }
 
 
-                        listening = true;
+                        Listening = true;
 
                     }
 
@@ -1277,7 +1279,7 @@ namespace StoryEngine
 
             // Client side shutdown.
 
-            if (listening)
+            if (Listening)
             {
                 Verbose("Stopping broadcast");
                 stopBroadcast();
@@ -1293,12 +1295,12 @@ namespace StoryEngine
 
             // Server side shutdown.
 
-            if (serving || sending)
+            if (Serving || Broadcasting)
             {
-                if (serving)
+                if (Serving)
                     stopNetworkServer(); // close ports
 
-                if (sending)
+                if (Broadcasting)
                     stopBroadcast();// close ports
 
                 networkBroadcast = null;
