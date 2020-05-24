@@ -13,11 +13,12 @@ namespace StoryEngine
 
     /*!
 * \brief
-* Holds a range of serialisable variables. To serve as base for storytask and storystate.
+* Holds a range of serialisable variables. Serves as base for storytask and storystate.
 
 */
 
 
+        /*
     public enum DATASTATE
 
     {
@@ -25,14 +26,14 @@ namespace StoryEngine
         AUTHORITY,
         NEEDSUPDATE
     }
-
+    */
 
     public class StoryData
     {
+
+        /*
         string _ID = "";
-
-        //   Guid GUID;
-
+        
         public string ID
         {
             get
@@ -47,6 +48,10 @@ namespace StoryEngine
                     Warning("Cannot change ID, are you sure that is your intention?");
             }
         }
+
+    */
+        readonly string ID = "StoryData";
+
         public SCOPE scope;
 
         protected Dictionary<string, Int32> taskIntValues;
@@ -151,11 +156,11 @@ namespace StoryEngine
             changeLog = new List<string>();
         }
 
-        public DataUpdate GetDataUpdateFor(string target)
+        public StoryDataUpdate GetDataUpdateFor(string target)
         {
             // Get changes for a target, so any changes NOT made by said target.
 
-            DataUpdate msg = new DataUpdate();
+            StoryDataUpdate msg = new StoryDataUpdate();
 
             string[] intNames = taskIntValues.Keys.ToArray();
 
@@ -374,11 +379,11 @@ namespace StoryEngine
 
         }
 
-        public DataUpdate GetDataUpdate()
+        public StoryDataUpdate GetDataUpdate()
         {
             // Bundled approach.
 
-            DataUpdate msg = new DataUpdate();
+            StoryDataUpdate msg = new StoryDataUpdate();
 
             string[] intNames = taskIntValues.Keys.ToArray();
 
@@ -597,7 +602,7 @@ namespace StoryEngine
         }
 
 
-        public void ApplyDataUpdate(DataUpdate update, string changeMask = "")
+        public void ApplyDataUpdate(StoryDataUpdate update, string changeMask = "")
         {
 
 

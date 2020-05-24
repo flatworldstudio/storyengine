@@ -35,7 +35,6 @@ namespace StoryEngine
 * \brief
 * Holds a task and variables associated with that task.
 * 
-* Task variables are updated across the network by the AssistantDirector.
 */
 
     public class StoryTask : StoryData
@@ -51,7 +50,7 @@ namespace StoryEngine
 
         TASKSTATUS status;
 
-        TaskUpdateBundled updateSend, updateReceive;
+        StoryTaskUpdate updateSend, updateReceive;
 
         int LastUpdateFrame = -1;
         int UpdatesPerFrame = 0;
@@ -66,6 +65,19 @@ namespace StoryEngine
         void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
         // ----------------
+
+        public void ApplyUpdateMessage(StoryTaskUpdate update, bool changeMask = false)
+        {
+
+            ApplyDataUpdate(update, "");
+
+        }
+
+        public StoryTaskUpdate GetUpdateBundled()
+        {
+
+            return (StoryEngine.Network.StoryTaskUpdate)GetDataUpdate();
+        }
 
         public StoryPoint Point
         {
@@ -161,8 +173,8 @@ namespace StoryEngine
 
             signedOn = new List<string>();
 
-            updateSend = new TaskUpdateBundled();
-            updateReceive = new TaskUpdateBundled();
+            updateSend = new StoryTaskUpdate();
+            updateReceive = new StoryTaskUpdate();
 
             setStatus(TASKSTATUS.ACTIVE);
 

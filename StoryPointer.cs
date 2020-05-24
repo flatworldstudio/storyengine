@@ -148,17 +148,17 @@ namespace StoryEngine
 
 //}
 
-            /*
+            
 #if !SOLO
 
-        public PointerUpdateBundled GetUpdate()
+        public StoryPointerUpdate GetUpdate()
 
         {
             // bundled approach.
-            // Generate a network update message for this pointer. Only case is KILL.
+            // Generate a network update message for this pointer. Only case is KILL, so only a name is needed.
 
 
-            PointerUpdateBundled updateMessageSend=new PointerUpdateBundled();
+            StoryPointerUpdate updateMessageSend =new StoryPointerUpdate();
             updateMessageSend.StoryLineName=currentPoint.StoryLine;
 
 
@@ -184,7 +184,7 @@ namespace StoryEngine
         }
 
 #endif
-    */
+    
 
         public void SetLocal (){
             scope = SCOPE.LOCAL;
