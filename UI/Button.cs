@@ -156,6 +156,11 @@ namespace StoryEngine.UI
             //   onTap = DefaultBlink;
         }
 
+        public void SetColor(Color _color)
+        {
+            color = _color;
+        }
+
 
         public void AddCallback(string _callBack)
         {
