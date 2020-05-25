@@ -796,7 +796,7 @@ namespace StoryEngine
                         // Create a new pointer 
                         updatePointer = new StoryPointer();
                       
-                        Log("Created a new pointer for task " + updateTask.Instruction);
+                        Log("Created a new pointer for point with ID " + taskUpdate.pointID);
 
                     }
 
