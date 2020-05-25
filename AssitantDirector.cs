@@ -48,10 +48,10 @@ namespace StoryEngine
 
         Director theDirector;
         string launchStoryline;
-        
+
         static public int BufferStatusOut = 0;
         static public int BufferStatusIn = 0;
-        
+
         // Copy these into every class for easy debugging.
         void Log(string _m) => StoryEngine.Log.Message(_m, ID);
         void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
@@ -195,7 +195,7 @@ namespace StoryEngine
                         // More than 2. Apply all the older ones in order of arrival, keep latest one because we may get 0 next frame.
 
                         Warning("Update buffer >2");
-                                                BufferStatusIn = 2;
+                        BufferStatusIn = 2;
 
                         while (NetworkHandler.Instance.StoryUpdateStack.Count > 1)
                         {
@@ -204,7 +204,7 @@ namespace StoryEngine
                             NetworkHandler.Instance.StoryUpdateStack.RemoveAt(0);
 
                         }
-                        
+
                         break;
 
                 }
@@ -270,7 +270,7 @@ namespace StoryEngine
                                         newTasks.Add(task);
                                         task.modified = true;
 
-                                        Verbose("Created global task " + task.Instruction + " for pointer " + pointer.currentPoint.StoryLine);
+                                        Verbose("Created global task " + task.Instruction + " with pointid " + task.PointID + " for pointer " + pointer.currentPoint.StoryLine);
 
                                     }
 
@@ -293,7 +293,8 @@ namespace StoryEngine
 
                                     newTasks.Add(task);
 
-                                    Verbose("Created local task " + task.Instruction + " for pointer " + pointer.currentPoint.StoryLine);
+
+                                    Verbose("Created local task " + task.Instruction + " with pointid " + task.PointID + " for pointer " + pointer.currentPoint.StoryLine);
 
                                 }
 
@@ -486,7 +487,7 @@ namespace StoryEngine
                                             if (task.scope == SCOPE.GLOBAL)
                                             {
 
-                                                Verbose("Global task " + task.Instruction + " changed, adding to update for server.");
+                                                Verbose("Global task " + task.Instruction +  " with id "+ task.PointID + " changed, adding to update for server.");
 
                                                 storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
 
@@ -499,7 +500,7 @@ namespace StoryEngine
                                             if (task.scope == SCOPE.GLOBAL)
                                             {
 
-                                                Verbose("Global task " + task.Instruction + " changed, adding to update for clients.");
+                                                Verbose("Global task " + task.Instruction + " with id " + task.PointID + " changed, adding to update for clients.");
 
                                                 storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
 
@@ -530,7 +531,7 @@ namespace StoryEngine
                             {
                                 case AUTHORITY.LOCAL:
 
-                                if (NetworkHandler.Instance!=null)    NetworkHandler.Instance.SendStoryUpdateToServer(storyUpdate);
+                                    if (NetworkHandler.Instance != null) NetworkHandler.Instance.SendStoryUpdateToServer(storyUpdate);
                                     Log("Sending story update to server. \n" + storyUpdate.DebugLog);
 
                                     break;
@@ -674,7 +675,7 @@ namespace StoryEngine
 
             }
 
-          
+
         }
 
 
@@ -718,7 +719,7 @@ namespace StoryEngine
                 ApplyPointerUpdate(pointerUpdateBundled);
 
             // apply all taskupdates
-            
+
             StoryTaskUpdate taskUpdateBundled;
 
             while (storyUpdate.GetTaskUpdate(out taskUpdateBundled))
@@ -746,7 +747,7 @@ namespace StoryEngine
 
                 // Remove tasks for pointer
                 // Server passes tasks, so if it is faster, client may be processing more than one task for a storyline. (Even if the deus dash would show it)
-                
+
                 for (int i = GENERAL.ALLTASKS.Count - 1; i >= 0; i--)
                 {
 
@@ -845,7 +846,7 @@ namespace StoryEngine
         {
 
             int count = 0;
-                       
+
             if (newTasksEventUnity != null)
             {
                 count += newTasksListenerUnityCount;
@@ -876,9 +877,9 @@ namespace StoryEngine
 
             Verbose("Unity event listener count " + newTasksListenerUnityCount);
         }
-        
+
     }
-    
+
     [System.Serializable]
     public class NewTasksEventUnity : UnityEvent<List<StoryTask>>
     {

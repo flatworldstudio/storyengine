@@ -385,6 +385,7 @@ namespace StoryEngine
             // Bundled approach.
 
             StoryDataUpdate msg = new StoryDataUpdate();
+        //    msg.pointID = PointID;
 
             string[] intNames = taskIntValues.Keys.ToArray();
 

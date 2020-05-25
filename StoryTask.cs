@@ -79,7 +79,15 @@ namespace StoryEngine
             // just returning data update now.
             // in fact, our point id is still there and should go here
 
-            return new StoryTaskUpdate(GetDataUpdate());
+            // get data update and expand into taskupdate
+            StoryTaskUpdate update = new StoryTaskUpdate(GetDataUpdate());
+
+            // add task update specifics that the dataobject doesn't know about.
+            update.pointID = PointID;
+
+            return update;
+
+         //   return new StoryTaskUpdate(GetDataUpdate());
         }
 
         public StoryPoint Point

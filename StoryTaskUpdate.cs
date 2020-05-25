@@ -9,6 +9,7 @@
     public class StoryTaskUpdate : StoryDataUpdate
     {
 
+   //     public int PointID;
 
         //  public  StoryDataUpdate dataUpdate;
 
@@ -21,7 +22,7 @@
 
         public StoryTaskUpdate(StoryDataUpdate dataUpdate) : base()
         {
-            pointID = dataUpdate.pointID;
+       //     pointID = dataUpdate.pointID;
 
             updatedIntNames = dataUpdate.updatedIntNames;
             updatedIntValues = dataUpdate.updatedIntValues;
