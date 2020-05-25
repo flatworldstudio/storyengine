@@ -45,7 +45,7 @@ namespace StoryEngine
 
         TASKSTATUS status;
 
-        StoryTaskUpdate updateSend, updateReceive;
+        //StoryTaskUpdate updateSend, updateReceive;
 
         int LastUpdateFrame = -1;
         int UpdatesPerFrame = 0;
@@ -77,8 +77,8 @@ namespace StoryEngine
 
             signedOn = new List<string>();
 
-            updateSend = new StoryTaskUpdate();
-            updateReceive = new StoryTaskUpdate();
+            //updateSend = new StoryTaskUpdate();
+            //updateReceive = new StoryTaskUpdate();
 
             setStatus(TASKSTATUS.ACTIVE);
 

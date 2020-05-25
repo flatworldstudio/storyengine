@@ -833,7 +833,7 @@ namespace StoryEngine
 
                 updateTask.ApplyUpdate(taskUpdate);
 
-            //    updateTask.scope = SCOPE.GLOBAL;// should be redundant but task that has update applied is always global
+                updateTask.scope = SCOPE.GLOBAL;// if a task was local it now becomes global
 
                 Verbose("Applied update to existing task " + updateTask.Instruction);
 
