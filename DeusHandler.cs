@@ -366,7 +366,7 @@ namespace StoryEngine
                             }
 
                             item.deusText.text = displayText;
-                            item.deusTextSuper.text = theTask.Pointer.currentPoint.StoryLine + " " + GENERAL.ALLPOINTERS.Count;
+                            item.deusTextSuper.text = theTask.Pointer.currentPoint.StoryLine + " " + GENERAL.ALLPOINTERS.Count + (theTask.scope == SCOPE.GLOBAL ? " G" : " L");
 
                         }
                         else

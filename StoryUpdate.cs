@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace StoryEngine.Network
@@ -258,8 +259,8 @@ namespace StoryEngine.Network
 #endif
 
             }
-
-            //Debug.Log("serialised " +DebugLog);
+           
+            Debug.Log("serialised " +DebugLog);
 
         }
 

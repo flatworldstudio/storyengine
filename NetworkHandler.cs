@@ -1213,7 +1213,7 @@ namespace StoryEngine
 
             // NetworkServer.SendUnreliableToAll(storyCode, message);
             NetworkServer.SendToAll(storyCode, message);
-            //  Verbose("Sending: "+message.DebugLog);
+              Verbose("Sending: "+message.DebugLog);
 
         }
 

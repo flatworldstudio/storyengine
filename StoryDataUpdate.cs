@@ -54,7 +54,7 @@ namespace StoryEngine.Network
         public string debug;
 
 
-        public StoryDataUpdate() : base()
+        public StoryDataUpdate() 
         {
 
             updatedIntNames = new List<string>();

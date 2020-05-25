@@ -31,7 +31,7 @@ namespace StoryEngine
     public class StoryData
     {
 
-        /*
+        
         string _ID = "";
         
         public string ID
@@ -49,8 +49,8 @@ namespace StoryEngine
             }
         }
 
-    */
-        readonly string ID = "StoryData";
+    
+     //   readonly string ID = "StoryData";
 
         public SCOPE scope;
 
@@ -98,7 +98,7 @@ namespace StoryEngine
             //      GUID = Guid.NewGuid(); // to be used over network
             ID = _id;
             scope = _scope;
-            setDefaults();
+            PopulateData();
 
         }
         //public void AddParticipant(string _ip)
@@ -137,7 +137,7 @@ namespace StoryEngine
 
         //}
 
-        void setDefaults()
+        void PopulateData()
         {
             //    Participants = new Dictionary<string, DATASTATE>();
 
@@ -378,6 +378,7 @@ namespace StoryEngine
             return msg;
 
         }
+   
 
         public StoryDataUpdate GetDataUpdate()
         {
@@ -735,6 +736,7 @@ namespace StoryEngine
         public void SetStringValue(string valueName, string value, string changer = "local")
         {
 
+            //Log("changing " + valueName + "  " + value); 
             taskStringValues[valueName] = value;
 
 
@@ -894,7 +896,7 @@ namespace StoryEngine
 
         public void SetStringArrayValue(string valueName, string[] value, string changer = "local")
         {
-
+          
             taskStringArrayValues[valueName] = value;
             taskValuesChangeMask[valueName] = changer;
             modified = true;
