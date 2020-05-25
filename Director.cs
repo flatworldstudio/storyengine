@@ -73,7 +73,15 @@ namespace StoryEngine
             }
             Log("new storyline " + _name);
 
-            StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+
+
+            //  StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+          StoryPointer pointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
+
+            pointer.SetScope(_scope);
+            pointer.SetStoryPointByID(_name);
+
+
             //pointer.scope = _scope;
         }
 
@@ -90,7 +98,11 @@ namespace StoryEngine
 
             if (GENERAL.GetPointerForStoryline(_name) == null)
             {
-                StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+               // StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+                StoryPointer pointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
+
+                pointer.SetScope(_scope);
+                pointer.SetStoryPointByID(_name);
             }
             else
             {
@@ -276,7 +288,12 @@ namespace StoryEngine
 
                                     Log("Starting new pointer for storypoint: " + targetPointerName);
 
-                                    newPointer = new StoryPointer(targetPointerName, pointer.scope);
+                                    //newPointer = new StoryPointer(targetPointerName, pointer.scope);
+                                     newPointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
+
+                                    newPointer.SetScope(pointer.scope);
+                                    newPointer.SetStoryPointByID(targetPointerName);
+
                                     pointerStack.Add(newPointer);
 
                                 }
@@ -503,7 +520,13 @@ namespace StoryEngine
 
                 Log("New callback storyline: " + callBackValue);
 
-                StoryPointer newStoryPointer = new StoryPointer(callBackValue, pointer.scope);
+                //StoryPointer newStoryPointer = new StoryPointer(callBackValue, pointer.scope);
+
+                StoryPointer newStoryPointer = new StoryPointer();
+
+                newStoryPointer.SetScope(pointer.scope);
+                newStoryPointer.SetStoryPointByID(callBackValue);
+                
 
                 if (newStoryPointer.currentPoint == null)
                 {

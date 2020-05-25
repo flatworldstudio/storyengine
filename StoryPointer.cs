@@ -42,16 +42,7 @@ namespace StoryEngine
         POINTERSTATUS status;
         public string persistantData;
 
-      //  public Text deusText;
-    //    public Text deusTextSuper;
-    //    public GameObject pointerObject, pointerTextObject;
-   //     public int position;
 
-        //public bool modified;
-
-//#if !SOLO
-//        public bool modified;
-//#endif
 
         string ID = "Storypointer";
 
@@ -88,31 +79,52 @@ namespace StoryEngine
 
         }
 
-        public StoryPointer(string pointID, SCOPE setScope)
+        public void SetStoryPointByID (string pointID)
         {
-
-            // Create a pointer from a given point. Task to be added later.
-
             currentPoint = GENERAL.GetStoryPointByID(pointID);
-         
-            currentTask = null;
             status = POINTERSTATUS.EVALUATE;
-            scope = setScope;
-
-         //   GENERAL.AddPointer(this);
-
-            GENERAL.ALLPOINTERS.Add(this);
-
-          //  updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
-
 
         }
+
+        public void SetScope(SCOPE setScope)
+        {
+            scope = setScope;
+                    }
+
+
+        public StoryTask SpawnTask()
+        {
+            currentTask = new StoryTask(this);
+            //status = POINTERSTATUS.EVALUATE;
+            return currentTask;
+        }
+      
+        //public StoryPointer(string pointID, SCOPE setScope)
+        //{
+
+        //    Warning("to be deprecated");
+        //    // Create a pointer from a given point. Task to be added later.
+
+        //    currentPoint = GENERAL.GetStoryPointByID(pointID);
+         
+        //    currentTask = null;
+        //    status = POINTERSTATUS.EVALUATE;
+        //    scope = setScope;
+
+        // //   GENERAL.AddPointer(this);
+
+        //    GENERAL.ALLPOINTERS.Add(this);
+
+        //  //  updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
+
+
+        //}
 
         public void PopulateWithTask(StoryTask task)
         {
 
             // Filling an empty pointer with task info. Used for network task and pointer creation.
-
+            Warning("may want to retire this");
             currentPoint = GENERAL.GetStoryPointByID(task.PointID);
             currentTask = task;
             task.Pointer = this;

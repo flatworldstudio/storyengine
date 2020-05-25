@@ -40,7 +40,7 @@ namespace StoryEngine
     public class StoryTask : StoryData
     {
 
-        string ID = "Storytask";
+        //   string ID = "Storytask";
 
 
         StoryPoint __point;
@@ -57,13 +57,96 @@ namespace StoryEngine
         public int MaxUpdatesPerFrame = 0;
 
 
-        // Copy these into every class for easy debugging.
-        void Log(string _m) => StoryEngine.Log.Message(_m, ID);
-        void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
-        void Error(string _m) => StoryEngine.Log.Error(_m, ID);
-        void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
+        //// Copy these into every class for easy debugging.
+        //void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        //void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        //void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        //void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
         // ----------------
+
+        #region CONSTRUCTORS
+
+        // Task can be created from a pointer's current storypoint.
+
+        public StoryTask(StoryPointer _fromPointer) : base("StoryTask", _fromPointer.scope)
+        {
+
+            // Create a task based on the current storypoint in the pointer.
+
+            Pointer = _fromPointer;
+            __point = _fromPointer.currentPoint;
+            scope = _fromPointer.scope;
+
+            setDefaults();
+            GENERAL.AddTask(this);
+
+        }
+
+        //public StoryTask(string _fromPointID, StoryPointer _targetPointer) : base("StoryTask", _targetPointer.scope)
+        //{
+
+        //    // Creating a task from a storypoint ID, and add it to a pointer
+        //    Warning("may want to retire this because scope can be inferred");
+
+        //    // populate task fields
+        //    scope = _targetPointer.scope;
+        //    __point = GENERAL.GetStoryPointByID(_fromPointID);
+
+        //    //  populate pointer fields
+        //    Pointer = _targetPointer;
+        //    Pointer.currentPoint = __point;
+        //    Pointer.currentTask = this;
+
+        //    setDefaults();
+        //    GENERAL.AddTask(this);
+
+        //}
+
+        //public StoryTask(StoryPointer _fromPointer, SCOPE _scope) : base("StoryTask", _scope)
+        //{
+
+        //    // Create a task based on the current storypoint of the pointer.
+        //    // Note that setting scope is explicit, but in effect the scope of the task is the same as the scope of the pointer.
+        //    Warning("may want to retire this because scope can be inferred");
+
+        //    Pointer = _fromPointer;
+        //    __point = Pointer.currentPoint;
+
+        //    _fromPointer.currentTask = this;
+        //    scope = _scope;
+
+        //    setDefaults();
+        //    GENERAL.AddTask(this);
+
+        //}
+
+
+
+        // Task can be created from a pointid, populating the pointer
+
+
+        //public StoryTask(string _fromPointID, SCOPE _scope) : base("StoryTask", _scope)
+        //{
+
+        //    Warning("may want to retire this because leaves pointer null");
+        //    // Creating a task from a storypoint -> pointer to be created from this task.
+
+        //    __point = GENERAL.GetStoryPointByID(_fromPointID);
+        //    scope = _scope;
+        //    Pointer = null;
+
+        //    setDefaults();
+        //    GENERAL.AddTask(this);
+
+
+        //}
+
+
+
+
+        #endregion
+
 
         public void ApplyUpdateMessage(StoryTaskUpdate update, bool changeMask = false)
         {
@@ -87,7 +170,7 @@ namespace StoryEngine
 
             return update;
 
-         //   return new StoryTaskUpdate(GetDataUpdate());
+            //   return new StoryTaskUpdate(GetDataUpdate());
         }
 
         public StoryPoint Point
@@ -136,37 +219,7 @@ namespace StoryEngine
         }
 
 
-        public StoryTask(string _fromPointID, SCOPE _scope) : base("StoryTask", _scope)
-        {
 
-            // Creating a task from a storypoint -> pointer to be created from this task.
-
-            __point = GENERAL.GetStoryPointByID(_fromPointID);
-            //    scope = _scope;
-            Pointer = null;
-
-            setDefaults();
-            GENERAL.AddTask(this);
-
-
-        }
-
-        public StoryTask(StoryPointer _fromPointer, SCOPE _scope) : base("StoryTask", _scope)
-        {
-
-            // Create a task based on the current storypoint of the pointer.
-            // Note that setting scope is explicit, but in effect the scope of the task is the same as the scope of the pointer.
-
-            Pointer = _fromPointer;
-            __point = Pointer.currentPoint;
-
-            _fromPointer.currentTask = this;
-            //       scope = _scope;
-
-            setDefaults();
-            GENERAL.AddTask(this);
-
-        }
 
         void setDefaults()
         {
@@ -188,19 +241,12 @@ namespace StoryEngine
         }
 
 
-
-
-
-
-
-
-
-
         void SetPointerToUpdated()
         {
-            Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
 
-            /*
+            //Pointer.SetStatus(POINTERSTATUS.TASKUPDATED);
+
+
             switch (GENERAL.AUTHORITY)
             {
 
@@ -234,7 +280,7 @@ namespace StoryEngine
 
 
             }
-            */
+
 
 
         }

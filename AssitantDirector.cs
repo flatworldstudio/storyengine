@@ -264,7 +264,11 @@ namespace StoryEngine
 
                                         pointer.SetStatus(POINTERSTATUS.PAUSED);
 
-                                        StoryTask task = new StoryTask(pointer, SCOPE.GLOBAL);
+                                        StoryTask task = pointer.SpawnTask();
+
+
+
+                                      //  StoryTask task = new StoryTask(pointer, SCOPE.GLOBAL);
                                         task.LoadPersistantData(pointer);
 
                                         newTasks.Add(task);
@@ -287,8 +291,9 @@ namespace StoryEngine
                                 {
 
                                     pointer.SetStatus(POINTERSTATUS.PAUSED);
+                                    StoryTask task = pointer.SpawnTask();
 
-                                    StoryTask task = new StoryTask(pointer, SCOPE.LOCAL);
+                                    //StoryTask task = new StoryTask(pointer, SCOPE.LOCAL);
                                     task.LoadPersistantData(pointer);
 
                                     newTasks.Add(task);
@@ -770,58 +775,55 @@ namespace StoryEngine
         void ApplyTaskUpdate(StoryTaskUpdate taskUpdate)
         {
 
-            // See if we have a task on this storypoint.
+            // See if we already have a task on this storypoint.
 
             StoryTask updateTask = GENERAL.GetTaskForPoint(taskUpdate.pointID);
-
-
+                       
             if (updateTask == null)
             {
 
-                // If not, and we're a client, we create the task.
-                // If we're the server, we ignore updates for task we no longer know about.
+                // Are we client ? -> create the task
+                // (If we're the server, we'll ignore updates for tasks we no longer know about)
 
                 if (GENERAL.AUTHORITY == AUTHORITY.LOCAL)
                 {
 
-                    updateTask = new StoryTask(taskUpdate.pointID, SCOPE.GLOBAL);
-                    updateTask.ApplyUpdateMessage(taskUpdate);
+                    // Do we already have a pointer for this storyline?
+                    StoryPointer updatePointer = GENERAL.GetStorylinePointerForPointID(taskUpdate.pointID);
 
+                    if (updatePointer == null)
+                    {
+                        // Create a new pointer 
+                        updatePointer = new StoryPointer();
+                      
+                        Log("Created a new pointer for task " + updateTask.Instruction);
+
+                    }
+
+                    updatePointer.SetStoryPointByID(taskUpdate.pointID);
+                    updatePointer.SetScope (SCOPE.GLOBAL);// global because we just got it
+
+                    updateTask = updatePointer.SpawnTask();
+
+                    //updateTask = new StoryTask(taskUpdate.pointID,updatePointer); // global because we just got it
                     Log("Created an instance of global task " + updateTask.Instruction + " id " + updateTask.PointID);
 
-                    if (taskUpdate.pointID != "GLOBALS")
-                    {
+                    //Log("Populated pointer " + updatePointer.currentPoint.StoryLine + " with task " + updateTask.Instruction);
+                    
+                    updateTask.ApplyUpdateMessage(taskUpdate);
 
-                        // Now find a pointer.
 
-                        StoryPointer updatePointer = GENERAL.GetStorylinePointerForPointID(taskUpdate.pointID);
-
-                        if (updatePointer == null)
-                        {
-
-                            updatePointer = new StoryPointer();
-
-                            Log("Created a new pointer for task " + updateTask.Instruction);
-
-                        }
-
-                        updatePointer.PopulateWithTask(updateTask);
-
-                        Log("Populated pointer " + updatePointer.currentPoint.StoryLine + " with task " + updateTask.Instruction);
-
-                        //     DistributeTasks(new TaskArgs(updateTask));
+                       // updatePointer.PopulateWithTask(updateTask);
+                       
 
                         List<StoryTask> newTasks = new List<StoryTask>();
                         newTasks.Add(updateTask);
 
-                        //     if (newTasksEvent != null) newTasksEvent(this, new TaskArgs(updateTask)); // trigger the event, if there are any listeners
-
-                        //    if (newTasksEvent != null) newTasksEvent(this, new TaskArgs(newTasks)); // trigger the event, if there are any listeners
-
+                    
                         if (newTasksEventUnity != null) newTasksEventUnity.Invoke(newTasks);
 
 
-                    }
+                 
                 }
 
 
@@ -831,7 +833,7 @@ namespace StoryEngine
 
                 updateTask.ApplyUpdateMessage(taskUpdate);
 
-                updateTask.scope = SCOPE.GLOBAL;//?? 
+            //    updateTask.scope = SCOPE.GLOBAL;// should be redundant but task that has update applied is always global
 
                 Verbose("Applied update to existing task " + updateTask.Instruction);
 

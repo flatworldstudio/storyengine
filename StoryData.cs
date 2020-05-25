@@ -30,24 +30,24 @@ namespace StoryEngine
 
     public class StoryData
     {
-
+        protected string ID = "StoryData";
         
-        string _ID = "";
+        //string _ID = "";
         
-        public string ID
-        {
-            get
-            {
-                return _ID;
-            }
-            set
-            {
-                if (_ID == "")
-                    _ID = value;
-                else
-                    Warning("Cannot change ID, are you sure that is your intention?");
-            }
-        }
+        //public string ID
+        //{
+        //    get
+        //    {
+        //        return _ID;
+        //    }
+        //    set
+        //    {
+        //        if (_ID == "")
+        //            _ID = value;
+        //        else
+        //            Warning("Cannot change ID, are you sure that is your intention?");
+        //    }
+        //}
 
     
      //   readonly string ID = "StoryData";
@@ -78,10 +78,10 @@ namespace StoryEngine
 
 
         // Copy these into every class for easy debugging.
-        void Log(string _m) => StoryEngine.Log.Message(_m, ID);
-        void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
-        void Error(string _m) => StoryEngine.Log.Error(_m, ID);
-        void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
+        protected void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        protected void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        protected void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        protected void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
         // ----------------
 
