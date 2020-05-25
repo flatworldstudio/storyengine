@@ -494,7 +494,7 @@ namespace StoryEngine
 
                                                 Verbose("Global task " + task.Instruction +  " with id "+ task.PointID + " changed, adding to update for server.");
 
-                                                storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+                                                storyUpdate.AddTaskUpdate(task.GetUpdate()); // bundled
 
                                             }
 
@@ -507,7 +507,7 @@ namespace StoryEngine
 
                                                 Verbose("Global task " + task.Instruction + " with id " + task.PointID + " changed, adding to update for clients.");
 
-                                                storyUpdate.AddTaskUpdate(task.GetUpdateBundled()); // bundled
+                                                storyUpdate.AddTaskUpdate(task.GetUpdate()); // bundled
 
                                             }
 
@@ -810,7 +810,7 @@ namespace StoryEngine
 
                     //Log("Populated pointer " + updatePointer.currentPoint.StoryLine + " with task " + updateTask.Instruction);
                     
-                    updateTask.ApplyUpdateMessage(taskUpdate);
+                    updateTask.ApplyUpdate(taskUpdate);
 
 
                        // updatePointer.PopulateWithTask(updateTask);
@@ -831,7 +831,7 @@ namespace StoryEngine
             else
             {
 
-                updateTask.ApplyUpdateMessage(taskUpdate);
+                updateTask.ApplyUpdate(taskUpdate);
 
             //    updateTask.scope = SCOPE.GLOBAL;// should be redundant but task that has update applied is always global
 

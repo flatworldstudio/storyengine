@@ -15,8 +15,6 @@ namespace StoryEngine
 {
 
 
-
-
     public enum POINTERSTATUS
     {
         EVALUATE,
@@ -41,31 +39,16 @@ namespace StoryEngine
 
         POINTERSTATUS status;
         public string persistantData;
-
-
-
+               
         string ID = "Storypointer";
 
-        // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
+        // Copy these into every class for easy debugging.
+        protected void Log(string _m) => StoryEngine.Log.Message(_m, ID);
+        protected void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
+        protected void Error(string _m) => StoryEngine.Log.Error(_m, ID);
+        protected void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
-
-        void Log(string message)
-        {
-            StoryEngine.Log.Message(message, ID);
-        }
-        void Warning(string message)
-        {
-            StoryEngine.Log.Warning(message, ID);
-        }
-        void Error(string message)
-        {
-            StoryEngine.Log.Error(message, ID);
-        }
-        void Verbose(string message)
-        {
-            StoryEngine.Log.Message(message, ID, LOGLEVEL.VERBOSE);
-        }
-
+        #region CONSTRUCTOR
         public StoryPointer()
         {
 
@@ -73,13 +56,13 @@ namespace StoryEngine
 
             status = POINTERSTATUS.PAUSED;
            GENERAL.ALLPOINTERS.Add(this);
-
-        //    updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
-
-
+                       
         }
+        #endregion
 
-        public void SetStoryPointByID (string pointID)
+        #region FLOW
+
+        public void SetStoryPointByID(string pointID)
         {
             currentPoint = GENERAL.GetStoryPointByID(pointID);
             status = POINTERSTATUS.EVALUATE;
@@ -89,7 +72,7 @@ namespace StoryEngine
         public void SetScope(SCOPE setScope)
         {
             scope = setScope;
-                    }
+        }
 
 
         public StoryTask SpawnTask()
@@ -98,109 +81,12 @@ namespace StoryEngine
             //status = POINTERSTATUS.EVALUATE;
             return currentTask;
         }
-      
-        //public StoryPointer(string pointID, SCOPE setScope)
-        //{
-
-        //    Warning("to be deprecated");
-        //    // Create a pointer from a given point. Task to be added later.
-
-        //    currentPoint = GENERAL.GetStoryPointByID(pointID);
-         
-        //    currentTask = null;
-        //    status = POINTERSTATUS.EVALUATE;
-        //    scope = setScope;
-
-        // //   GENERAL.AddPointer(this);
-
-        //    GENERAL.ALLPOINTERS.Add(this);
-
-        //  //  updateMessageSend = new PointerUpdateBundled(); // we'll reuse.
 
 
-        //}
-
-        public void PopulateWithTask(StoryTask task)
+        public void SetLocal()
         {
-
-            // Filling an empty pointer with task info. Used for network task and pointer creation.
-            Warning("may want to retire this");
-            currentPoint = GENERAL.GetStoryPointByID(task.PointID);
-            currentTask = task;
-            task.Pointer = this;
-            scope = task.scope;
-
-        }
-
-        public void LoadPersistantData()
-        {
-
-            // load carry over value from task into pointer.
-
-            if (currentTask != null)
-                currentTask.GetStringValue("persistantData", out persistantData);
-
-        }
-
-        //public PointerUpdate GetUpdateMessage()
-        //{
-
-//    // Generate a network update message for this pointer. (In effect: if it was killed.)
-
-//    PointerUpdate message = new PointerUpdate();
-
-//    message.storyPointID = currentPoint.ID;
-
-//    if (status == POINTERSTATUS.KILLED)
-//    {
-//        message.killed = true;
-//    }
-
-//    return message;
-
-//}
-
-            
-#if !SOLO
-
-        public StoryPointerUpdate GetUpdate()
-
-        {
-            // bundled approach.
-            // Generate a network update message for this pointer. Only case is KILL, so only a name is needed.
-
-
-            StoryPointerUpdate updateMessageSend =new StoryPointerUpdate();
-            updateMessageSend.StoryLineName=currentPoint.StoryLine;
-
-
-        //updateMessageSend =;
-
-        //updateMessageSend.storyPointID= currentPoint.ID;
-
-//            
-//            updateMessageSend.storyPointID = currentPoint.ID;
-
-//            if (status == POINTERSTATUS.KILLED)
-//            {
-//                updateMessageSend.killed = true;
-
-//            } else{
-                
-//                updateMessageSend.killed = false;
-
-//            }
-//
-            return updateMessageSend;
-
-        }
-
-#endif
-    
-
-        public void SetLocal (){
             scope = SCOPE.LOCAL;
-            status=POINTERSTATUS.EVALUATE;
+            status = POINTERSTATUS.EVALUATE;
         }
 
         public void Kill()
@@ -224,11 +110,6 @@ namespace StoryEngine
                 status = theStatus;
             }
 
-//#if !SOLO
-
-            //modified = true;
-
-//#endif
 
         }
 
@@ -254,6 +135,47 @@ namespace StoryEngine
             return r;
 
         }
+
+
+        #endregion
+
+        #region GETSET
+
+        public void LoadPersistantData()
+        {
+
+            // load carry over value from task into pointer.
+
+            if (currentTask != null)
+                currentTask.GetStringValue("persistantData", out persistantData);
+
+        }
+
+
+        #endregion
+
+
+        #region UPDATE
+        public StoryPointerUpdate GetUpdate()
+
+        {
+            // bundled approach.
+            // Generate a network update message for this pointer. Only case is KILL, so only a name is needed.
+
+
+            StoryPointerUpdate updateMessageSend = new StoryPointerUpdate();
+            updateMessageSend.StoryLineName = currentPoint.StoryLine;
+
+            return updateMessageSend;
+
+        }
+
+
+        #endregion
+
+
+
+
 
     }
 

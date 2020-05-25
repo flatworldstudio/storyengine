@@ -17,10 +17,10 @@ namespace StoryEngine
     public enum TASKTYPE
     {
 
-        // is END still a thign?
+
         BASIC,
-        ROUTING,
-        END
+        ROUTING
+
 
     }
 
@@ -28,7 +28,6 @@ namespace StoryEngine
     {
         ACTIVE,
         COMPLETE,
-
     }
 
     /*!
@@ -39,9 +38,6 @@ namespace StoryEngine
 
     public class StoryTask : StoryData
     {
-
-        //   string ID = "Storytask";
-
 
         StoryPoint __point;
         public StoryPointer Pointer;
@@ -55,19 +51,11 @@ namespace StoryEngine
         int UpdatesPerFrame = 0;
         public int LastUpdatesPerFrame = 0;
         public int MaxUpdatesPerFrame = 0;
+        // ------------------------------------------------
 
+        #region CONSTRUCTOR
 
-        //// Copy these into every class for easy debugging.
-        //void Log(string _m) => StoryEngine.Log.Message(_m, ID);
-        //void Warning(string _m) => StoryEngine.Log.Warning(_m, ID);
-        //void Error(string _m) => StoryEngine.Log.Error(_m, ID);
-        //void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
-
-        // ----------------
-
-        #region CONSTRUCTORS
-
-        // Task can be created from a pointer's current storypoint.
+        // Tasks are create by calling spawntask on a pointer. 
 
         public StoryTask(StoryPointer _fromPointer) : base("StoryTask", _fromPointer.scope)
         {
@@ -83,143 +71,6 @@ namespace StoryEngine
 
         }
 
-        //public StoryTask(string _fromPointID, StoryPointer _targetPointer) : base("StoryTask", _targetPointer.scope)
-        //{
-
-        //    // Creating a task from a storypoint ID, and add it to a pointer
-        //    Warning("may want to retire this because scope can be inferred");
-
-        //    // populate task fields
-        //    scope = _targetPointer.scope;
-        //    __point = GENERAL.GetStoryPointByID(_fromPointID);
-
-        //    //  populate pointer fields
-        //    Pointer = _targetPointer;
-        //    Pointer.currentPoint = __point;
-        //    Pointer.currentTask = this;
-
-        //    setDefaults();
-        //    GENERAL.AddTask(this);
-
-        //}
-
-        //public StoryTask(StoryPointer _fromPointer, SCOPE _scope) : base("StoryTask", _scope)
-        //{
-
-        //    // Create a task based on the current storypoint of the pointer.
-        //    // Note that setting scope is explicit, but in effect the scope of the task is the same as the scope of the pointer.
-        //    Warning("may want to retire this because scope can be inferred");
-
-        //    Pointer = _fromPointer;
-        //    __point = Pointer.currentPoint;
-
-        //    _fromPointer.currentTask = this;
-        //    scope = _scope;
-
-        //    setDefaults();
-        //    GENERAL.AddTask(this);
-
-        //}
-
-
-
-        // Task can be created from a pointid, populating the pointer
-
-
-        //public StoryTask(string _fromPointID, SCOPE _scope) : base("StoryTask", _scope)
-        //{
-
-        //    Warning("may want to retire this because leaves pointer null");
-        //    // Creating a task from a storypoint -> pointer to be created from this task.
-
-        //    __point = GENERAL.GetStoryPointByID(_fromPointID);
-        //    scope = _scope;
-        //    Pointer = null;
-
-        //    setDefaults();
-        //    GENERAL.AddTask(this);
-
-
-        //}
-
-
-
-
-        #endregion
-
-
-        public void ApplyUpdateMessage(StoryTaskUpdate update, bool changeMask = false)
-        {
-
-            // apply data changes. changemask isn't really in use right now.
-
-            ApplyDataUpdate(update, "");
-
-        }
-
-        public StoryTaskUpdate GetUpdateBundled()
-        {
-            // just returning data update now.
-            // in fact, our point id is still there and should go here
-
-            // get data update and expand into taskupdate
-            StoryTaskUpdate update = new StoryTaskUpdate(GetDataUpdate());
-
-            // add task update specifics that the dataobject doesn't know about.
-            update.pointID = PointID;
-
-            return update;
-
-            //   return new StoryTaskUpdate(GetDataUpdate());
-        }
-
-        public StoryPoint Point
-        {
-            get
-            {
-                return __point;
-            }
-            set
-            {
-                Warning("Can't set Point value directly.");
-            }
-        }
-
-
-
-
-        public string Instruction
-        {
-            get
-            {
-                if (__point == null || __point.Instructions == null || __point.Instructions.Length == 0)
-                    return "";
-                else
-                    return __point.Instructions[0];
-            }
-            set
-            {
-                Warning("Can't set Instruction value directly.");
-            }
-        }
-
-        public string PointID
-        {
-            get
-            {
-                if (__point == null)
-                    return "";
-                else
-                    return __point.ID;
-            }
-            set
-            {
-                Warning("Can't set PointID value directly.");
-            }
-        }
-
-
-
 
         void setDefaults()
         {
@@ -233,13 +84,9 @@ namespace StoryEngine
 
         }
 
-        public void LoadPersistantData(StoryPointer referencePointer)
-        {
+        #endregion
 
-            SetStringValue("persistantData", referencePointer.persistantData);
-
-        }
-
+        #region FLOW
 
         void SetPointerToUpdated()
         {
@@ -305,21 +152,9 @@ namespace StoryEngine
         {
             Warning("Force complete, signoffs still required was " + signedOn.Count);
             signedOn.Clear();
-            //signoffs = GENERAL.SIGNOFFS;
             complete();
 
-
-
-            //Warning("Force complete, signoffs still required was " + (GENERAL.SIGNOFFS - signoffs));
-
-            //signoffs = GENERAL.SIGNOFFS;
-            //complete();
-
-
-
         }
-
-
 
 
         void complete()
@@ -341,6 +176,7 @@ namespace StoryEngine
             }
 
         }
+
 
         public void setCallBack(string theCallBackPoint)
         {
@@ -381,7 +217,6 @@ namespace StoryEngine
             {
                 Warning(Instruction + " trying to sign off more than once: " + fromMe);
 
-
             }
             else
             {
@@ -412,26 +247,99 @@ namespace StoryEngine
                 complete();
             }
 
-            /*
-            if (GENERAL.SIGNOFFS == 0)
-            {
-                Warning("Trying to signoff on a task with 0 required signoffs.");
-            }
 
-            signoffs++;
-
-            //			Debug.Log ("SIGNOFFS "+fromMe + description + " signoffs: " + signoffs + " of " + signoffsRequired);
-
-            if (signoffs == GENERAL.SIGNOFFS)
-            {
-
-                complete();
-
-            }
-            */
 
 
         }
+
+        #endregion
+
+        #region UPDATING
+
+        public void ApplyUpdate(StoryTaskUpdate update, bool changeMask = false)
+        {
+            // apply data changes. changemask isn't really in use right now, to be used for having multiple clients...
+            ApplyDataUpdate(update, "");
+        }
+
+        public StoryTaskUpdate GetUpdate()
+        {
+            // just returning data update now.
+            // in fact, our point id is still there and should go here
+
+            // get data update and expand into taskupdate
+            StoryTaskUpdate update = new StoryTaskUpdate(GetDataUpdate());
+
+            // add task update specifics that the dataobject doesn't know about.
+            update.pointID = PointID;
+
+            return update;
+
+        }
+
+        #endregion
+
+
+
+        #region GETSET
+
+        public void LoadPersistantData(StoryPointer referencePointer)
+        {
+
+            SetStringValue("persistantData", referencePointer.persistantData);
+
+        }
+
+        public StoryPoint Point
+        {
+            get
+            {
+                return __point;
+            }
+            set
+            {
+                Warning("Can't set Point value directly.");
+            }
+        }
+
+        public string Instruction
+        {
+            get
+            {
+                if (__point == null || __point.Instructions == null || __point.Instructions.Length == 0)
+                    return "";
+                else
+                    return __point.Instructions[0];
+            }
+            set
+            {
+                Warning("Can't set Instruction value directly.");
+            }
+        }
+
+        public string PointID
+        {
+            get
+            {
+                if (__point == null)
+                    return "";
+                else
+                    return __point.ID;
+            }
+            set
+            {
+                Warning("Can't set PointID value directly.");
+            }
+        }
+
+        #endregion
+
+
+
+
+
+
+
 
     }
 
