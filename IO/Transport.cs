@@ -123,8 +123,10 @@ namespace StoryEngine.IO
 
         /*!\brief Write a string to disk as a file. */
 
-        public static void TextToFile(string _content, string _path)
+        public static bool TextToFile(string _content, string _path)
         {
+            bool success = true;
+
             if (!Directory.Exists(Path.GetDirectoryName(_path)))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(_path));
@@ -138,7 +140,9 @@ namespace StoryEngine.IO
             catch (Exception e)
             {
                 Error("File " + _path + " failed writing: " + e.Message);
+                success = false;
             }
+            return success;
         }
 
         /*!\brief Read a file from disk ias a string. */

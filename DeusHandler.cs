@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Linq;
 
 namespace StoryEngine
 {
@@ -126,7 +127,11 @@ namespace StoryEngine
         readonly string ID = "Deus";
         public LOGLEVEL LogLevel = LOGLEVEL.WARNINGS;
 
-        public GameObject DeusCanvas, PointerBlock;
+        public GameObject DebugCanvas, PointerBlock;
+
+        public GameObject MessageCanvas;
+
+        GameObject[] MessageCanvases;
 
         List<StoryTask> taskList;
 
@@ -190,14 +195,14 @@ namespace StoryEngine
 
             //    for (int i = 0; i < itemPositions.Length; i++) itemPositions[i] = Item.EMPTY;
 
-            if (DeusCanvas == null)
+            if (DebugCanvas == null)
             {
                 Warning("DeusCanvas not found.");
             }
             else
             {
 
-                DeusCanvas.SetActive(false);
+                DebugCanvas.SetActive(false);
 
             }
 
@@ -256,11 +261,62 @@ namespace StoryEngine
 
         }
 
+        float MessageTimeStamp;
+
+        public void DeusMessage(string message, float duration = 5f)
+        {
+
+
+            if (MessageCanvas == null) return;
+
+            Log("Deus message: " + message);
+
+            if (MessageCanvases == null || MessageCanvases.Length == 0)
+            {
+                // just populate with 8 for 8 potential displays.
+                MessageCanvases = new GameObject[8];
+
+                for (int d = 0; d < 8; d++)
+                {
+                    GameObject clone = Instantiate(this.MessageCanvas);
+                    clone.SetActive(true);
+                    clone.GetComponent<Canvas>().targetDisplay = d;
+                    clone.GetComponentInChildren<Text>().text = message;
+                    clone.transform.SetParent(this.gameObject.transform);
+                    this.MessageCanvases[d] = clone;
+
+                }
+                MessageTimeStamp = Time.time + duration;
+            }
+            else
+            {
+                foreach (GameObject o in MessageCanvases) o.GetComponentInChildren<Text>().text = message;
+            }
+
+
+        }
+
+        public void DeusMessageTimeOut()
+        {
+            // if anything to time out
+            if (MessageTimeStamp > float.Epsilon && Time.time > MessageTimeStamp)
+            {
+                // time out and destroy canvases
+                MessageTimeStamp = 0f;
+                if (MessageCanvases != null)
+                {
+                    foreach (GameObject o in MessageCanvases) Destroy(o);
+                }
+                MessageCanvases = null;
+
+            }
+        }
+
 
         void updateTaskDisplays()
         {
 
-            if (PointerBlock == null || DeusCanvas == null)
+            if (PointerBlock == null || DebugCanvas == null)
             {
                 Warning("Set references for pointerblock and deuscanvas.");
                 return;
@@ -276,7 +332,7 @@ namespace StoryEngine
                 if (!itemList.Exists(x => x.StoryPointer == pointer))
                 {
                     Item ni = new Item(pointer, PointerBlock);
-                    ni.displayObject.transform.SetParent(DeusCanvas.transform, false);
+                    ni.displayObject.transform.SetParent(DebugCanvas.transform, false);
 
                     itemList.Add(ni);
 
@@ -330,7 +386,9 @@ namespace StoryEngine
 
                 Item item = itemList[i];
 
+//                item.displayObject.GetComponent<RectTransform>().localPosition = scale * new Vector3(PointerDisplayCols / 2f * -1024f + 512f + col * 1024f, PointerDisplayRows / 2f * 512f - 256f - row * 512f, 0);
                 item.displayObject.GetComponent<RectTransform>().localPosition = scale * new Vector3(PointerDisplayCols / 2f * -1024f + 512f + col * 1024f, PointerDisplayRows / 2f * 512f - 256f - row * 512f, 0);
+
                 item.displayObject.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, scale);
 
                 switch (item.Type)
@@ -485,11 +543,20 @@ namespace StoryEngine
 
         {
 
+
+
+
 #if UNITY_EDITOR
             StoryEngine.Log.SetModuleLevel(ID, LogLevel);
 #endif
 
-            DeusCanvas.SetActive(GENERAL.Debugging);
+
+            DebugCanvas.SetActive(GENERAL.Debugging);
+
+            if (MessageCanvases != null) foreach (GameObject o in MessageCanvases) o.SetActive(GENERAL.Debugging);
+
+            DeusMessageTimeOut();
+
 
             if (Input.GetKey("escape"))
             {
@@ -550,7 +617,7 @@ namespace StoryEngine
 
             if (BufferStatusIn != null && BufferStatusOut != null && NetworkHandler.Instance != null)
             {
-                
+
                 BufferStatusIn.SetActive(NetworkHandler.Instance.Connected);
                 BufferStatusOut.SetActive(NetworkHandler.Instance.Connected);
 
