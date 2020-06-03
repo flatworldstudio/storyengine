@@ -125,7 +125,7 @@ namespace StoryEngine
     {
 
         readonly string ID = "Deus";
-        public LOGLEVEL LogLevel = LOGLEVEL.WARNINGS;
+    //    public LOGLEVEL LogLevel = LOGLEVEL.WARNINGS;
 
         public GameObject DebugCanvas, PointerBlock;
 
@@ -547,7 +547,7 @@ namespace StoryEngine
 
 
 #if UNITY_EDITOR
-            StoryEngine.Log.SetModuleLevel(ID, LogLevel);
+        //    StoryEngine.Log.SetModuleLevel(ID, LogLevel);
 #endif
 
 

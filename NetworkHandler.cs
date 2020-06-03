@@ -8,7 +8,7 @@ using StoryEngine.Network;
 using System.Net.NetworkInformation;
 using System.Linq;
 using UnityEngine.Networking.NetworkSystem;
-using JimEngine.Basemodule;
+using JimEngine.ConfigHandler;
 using System.Net;
 using System.Net.Sockets;
 
@@ -27,9 +27,9 @@ namespace StoryEngine
     public class NetworkHandler : MonoBehaviour
     {
 
-        [Header("Logging")]
-        public LOGLEVEL LogLevel = LOGLEVEL.WARNINGS;
-        public LOGLEVEL LogLevelNetworkManager = LOGLEVEL.WARNINGS;
+        //[Header("Logging")]
+        //public LOGLEVEL LogLevel = LOGLEVEL.WARNINGS;
+        //public LOGLEVEL LogLevelNetworkManager = LOGLEVEL.WARNINGS;
 
         GameObject NetworkObject;
         NetworkBroadcast networkBroadcast;
@@ -649,8 +649,8 @@ namespace StoryEngine
         {
 
 #if UNITY_EDITOR
-            StoryEngine.Log.SetModuleLevel(ID, LogLevel);
-            StoryEngine.Log.SetModuleLevel("NetworkManager", LogLevelNetworkManager);
+     //       StoryEngine.Log.SetModuleLevel(ID, LogLevel);
+    //        StoryEngine.Log.SetModuleLevel("NetworkManager", LogLevelNetworkManager);
 
 #endif
 

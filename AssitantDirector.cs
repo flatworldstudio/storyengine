@@ -4,7 +4,7 @@ using System;
 
 using Random = UnityEngine.Random;
 using UnityEngine.Events;
-using JimEngine.Basemodule;
+using JimEngine.ConfigHandler;
 
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
@@ -35,13 +35,19 @@ namespace StoryEngine
 
         public static AssitantDirector Instance;
 
-        [Header("Log levels")]
+        [Header("Default log level")]
+
         public LOGLEVEL DefaultLogLevel;/*!< \brief Set this value in Unity Editor */
-        public LOGLEVEL DirectorLogLevel;
-        public LOGLEVEL ADLogLevel;
-        public LOGLEVEL DataControllerLogLevel;
-        public LOGLEVEL ControllerLogLevel;
-        public LOGLEVEL EventLogLevel;
+        [Header("Log levels")]
+        public string[] id;
+        public LOGLEVEL[] loglevel;
+
+
+        //public LOGLEVEL DirectorLogLevel;
+        //public LOGLEVEL ADLogLevel;
+        //public LOGLEVEL DataControllerLogLevel;
+        //public LOGLEVEL ControllerLogLevel;
+        //public LOGLEVEL EventLogLevel;
 
         string ID = "AD";
         private NewTasksEventUnity newTasksEventUnity;
@@ -78,12 +84,14 @@ namespace StoryEngine
 
             Verbose("Starting.");
 
-            StoryEngine.Log.SetModuleLevel("Director", DirectorLogLevel);
-            StoryEngine.Log.SetModuleLevel("AD", ADLogLevel);
-            //       StoryEngine.Log.SetModuleLevel("DataController", DataControllerLogLevel);
 
-            StoryEngine.Log.SetModuleLevel("Controller", ControllerLogLevel);
-            StoryEngine.Log.SetModuleLevel("Event", EventLogLevel);
+
+            //StoryEngine.Log.SetModuleLevel("Director", DirectorLogLevel);
+            //StoryEngine.Log.SetModuleLevel("AD", ADLogLevel);
+            ////       StoryEngine.Log.SetModuleLevel("DataController", DataControllerLogLevel);
+
+            //StoryEngine.Log.SetModuleLevel("Controller", ControllerLogLevel);
+            //StoryEngine.Log.SetModuleLevel("Event", EventLogLevel);
 
 
 
@@ -151,6 +159,19 @@ namespace StoryEngine
 
         void Update()
         {
+
+            if (id != null && loglevel != null)
+            {
+                // set custom log levels
+                for (int i = 0; i < id.Length; i++)
+                {
+                    if (i < loglevel.Length)
+                    {
+                        StoryEngine.Log.SetModuleLevel(id[i], loglevel[i]);
+                    }
+                }
+            }
+
             #region APPLYUPDATES
 
             if (NetworkHandler.Instance != null)
@@ -268,7 +289,7 @@ namespace StoryEngine
 
 
 
-                                      //  StoryTask task = new StoryTask(pointer, SCOPE.GLOBAL);
+                                        //  StoryTask task = new StoryTask(pointer, SCOPE.GLOBAL);
                                         task.LoadPersistantData(pointer);
 
                                         newTasks.Add(task);
@@ -492,7 +513,7 @@ namespace StoryEngine
                                             if (task.scope == SCOPE.GLOBAL)
                                             {
 
-                                                Verbose("Global task " + task.Instruction +  " with id "+ task.PointID + " changed, adding to update for server.");
+                                                Verbose("Global task " + task.Instruction + " with id " + task.PointID + " changed, adding to update for server.");
 
                                                 storyUpdate.AddTaskUpdate(task.GetUpdate()); // bundled
 
@@ -778,7 +799,7 @@ namespace StoryEngine
             // See if we already have a task on this storypoint.
 
             StoryTask updateTask = GENERAL.GetTaskForPoint(taskUpdate.pointID);
-                       
+
             if (updateTask == null)
             {
 
@@ -795,13 +816,13 @@ namespace StoryEngine
                     {
                         // Create a new pointer 
                         updatePointer = new StoryPointer();
-                      
+
                         Log("Created a new pointer for point with ID " + taskUpdate.pointID);
 
                     }
 
                     updatePointer.SetStoryPointByID(taskUpdate.pointID);
-                    updatePointer.SetScope (SCOPE.GLOBAL);// global because we just got it
+                    updatePointer.SetScope(SCOPE.GLOBAL);// global because we just got it
 
                     updateTask = updatePointer.SpawnTask();
 
@@ -809,21 +830,21 @@ namespace StoryEngine
                     Log("Created an instance of global task " + updateTask.Instruction + " id " + updateTask.PointID);
 
                     //Log("Populated pointer " + updatePointer.currentPoint.StoryLine + " with task " + updateTask.Instruction);
-                    
+
                     updateTask.ApplyUpdate(taskUpdate);
 
 
-                       // updatePointer.PopulateWithTask(updateTask);
-                       
-
-                        List<StoryTask> newTasks = new List<StoryTask>();
-                        newTasks.Add(updateTask);
-
-                    
-                        if (newTasksEventUnity != null) newTasksEventUnity.Invoke(newTasks);
+                    // updatePointer.PopulateWithTask(updateTask);
 
 
-                 
+                    List<StoryTask> newTasks = new List<StoryTask>();
+                    newTasks.Add(updateTask);
+
+
+                    if (newTasksEventUnity != null) newTasksEventUnity.Invoke(newTasks);
+
+
+
                 }
 
 

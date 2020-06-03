@@ -24,7 +24,7 @@ namespace StoryEngine
    * By setting a loglevel for a module, logging can be set to verbose, normal, warnings or errors.
    * An echo method can be added to errors, ie. for logging them to a server.  
    */
-    
+
     public static class Log
     {
 
@@ -32,7 +32,7 @@ namespace StoryEngine
 
         static Dictionary<string, LOGLEVEL> moduleLogStatus;
 
-         static void AddModule(string module, LOGLEVEL status)
+        static void AddModule(string module, LOGLEVEL status)
         {
 
             Init();
@@ -41,7 +41,7 @@ namespace StoryEngine
 
         }
 
-         static void Init()
+        static void Init()
         {
             if (moduleLogStatus == null)
                 moduleLogStatus = new Dictionary<string, LOGLEVEL>();
@@ -56,6 +56,7 @@ namespace StoryEngine
         public static void SetModuleLevel(string module, LOGLEVEL level)
         {
 
+            if (module == "") return;
             LOGLEVEL current;
 
             Init();
@@ -82,13 +83,13 @@ namespace StoryEngine
 #if !NOLOGGING
             Init();
 
-            LOGLEVEL moduleLevel ;
+            LOGLEVEL moduleLevel;
 
             if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
                 moduleLevel = AssitantDirector.Instance.DefaultLogLevel;
 
             if (messageLevel <= moduleLevel)
-				Debug.Log (module + ": " + message);
+                Debug.Log(module + ": " + message);
 
 #endif
         }

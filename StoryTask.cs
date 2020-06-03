@@ -215,7 +215,7 @@ namespace StoryEngine
         {
             if (signedOn.Exists(x => x == fromMe))
             {
-                Warning(Instruction + " trying to sign off more than once: " + fromMe);
+                Warning(Instruction + " trying to sign on more than once: " + fromMe);
 
             }
             else
