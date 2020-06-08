@@ -75,6 +75,9 @@ namespace StoryEngine
 
             theDirector = new Director();
             GENERAL.ALLTASKS = new List<StoryTask>();
+
+            SetDebugLevels();
+
             //  GENERAL.ALLDATA = new List<StoryData>();
         }
 
@@ -159,18 +162,18 @@ namespace StoryEngine
 
         void Update()
         {
-
-            if (id != null && loglevel != null)
-            {
-                // set custom log levels
-                for (int i = 0; i < id.Length; i++)
-                {
-                    if (i < loglevel.Length)
-                    {
-                        StoryEngine.Log.SetModuleLevel(id[i], loglevel[i]);
-                    }
-                }
-            }
+            SetDebugLevels();
+            //if (id != null && loglevel != null)
+            //{
+            //    // set custom log levels
+            //    for (int i = 0; i < id.Length; i++)
+            //    {
+            //        if (i < loglevel.Length)
+            //        {
+            //            StoryEngine.Log.SetModuleLevel(id[i], loglevel[i]);
+            //        }
+            //    }
+            //}
 
             #region APPLYUPDATES
 
@@ -863,6 +866,24 @@ namespace StoryEngine
         }
         #endregion
 
+
+        #region DEBUGGING
+        void SetDebugLevels()
+        {
+            if (id != null && loglevel != null)
+            {
+                // set custom log levels
+                for (int i = 0; i < id.Length; i++)
+                {
+                    if (i < loglevel.Length)
+                    {
+                        StoryEngine.Log.SetModuleLevel(id[i], loglevel[i]);
+                    }
+                }
+            }
+
+        }
+        #endregion
 
 
         public int eventHandlerCount()

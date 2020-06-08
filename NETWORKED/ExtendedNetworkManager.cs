@@ -87,6 +87,7 @@ namespace StoryEngine.Network
 
         public void StopNetworkClient()
         {
+           
             Verbose("Stopping as client.");
             StopClient();
 
@@ -94,8 +95,8 @@ namespace StoryEngine.Network
 
         public override void OnStopClient()
         {
-
-            Verbose("Stopped as client.");
+         
+        //    Verbose("Stopped as client.");
 
             if (onStopClientDelegate != null)
                 onStopClientDelegate();
