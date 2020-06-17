@@ -15,6 +15,7 @@ namespace StoryEngine
 
     public enum DIRECTORSTATUS
     {
+        ERROR,
         NOTREADY,
         READY,
         ACTIVE,
@@ -76,7 +77,7 @@ namespace StoryEngine
 
 
             //  StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
-          StoryPointer pointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
+            StoryPointer pointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
 
             pointer.SetScope(_scope);
             pointer.SetStoryPointByID(_name);
@@ -98,7 +99,7 @@ namespace StoryEngine
 
             if (GENERAL.GetPointerForStoryline(_name) == null)
             {
-               // StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
+                // StoryPointer pointer = new StoryPointer(_name, _scope); // constructor adds pointer to GENERAL.allpointers
                 StoryPointer pointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
 
                 pointer.SetScope(_scope);
@@ -150,9 +151,9 @@ namespace StoryEngine
 
                     // pointer needs evaluating. but we only do this if pointer is local OR if pointer is global and we are the server
 
-            //        if ((sp.scope == SCOPE.GLOBAL && GENERAL.AUTHORITY == AUTHORITY.GLOBAL) || (sp.scope == SCOPE.LOCAL))
-                        if ((sp.scope == SCOPE.GLOBAL && true) || (sp.scope == SCOPE.LOCAL))
-                        {
+                    //        if ((sp.scope == SCOPE.GLOBAL && GENERAL.AUTHORITY == AUTHORITY.GLOBAL) || (sp.scope == SCOPE.LOCAL))
+                    if ((sp.scope == SCOPE.GLOBAL && true) || (sp.scope == SCOPE.LOCAL))
+                    {
 
                         pointerStack.Add(sp);
 
@@ -289,7 +290,7 @@ namespace StoryEngine
                                     Log("Starting new pointer for storypoint: " + targetPointerName);
 
                                     //newPointer = new StoryPointer(targetPointerName, pointer.scope);
-                                     newPointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
+                                    newPointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
 
                                     newPointer.SetScope(pointer.scope);
                                     newPointer.SetStoryPointByID(targetPointerName);
@@ -526,7 +527,7 @@ namespace StoryEngine
 
                 newStoryPointer.SetScope(pointer.scope);
                 newStoryPointer.SetStoryPointByID(callBackValue);
-                
+
 
                 if (newStoryPointer.currentPoint == null)
                 {
@@ -555,33 +556,22 @@ namespace StoryEngine
 
         }
 
-        public void loadScript(TextAsset _asset)
+        public void loadScriptAsset(TextAsset _asset)
         {
-            //Script theScript = new Script(_asset);
-
-            Script.Mount(_asset);
-
-            //while (!theScript.isReady)
-            //{
-
-            //}
-
+            Script.MountAsset(_asset);
             status = DIRECTORSTATUS.READY;
-
         }
 
-        public void loadScript(string fileName)
+        public void loadScriptResource(string fileName)
         {
-            //  Script theScript = new Script(fileName);
-
-            Script.Mount(fileName);
-            //while (!theScript.isReady)
-            //{
-
-            //}
-
+            Script.MountResource(fileName);
             status = DIRECTORSTATUS.READY;
+        }
 
+        public void loadScriptText(string script)
+        {
+            Script.MountScript(script);
+            status = DIRECTORSTATUS.READY;
         }
 
 

@@ -9,7 +9,7 @@ using JimEngine.ConfigHandler;
 using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 using StoryEngine.Network;
-
+using StoryEngine.IO;
 
 namespace StoryEngine
 {
@@ -28,7 +28,8 @@ namespace StoryEngine
     public class AssitantDirector : MonoBehaviour
     {
 
-        public TextAsset script;/*!< \brief Set this value in Unity Editor */
+        public TextAsset scriptAsset;/*!< \brief Set this value in Unity Editor */
+        public string scriptFile;/*!< \brief Set this value in Unity Editor, if set the AD will attempt to load local file first. */
 
         //public string scriptName;/*!< \brief Set this value in Unity Editor, will be deprecated. */
         public string launchOSX, launchWIN, launchIOS, launchAndroid;/*!< \brief Set this value in Unity Editor */
@@ -371,21 +372,34 @@ namespace StoryEngine
 
                 case DIRECTORSTATUS.NOTREADY:
 
-                    if (script != null)
+                    if (scriptFile != null && scriptFile != "")
                     {
-                        theDirector.loadScript(script);
+                        // we have a reference to a local script file, so we'll attempt to load it (synchronous)
+
+                        string script = Transport.FileToText(Application.persistentDataPath + scriptFile);
+
+                        if (script == "")
+                        {
+                            Warning("Error loading local script file.");
+                        }
+                        else
+                        {
+                            theDirector.loadScriptText(script);
+                            Log("Script loaded, from local file.");
+                            break;
+                        }
+                       
+                    }
+
+                    if (scriptAsset != null)
+                    {
+                        theDirector.loadScriptAsset(scriptAsset);
+                        Log("Script loaded, from asset.");
                         break;
                     }
 
-                    //if (scriptName != "")
-                    //{
-                    //    Warning("Please use the TextAsset field for your script.");
-                    //    theDirector.loadScript(scriptName);
-                    //    break;
-                    //}
-
-                    Error("No script reference found.");
-
+                    Error("No script reference found, pausing director.");
+                    theDirector.status = DIRECTORSTATUS.PAUSED;
                     break;
 
                 default:

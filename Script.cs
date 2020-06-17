@@ -14,9 +14,9 @@ namespace StoryEngine
 * Takes a text document and parses it into connected StoryPoint objects.
 */
 
-   static public class Script
+    static public class Script
     {
-      static  string ID = "Script";
+        static string ID = "Script";
 
         static List<string> manuscript;
 
@@ -28,17 +28,20 @@ namespace StoryEngine
         static void Error(string _m) => StoryEngine.Log.Error(_m, ID);
         static void Verbose(string _m) => StoryEngine.Log.Message(_m, ID, LOGLEVEL.VERBOSE);
 
-
-        static public void Mount(TextAsset _asset)
+        static public void MountAsset(TextAsset _asset)
         {
             parse(_asset.text);
-            }
+        }
 
-        static public void Mount(string _filename)
+        static public void MountResource(string _filename)
         {
-            string text = Load(_filename);
+            string text = LoadResource(_filename);
             parse(text);
+        }
 
+        static public void MountScript(string text)
+        {
+            parse(text);
         }
 
         /*
@@ -81,7 +84,7 @@ namespace StoryEngine
 
             for (int i = 0; i < lines.Length; i++)
             {
-                flattened += " "+lines[i];
+                flattened += " " + lines[i];
                 if (!isComment(lines[i]))
                     manuscript.Add(lines[i]);
             }
@@ -89,7 +92,7 @@ namespace StoryEngine
             if (manuscript.Count == 0)
                 Error("Script has no lines.");
 
-        //    Verbose(flattened);
+            //    Verbose(flattened);
 
             GENERAL.storyPoints = new Dictionary<string, StoryPoint>();
             Dictionary<string, StoryPoint> storyLines = new Dictionary<string, StoryPoint>();
@@ -200,7 +203,7 @@ namespace StoryEngine
                 if (storyLine == null && storyLabel == null && storyPoint != null)
                 {
                     string[] task = getTask(manuscript[l]);
-                 
+
                     point = new StoryPoint(GetId(), currentStoryline, task);
 
                     GENERAL.storyPoints.Add(point.ID, point);
@@ -427,7 +430,7 @@ namespace StoryEngine
         }
 
 
-        static private string Load(string fileName)
+        static private string LoadResource(string fileName)
         {
 
             TextAsset mytxtData = (TextAsset)Resources.Load(fileName);
@@ -443,6 +446,6 @@ namespace StoryEngine
         }
     }
 
-   
+
 
 }
