@@ -37,13 +37,13 @@ namespace StoryEngine
         List<string> TrackedAddresses, NewAddresses;
 
         public GameObject NetworkObjectRef;
-     //   public GameObject NetworkStatusObjectRef;
- //       GameObject BufferStatusIn, BufferStatusOut;
+        //   public GameObject NetworkStatusObjectRef;
+        //       GameObject BufferStatusIn, BufferStatusOut;
 
         const short connectionMessageCode = 1001;
 
-         string BroadcastMessage = "";
-         int BroadcastKey = 0;
+        string BroadcastMessage = "";
+        int BroadcastKey = 0;
 
 
         const short stringCode = 1002;
@@ -157,7 +157,7 @@ namespace StoryEngine
 
         }
 
-        public void SetBroadcastInfo (int key, string message)
+        public void SetBroadcastInfo(int key, string message)
         {
             BroadcastKey = key;
             BroadcastMessage = message;
@@ -166,17 +166,17 @@ namespace StoryEngine
         public void SetBroadcastKey(int key)
         {
             BroadcastKey = key;
-         
+
         }
 
-        public void SetBroadcastMessage( string message)
+        public void SetBroadcastMessage(string message)
         {
 
             BroadcastMessage = message;
         }
 
         public void ResetBroadcastInfo()
-        { 
+        {
             BroadcastKey = 0;
             BroadcastMessage = "";
         }
@@ -364,7 +364,7 @@ namespace StoryEngine
 
         public void startBroadcastServer()
         {
-      //      Verbose("Starting broadcast server.\nKey: " + networkBroadcast.broadcastKey + "\nMessage: " + networkBroadcast.broadcastData);
+            //      Verbose("Starting broadcast server.\nKey: " + networkBroadcast.broadcastKey + "\nMessage: " + networkBroadcast.broadcastData);
             networkBroadcast.StartServer();
             Broadcasting = true;
         }
@@ -389,7 +389,7 @@ namespace StoryEngine
 
         public void startNetworkServer()
         {
-          //  Verbose("Starting network server.");
+            //  Verbose("Starting network server.");
             networkManager.StartNetworkServer();
             Serving = true;
         }
@@ -648,16 +648,30 @@ namespace StoryEngine
         void Update()
         {
 
-#if UNITY_EDITOR
-     //       StoryEngine.Log.SetModuleLevel(ID, LogLevel);
-    //        StoryEngine.Log.SetModuleLevel("NetworkManager", LogLevelNetworkManager);
+#if UNITY_EDITOR && UNITY_IOS
+
+            // Pause applicatin simulation for debugging.
+
+            if (Input.GetKeyDown("p"))
+            {
+                OnApplicationPause(true);
+            }
+
+            if (Input.GetKeyDown("o"))
+            {
+                OnApplicationPause(false);
+            }
+
+            if (state == STATE.PAUSED)
+                return;
 
 #endif
 
-            
+
+
             // Set debug visibility
-                    displayNetworkGUI(GENERAL.Debugging);
-        
+            displayNetworkGUI(GENERAL.Debugging);
+
 
 
             int t = 0;
@@ -693,24 +707,24 @@ namespace StoryEngine
 
 
 
-#if UNITY_EDITOR && UNITY_IOS
+            //#if UNITY_EDITOR && UNITY_IOS
 
-            // Pause applicatin simulation for debugging.
+            //            // Pause applicatin simulation for debugging.
 
-            if (Input.GetKeyDown("p"))
-            {
-                OnApplicationPause(true);
-            }
+            //            if (Input.GetKeyDown("p"))
+            //            {
+            //                OnApplicationPause(true);
+            //            }
 
-            if (Input.GetKeyDown("o"))
-            {
-                OnApplicationPause(false);
-            }
+            //            if (Input.GetKeyDown("o"))
+            //            {
+            //                OnApplicationPause(false);
+            //            }
 
-            if (state == STATE.PAUSED)
-                return;
+            //            if (state == STATE.PAUSED)
+            //                return;
 
-#endif
+            //#endif
 
 
 
@@ -726,7 +740,7 @@ namespace StoryEngine
             {
 
 
-         
+
                 // ---------------------------- SCOPE ----------------------------
 
                 case "isglobal":
@@ -738,7 +752,7 @@ namespace StoryEngine
                     }
                     else
                     {
-                        Log("No global authority, not changing pointer scope. " );
+                        Log("No global authority, not changing pointer scope. ");
                     }
 
                     done = true;
@@ -785,7 +799,7 @@ namespace StoryEngine
                     {
 
 
-                        if (BroadcastKey==0 || BroadcastMessage==null || BroadcastMessage.Length == 0)
+                        if (BroadcastKey == 0 || BroadcastMessage == null || BroadcastMessage.Length == 0)
                         {
                             // no info on how to configure broadcasterver
 
@@ -793,7 +807,7 @@ namespace StoryEngine
                         }
                         else
                         {
-                            startBroadcastServer(BroadcastKey,BroadcastMessage);
+                            startBroadcastServer(BroadcastKey, BroadcastMessage);
                             Log("Starting broadcast server, key: " + BroadcastKey + " message: " + BroadcastMessage);
                         }
 
@@ -844,22 +858,23 @@ namespace StoryEngine
                     // Keep servers up on IOS (because of application pause)
 
 #if UNITY_IOS
-                            if (!sending)
-                            {
-                                Log("Starting broadcast server, key " + ConnectionKey + " message " + ConnectionMessage);
-                                startBroadcastServer(ConnectionKey, ConnectionMessage);
-                            }
+                    if (!Broadcasting)
+                    {
+                        Log("Starting broadcast server, key " + BroadcastKey + " message " + BroadcastMessage);
+                        //startBroadcastServer(ConnectionKey, ConnectionMessage);
+                        startBroadcastServer(BroadcastKey, BroadcastMessage);
+                    }
 
-                            if (!serving)
-                            {
-                                Log("Starting network server.");
-                                startNetworkServer();
-                            }
+                    if (!Serving)
+                    {
+                        Log("Starting network server.");
+                        startNetworkServer();
+                    }
 
 #endif
 
 
-                    
+
                     // Watch for new clients. Stays live indefinitely.
 
                     if (Serving && NewTrackedAddresses())
@@ -875,7 +890,7 @@ namespace StoryEngine
                         task.setCallBack("addclient");
 
                     }
-                    
+
                     if (networkManager != null)
                     {
                         NetworkConnection[] connections = networkManager.GetConnectedClients();
@@ -1213,7 +1228,7 @@ namespace StoryEngine
 
             // NetworkServer.SendUnreliableToAll(storyCode, message);
             NetworkServer.SendToAll(storyCode, message);
-              Verbose("Sending: "+message.DebugLog);
+            Verbose("Sending: " + message.DebugLog);
 
         }
 
