@@ -442,6 +442,37 @@ namespace StoryEngine
 
                             // Something has happened in the task that we need to evaluate.
 
+
+                            if (checkForCallBack(pointer))
+                            {
+                                // pointer itself has moved, will be evaluated
+                                // task may still exist
+                                // pointerstatus is already set to evaluate.
+                            }
+                            else
+                            {
+                                // point itself didn't move (another pointer may have been launched), so see if task was completed.
+                                switch (pointer.currentTask.getStatus())
+                                {
+                                    case TASKSTATUS.COMPLETE:
+                                        Log("Storyline " + pointer.currentPoint.StoryLine + " task " + pointer.currentTask.Instruction + " completed.");
+
+                                        pointer.SetStatus(POINTERSTATUS.EVALUATE);
+                                        Log("Moving storyline " + pointer.currentPoint.StoryLine + " to next point.");
+                                        moveToNextPoint(pointer);
+                                        break;
+
+                                    case TASKSTATUS.ACTIVE:
+                                    default:
+                                        pointer.SetStatus(POINTERSTATUS.PAUSED);
+                                        pointerStack.RemoveAt(0);
+                                        break;
+                                }
+                            }
+
+
+                            /*
+
                             if (pointer.currentTask.getStatus() == TASKSTATUS.COMPLETE)
                             {
 
@@ -475,7 +506,7 @@ namespace StoryEngine
                                 pointerStack.RemoveAt(0);
 
                             }
-
+                            */
                         }
 
                         break;
@@ -499,8 +530,8 @@ namespace StoryEngine
         bool checkForCallBack(StoryPointer pointer)
         {
 
-            // checks and trigger callback on the current task for given pointer. does not touch the pointer itself.
-            
+            // checks for callbacks on the pointer. returns true if the pointer itself was moved.
+
             if (pointer.currentTask == null)
                 return false;
 
@@ -512,14 +543,12 @@ namespace StoryEngine
 
             pointer.currentTask.clearCallBack(); // clear value
 
-            // A callback is equivalent to 'start name', launching a new storypointer on the given point.
-
             // a callback refers to a point. if it's a storyline, a new storypoint will launch on the given point.
             // if it's another point, it works as goto
 
             StoryPoint callBackPoint = GENERAL.GetStoryPointByID(callBackValue);
-                     
-            if (callBackValue == null)
+
+            if (callBackPoint == null)
                 return false;
 
             // check if this point is on our own storyline
@@ -528,78 +557,43 @@ namespace StoryEngine
             {
 
                 // point is on the storyline our pointer is on, so make our pointer move
-            
-                Log("Callback -> caller's own storyline: " + callBackPoint.StoryLine + " moved to point: " + callBackValue);
+
+                Log("Callback -> caller's own storyline: " + callBackPoint.StoryLine + " moved to point: " + callBackValue + " task: " + callBackPoint.Instructions[0]);
                 pointer.currentPoint = callBackPoint;
                 pointer.SetStatus(POINTERSTATUS.EVALUATE);
-
-            }
-            else
-            {
-                // check if a pointer exists on the callback point's storyline
-
-                StoryPointer storyPointer = GENERAL.GetPointerForStoryline(callBackPoint.StoryLine);
-
-                if (storyPointer == null)
-                {
-
-                    // no pointer for the callback point's storyline exists, we'll create one
-                    Log("Callback -> new storyline: " + callBackPoint.StoryLine+ " starting at point: "+callBackValue);
-                    
-                    StoryPointer newStoryPointer = new StoryPointer();
-                    newStoryPointer.SetScope(pointer.scope);
-                    newStoryPointer.SetStoryPointByID(callBackValue);
-                    pointerStack.Add(newStoryPointer);
-                    newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task
-                }
-                else
-                {
-                    // a pointer on the storyline exists, we'll move it
-                    Log("Callback -> existing storyline: " + callBackPoint.StoryLine +  " moved to point: " + callBackValue);
-                    storyPointer.currentPoint = callBackPoint;
-                    storyPointer.SetStatus(POINTERSTATUS.EVALUATE);
-
-                }
-
-
+                return true;
             }
 
-            /*
-            if (GENERAL.GetPointerForStoryline(pointer.currentTask.getCallBack()) == null)
+
+
+            // check if a pointer exists on the callback point's storyline
+
+            StoryPointer storyPointer = GENERAL.GetPointerForStoryline(callBackPoint.StoryLine);
+
+            if (storyPointer == null)
             {
 
+                // no pointer for the callback point's storyline exists, we'll create one
+                Log("Callback -> new storyline: " + callBackPoint.StoryLine + " starting at point: " + callBackValue + " task: " + callBackPoint.Instructions[0]);
 
-                Log("New callback storyline: " + callBackValue);
-              
                 StoryPointer newStoryPointer = new StoryPointer();
                 newStoryPointer.SetScope(pointer.scope);
                 newStoryPointer.SetStoryPointByID(callBackValue);
-
-
-                if (newStoryPointer.currentPoint == null)
-                {
-                    // callback value was invalid, no point was found, we don't add the pointer.
-                    GENERAL.ALLPOINTERS.Remove(newStoryPointer);// was auto-added in constructor, so must be removed
-                    Warning("Callback storyline doesn't exist: " + callBackValue);
-                }
-                else
-                {
-                    //newStoryPointer.modified = true;
-                    pointerStack.Add(newStoryPointer);
-                    newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task.
-
-                }
-
-
-
+                pointerStack.Add(newStoryPointer);
+                newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task
             }
             else
             {
+                // a pointer on the storyline exists, we'll move it
+                Log("Callback -> existing storyline: " + callBackPoint.StoryLine + " moved to point: " + callBackValue + " task: " + callBackPoint.Instructions[0]);
+                storyPointer.currentPoint = callBackPoint;
+                storyPointer.SetStatus(POINTERSTATUS.EVALUATE);
 
-                Log("Callback storyline already started: " + callBackValue);
             }
-            */
-            return true;
+
+
+
+            return false;
 
         }
 
