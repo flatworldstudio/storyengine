@@ -500,8 +500,7 @@ namespace StoryEngine
         {
 
             // checks and trigger callback on the current task for given pointer. does not touch the pointer itself.
-
-
+            
             if (pointer.currentTask == null)
                 return false;
 
@@ -515,16 +514,64 @@ namespace StoryEngine
 
             // A callback is equivalent to 'start name', launching a new storypointer on the given point.
 
+            // a callback refers to a point. if it's a storyline, a new storypoint will launch on the given point.
+            // if it's another point, it works as goto
+
+            StoryPoint callBackPoint = GENERAL.GetStoryPointByID(callBackValue);
+                     
+            if (callBackValue == null)
+                return false;
+
+            // check if this point is on our own storyline
+
+            if (callBackPoint.StoryLine == pointer.currentPoint.StoryLine)
+            {
+
+                // point is on the storyline our pointer is on, so make our pointer move
+            
+                Log("Callback -> caller's own storyline: " + callBackPoint.StoryLine + " moved to point: " + callBackValue);
+                pointer.currentPoint = callBackPoint;
+                pointer.SetStatus(POINTERSTATUS.EVALUATE);
+
+            }
+            else
+            {
+                // check if a pointer exists on the callback point's storyline
+
+                StoryPointer storyPointer = GENERAL.GetPointerForStoryline(callBackPoint.StoryLine);
+
+                if (storyPointer == null)
+                {
+
+                    // no pointer for the callback point's storyline exists, we'll create one
+                    Log("Callback -> new storyline: " + callBackPoint.StoryLine+ " starting at point: "+callBackValue);
+                    
+                    StoryPointer newStoryPointer = new StoryPointer();
+                    newStoryPointer.SetScope(pointer.scope);
+                    newStoryPointer.SetStoryPointByID(callBackValue);
+                    pointerStack.Add(newStoryPointer);
+                    newStoryPointer.persistantData = pointer.persistantData; // inherit data, note that data network distribution is via task only. AD will load value into task
+                }
+                else
+                {
+                    // a pointer on the storyline exists, we'll move it
+                    Log("Callback -> existing storyline: " + callBackPoint.StoryLine +  " moved to point: " + callBackValue);
+                    storyPointer.currentPoint = callBackPoint;
+                    storyPointer.SetStatus(POINTERSTATUS.EVALUATE);
+
+                }
+
+
+            }
+
+            /*
             if (GENERAL.GetPointerForStoryline(pointer.currentTask.getCallBack()) == null)
             {
 
 
                 Log("New callback storyline: " + callBackValue);
-
-                //StoryPointer newStoryPointer = new StoryPointer(callBackValue, pointer.scope);
-
+              
                 StoryPointer newStoryPointer = new StoryPointer();
-
                 newStoryPointer.SetScope(pointer.scope);
                 newStoryPointer.SetStoryPointByID(callBackValue);
 
@@ -551,7 +598,7 @@ namespace StoryEngine
 
                 Log("Callback storyline already started: " + callBackValue);
             }
-
+            */
             return true;
 
         }
