@@ -21,6 +21,7 @@ namespace StoryEngine
         static List<string> manuscript;
 
         static public string flattened = ""; // this is stripped of line endings, for checking purposes (eg hash)
+        static public string fullText = ""; // full string, for transferring
 
         // Copy these into every class for easy debugging.
         static void Log(string _m) => StoryEngine.Log.Message(_m, ID);
@@ -76,8 +77,11 @@ namespace StoryEngine
 
         static void parse(string _text)
         {
+
+
             __idcount = 0;
             flattened = "";
+            fullText = _text;
 
             manuscript = new List<string>();
             string[] lines = _text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
