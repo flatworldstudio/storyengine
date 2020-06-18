@@ -374,13 +374,13 @@ namespace StoryEngine
 
                     if (scriptFile != null && scriptFile != "")
                     {
-                        // we have a reference to a local script file, so we'll attempt to load it (synchronous)
+                        // we have a reference to a local script file, so we'll attempt to load it (synchronous). we load it from a folder with the current version
 
-                        string script = Transport.FileToText(Application.persistentDataPath + scriptFile);
+                        string script = Transport.FileToText(Application.persistentDataPath + "/scripts/" + Application.version + "/" + scriptFile);
 
                         if (script == "")
                         {
-                            Warning("Error loading local script file.");
+                            Warning("Error loading local script file, version folder "+Application.version);
                         }
                         else
                         {
@@ -388,7 +388,7 @@ namespace StoryEngine
                             Log("Script loaded, from local file.");
                             break;
                         }
-                       
+
                     }
 
                     if (scriptAsset != null)
