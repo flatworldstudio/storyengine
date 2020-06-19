@@ -138,7 +138,7 @@ namespace StoryEngine
         public Text FrameRate;
         public GameObject BufferStatusIn, BufferStatusOut;
 
-
+        public Text Logs;
         //List<StoryPointer> pointerList;
         //List<StoryData> dataList;
 
@@ -262,6 +262,11 @@ namespace StoryEngine
         }
 
         float MessageTimeStamp;
+
+        public void AddLogLine (string logLine)
+        {
+            Logs.text = logLine + "\n" + Logs.text;
+        }
 
         public void DeusMessage(string message, float duration = 5f)
         {

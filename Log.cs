@@ -107,7 +107,11 @@ namespace StoryEngine
                 moduleLevel = AssitantDirector.Instance.DefaultLogLevel;
 
             if (messageLevel <= moduleLevel)
+            {
                 Debug.LogWarning(module + ": " + message);
+                DeusHandler.Instance?.AddLogLine(module + ": " + message);
+            }
+                
 
 #endif
 
@@ -127,6 +131,7 @@ namespace StoryEngine
             if (messageLevel <= moduleLevel)
             {
                 Debug.LogError(module + ": " + message);
+                DeusHandler.Instance?.AddLogLine(module + ": " + message);
                 if (errorEcho != null)
                     errorEcho(message, module);
 
