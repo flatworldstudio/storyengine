@@ -608,9 +608,31 @@ namespace StoryEngine
 
             updateTaskDisplays();
             SetIndicators();
+            SetDebugCanvasSize();
         }
 
         //
+
+            void SetDebugCanvasSize()
+        {
+            // Set the reference canvas size to the actual canvas size, because scale widht/height isn't always ideal
+
+            Canvas canvas = DebugCanvas?.GetComponent<Canvas>();
+            CanvasScaler canvasScaler = DebugCanvas?.GetComponent<CanvasScaler>();
+
+            if (canvas!=null && canvasScaler != null)
+            {
+
+                int d = canvas.targetDisplay;
+                int Horizontal = Display.displays[d].renderingWidth;
+                int Vertical = Display.displays[d].renderingHeight;
+                canvasScaler.referenceResolution = new Vector2(Horizontal, Vertical);
+
+            }
+
+
+
+        }
 
         void SetIndicators()
         {
