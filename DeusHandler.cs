@@ -309,7 +309,13 @@ namespace StoryEngine
             Logs.text = logLine + "\n" + Logs.text;
         }
 
-        public void DeusMessage(string message, float duration = 5f)
+
+        public static void DeusMessage(string message, float duration = 5f)
+        {
+            if (Instance != null) Instance.ShowDeusMessage(message, duration);
+        }
+
+        public void ShowDeusMessage(string message, float duration = 5f)
         {
 
 
