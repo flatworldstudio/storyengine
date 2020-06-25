@@ -150,7 +150,7 @@ namespace StoryEngine
         public static DeusHandler Instance;
         //  int PointerdisplayBuffer = 24;
 
-
+     
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
         void Log(string message) => StoryEngine.Log.Message(message, ID);
@@ -226,6 +226,47 @@ namespace StoryEngine
 
             switch (task.Instruction)
             {
+
+                case "pause1":
+
+                    float timeOut1;
+
+                    if (!task.GetFloatValue("timeOut", out  timeOut1))
+                    {
+                        task.SetFloatValue("timeOut",  Time.time + 1f);
+
+                    }
+                    else
+                    {
+                        if (Time.time > timeOut1)
+                        {
+                            done = true;
+                        }
+
+                    }
+                    break;
+
+                case "pause5":
+
+                    float timeOut5;
+
+                    if (!task.GetFloatValue("timeOut", out timeOut5))
+                    {
+                        task.SetFloatValue("timeOut", Time.time + 5f);
+
+                    }
+                    else
+                    {
+                        if (Time.time > timeOut5)
+                        {
+                            done = true;
+                        }
+
+                    }
+                    break;
+
+
+
 
                 case "debugon":
 

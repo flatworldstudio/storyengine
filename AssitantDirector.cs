@@ -47,7 +47,7 @@ namespace StoryEngine
 
 
 
-        string ID = "AD";
+        string ID = "AssistantDirector";
         private NewTasksEventUnity newTasksEventUnity;
 
         Director theDirector;
