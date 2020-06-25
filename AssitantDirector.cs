@@ -10,6 +10,8 @@ using UnityEngine.Networking;
 using UnityEngine.Networking.NetworkSystem;
 using StoryEngine.Network;
 using StoryEngine.IO;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace StoryEngine
 {
@@ -27,11 +29,11 @@ namespace StoryEngine
 
     public class AssitantDirector : MonoBehaviour
     {
-
-        public TextAsset scriptAsset;/*!< \brief Set this value in Unity Editor */
+        // ad will try to load script in this order.
+        //public string scriptAddressable;/*!< \brief Set this value in Unity Editor, AD will try addressable first */
         public string scriptFile;/*!< \brief Set this value in Unity Editor, if set the AD will attempt to load local file first. */
+        public TextAsset scriptAsset;/*!< \brief Set this value in Unity Editor */
 
-        //public string scriptName;/*!< \brief Set this value in Unity Editor, will be deprecated. */
         public string launchOSX, launchWIN, launchIOS, launchAndroid;/*!< \brief Set this value in Unity Editor */
 
         public static AssitantDirector Instance;
@@ -44,11 +46,6 @@ namespace StoryEngine
         public LOGLEVEL[] loglevel;
 
 
-        //public LOGLEVEL DirectorLogLevel;
-        //public LOGLEVEL ADLogLevel;
-        //public LOGLEVEL DataControllerLogLevel;
-        //public LOGLEVEL ControllerLogLevel;
-        //public LOGLEVEL EventLogLevel;
 
         string ID = "AD";
         private NewTasksEventUnity newTasksEventUnity;
@@ -89,6 +86,7 @@ namespace StoryEngine
             Verbose("Starting.");
 
 
+            
 
             //StoryEngine.Log.SetModuleLevel("Director", DirectorLogLevel);
             //StoryEngine.Log.SetModuleLevel("AD", ADLogLevel);
@@ -119,9 +117,9 @@ namespace StoryEngine
 
 #if UNITY_IOS
 
-		Log ("Running on IOS platform. ");
+            Log("Running on IOS platform. ");
 
-		launchStoryline = launchIOS;
+            launchStoryline = launchIOS;
 
 #endif
 
@@ -164,17 +162,6 @@ namespace StoryEngine
         void Update()
         {
             SetDebugLevels();
-            //if (id != null && loglevel != null)
-            //{
-            //    // set custom log levels
-            //    for (int i = 0; i < id.Length; i++)
-            //    {
-            //        if (i < loglevel.Length)
-            //        {
-            //            StoryEngine.Log.SetModuleLevel(id[i], loglevel[i]);
-            //        }
-            //    }
-            //}
 
             #region APPLYUPDATES
 
@@ -372,15 +359,47 @@ namespace StoryEngine
 
                 case DIRECTORSTATUS.NOTREADY:
 
+                    // try addressable script first.
+
+                    //if (scriptAddressable != null && scriptAddressable != "")
+                    //{
+                    //    // pause while loading
+                    //    theDirector.status = DIRECTORSTATUS.PAUSED;
+
+                
+
+                    //    Addressables.LoadAssetAsync<TextAsset>(scriptAddressable).Completed += obj =>
+                    //    {
+                    //        if (obj.Result == null)
+                    //        {
+                    //            Error("Addressable script asset failed: " + obj.OperationException.Message);
+
+                    //        }
+                    //        else
+                    //        {
+
+                    //            theDirector.loadScriptAsset(obj.Result);
+                    //            Log("Script loaded, from addressable asset.");
+
+
+                    //        }
+
+
+
+                    //    };
+
+                    //}
+
+
                     if (scriptFile != null && scriptFile != "")
                     {
                         // we have a reference to a local script file, so we'll attempt to load it (synchronous). we load it from a folder with the current version
 
-                        string script = Transport.FileToText(Application.persistentDataPath + "/scripts/" + Application.version + "/" + scriptFile);
+                        string script = Transport.FileToText(Application.persistentDataPath + "/scripts/" + JimEngine.App.Info.GetMinorNumber() + "/" + scriptFile);
 
                         if (script == "")
                         {
-                            Warning("Error loading local script file, version folder "+Application.version);
+                            Warning("Error loading local script file, version folder " + JimEngine.App.Info.GetMinorNumber());
                         }
                         else
                         {
@@ -399,6 +418,7 @@ namespace StoryEngine
                     }
 
                     Error("No script reference found, pausing director.");
+
                     theDirector.status = DIRECTORSTATUS.PAUSED;
                     break;
 
@@ -408,6 +428,42 @@ namespace StoryEngine
 
             #endregion
         }
+
+        /*
+        private async void LoadScript()
+        {
+            if (scriptAddressable != null && scriptAddressable != "")
+            {
+                theDirector.status = DIRECTORSTATUS.PAUSED;
+                AsyncOperationHandle<TextAsset> handle = Addressables.LoadAssetAsync<TextAsset>(scriptAddressable);
+                await handle.Task;
+
+                if (handle.Status==)
+                if (handle.Result == null)
+                {
+                    Error("Addressable script asset failed: " + obj.OperationException.Message);
+
+                }
+                else
+                {
+
+                    theDirector.loadScriptAsset(obj.Result);
+                    Log("Script loaded, from addressable asset.");
+
+
+                }
+
+            }
+
+
+
+            
+
+            // The task is complete. Be sure to check the Status is successful before storing the Result.
+
+        }
+
+        */
 
 
 
