@@ -259,9 +259,9 @@ namespace StoryEngine.Network
 #endif
 
             }
-           
+#if LOGVERBOSE
             Debug.Log("serialised " +DebugLog);
-
+#endif
         }
 
     }
