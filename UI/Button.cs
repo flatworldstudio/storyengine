@@ -49,6 +49,9 @@ namespace StoryEngine.UI
         //    lastPosition = Vector2.zero;
         //}
 
+     
+
+
         public Button(string _name)
         {
             Initialise(_name);
@@ -76,6 +79,27 @@ namespace StoryEngine.UI
             lastPosition = Vector2.zero;
             orthoDragging = false;
         }
+
+        public Button(GameObject _object, bool locked)
+        {
+
+            Initialise(_object);
+
+            if (locked)
+            {
+                constraint = null;
+                dragTarget = null;
+            }
+            else
+            {
+                constraint = Constraint.none;
+                dragTarget = gameObject;
+            }
+
+            lastPosition = Vector2.zero;
+            orthoDragging = false;
+        
+    }
 
 
         public Button(string _name, GameObject _dragTarget)
@@ -115,43 +139,68 @@ namespace StoryEngine.UI
 
             lastPosition = Vector2.zero;
         }
-
-        void Initialise(string _name)
+        public Button(GameObject _go, GameObject _dragTargetHorizontal, Constraint _constraintHorizontal, GameObject _dragTargetVertical, Constraint _constraintVertical)
         {
+            Initialise(_go);
+
+            // Button with differentiated constraints for horizontal and vertical dragging. Dragging will snap to initial direction.
+
+            constraint = Constraint.none;
+            dragTarget = gameObject;
+
+            dragTargetHorizontal = _dragTargetHorizontal;
+            constraintHorizontal = _constraintHorizontal;
+
+            dragTargetVertical = _dragTargetVertical;
+            constraintVertical = _constraintVertical;
+
+            orthoDragging = true;
+
+            lastPosition = Vector2.zero;
+        }
+
+        void Initialise(GameObject _go)
+        {
+            gameObject = _go;
             callback = "";
-            name = _name;
-        //    color = new Color(1, 1, 1, 1);
+            name = gameObject.name;
+            //    color = new Color(1, 1, 1, 1);
             brightness = 1f;
             targetBrightness = 1f;
             stepBrightness = 1f / 0.25f;
 
-            gameObject = GameObject.Find(_name);
+            
 
-
-            //image = gameObject.GetComponent<Image>();
-
-
-            if (gameObject != null)
-            {
-
-               image = gameObject.GetComponent<Image>();
+                image = gameObject.GetComponent<Image>();
                 if (image != null)
                 {
                     color = image.color;
                 }
-             //   color = new Color(1, 1, 1, 1);
+                //   color = new Color(1, 1, 1, 1);
                 //   ApplyBrightness();
 
                 //if (image != null)
                 //{
                 //    image.color = brightness * color;
                 //}
-            }
+          
+        }
+
+        void Initialise(string _name)
+        {
+           
+
+            gameObject = GameObject.Find(_name);
+
+            if (gameObject != null)
+                Initialise(gameObject);
             else
-            {
-                // catch exception
-                Error("Gameobject not found: " + _name);
-            }
+                Warning("Gameobject not found.");
+           
+            //image = gameObject.GetComponent<Image>();
+
+
+           
 
             //   onTap = DefaultBlink;
         }
@@ -236,7 +285,11 @@ namespace StoryEngine.UI
 
         }
 
-        public void Tap()
+
+	
+
+
+		public void Tap()
         {
             //Debug.Log("tapped");
 

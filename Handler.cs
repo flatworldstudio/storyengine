@@ -8,7 +8,6 @@ namespace StoryEngine
     public class Handler : MonoBehaviour
     {
 
-   //     public LOGLEVEL LogLevel = LOGLEVEL.WARNINGS;
 
         readonly string ID = "Handler";
         List<StoryTask> taskList;
@@ -87,10 +86,6 @@ namespace StoryEngine
         #region UPDATE
         void Update()
         {
-
-#if UNITY_EDITOR
-        //    StoryEngine.Log.SetModuleLevel(ID, LogLevel);
-#endif
 
             int t = 0;
 

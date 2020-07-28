@@ -37,6 +37,11 @@ namespace StoryEngine.UI
         public Button targetButton;
 
         public bool isInert, isSpringing;
+      public  float eVel0 = 0;
+  public       float eVel1 = 0;
+        public float eVel2 = 0;
+        public float eVel3 = 0;
+
         public int springIndex;
 
         float tapCount;
@@ -157,6 +162,8 @@ namespace StoryEngine.UI
             result.tapCount = this.tapCount;
             return result;
         }
+        float iVel = 0;
+        Vector2 iVec = Vector2.zero;
 
         public void Inertia()
         {
@@ -164,8 +171,8 @@ namespace StoryEngine.UI
             if (isInert)
             {
 
-                float iVel = 0f;
-                Vector2 iVec = Vector2.zero;
+              //  float iVel = 0f;
+             //   Vector2 iVec = Vector2.zero;
 
                 // Dampen double touch distance inertia.
 

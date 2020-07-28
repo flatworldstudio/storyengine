@@ -87,7 +87,7 @@ namespace StoryEngine.UI
             if (ui.isSpringing)
             {
 
-                bool springing = apply2Dsprings(target, constraint, ui.springIndex);
+                bool springing = apply2Dsprings(target, constraint,ui);
 
                 if (ui.isSpringing && springing == false)
                 {
@@ -96,9 +96,11 @@ namespace StoryEngine.UI
                 }
             }
         }
-
-        static bool apply2Dsprings(GameObject target, Constraint constraint, int springIndex)
+    
+        static bool apply2Dsprings(GameObject target, Constraint constraint, Event ui)
         {
+            int springIndex = ui.springIndex;
+
             // apply springs to gui object. returns true if it did anything.
             bool result = false;
             Vector3 anchor = target.GetComponent<RectTransform>().anchoredPosition;
@@ -106,30 +108,26 @@ namespace StoryEngine.UI
             if (constraint.edgeSprings)
             {
                 result = true;
-                float eVel0 = 0;
-                float eVel1 = 0;
-                float eVel2 = 0;
-                float eVel3 = 0;
-
+             
                 if (anchor.x < constraint.edgeSpringMin.x)
                 {
-                    anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMin.x, ref eVel0, 0.15f);
+                    anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMin.x, ref ui.eVel0, 0.15f);
                 }
                 else if (anchor.x > constraint.edgeSpringMax.x)
                 {
-                    anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMax.x, ref eVel1, 0.15f);
+                    anchor.x = Mathf.SmoothDamp(anchor.x, constraint.edgeSpringMax.x, ref ui.eVel1, 0.15f);
                 }
 
                 if (anchor.y < constraint.edgeSpringMin.y)
                 {
-                    anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMin.y, ref eVel2, 0.15f);
+                    anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMin.y, ref ui.eVel2, 0.15f);
                 }
                 else if (anchor.y > constraint.edgeSpringMax.y)
                 {
-                    anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMax.y, ref eVel3, 0.15f);
+                    anchor.y = Mathf.SmoothDamp(anchor.y, constraint.edgeSpringMax.y, ref ui.eVel3, 0.15f);
                 }
 
-                float maxVel = Mathf.Max(Mathf.Abs(eVel0), Mathf.Abs(eVel1), Mathf.Abs(eVel2), Mathf.Abs(eVel3));
+                float maxVel = Mathf.Max(Mathf.Abs(ui.eVel0), Mathf.Abs(ui.eVel1), Mathf.Abs(ui.eVel2), Mathf.Abs(ui.eVel3));
 
                 if (maxVel < 1f)
                 {
@@ -173,13 +171,13 @@ namespace StoryEngine.UI
 
                 }
 
-                float eVel0 = 0;
-                float eVel1 = 0;
+                //float eVel0 = 0;
+                //float eVel1 = 0;
 
-                anchor.x = Mathf.SmoothDamp(anchor.x, constraint.springPositions[closestSpring].x, ref eVel0, 0.15f);
-                anchor.y = Mathf.SmoothDamp(anchor.y, constraint.springPositions[closestSpring].y, ref eVel1, 0.15f);
+                anchor.x = Mathf.SmoothDamp(anchor.x, constraint.springPositions[closestSpring].x, ref ui.eVel0, 0.15f);
+                anchor.y = Mathf.SmoothDamp(anchor.y, constraint.springPositions[closestSpring].y, ref ui.eVel1, 0.15f);
 
-                float maxVel = Mathf.Max(Mathf.Abs(eVel0), Mathf.Abs(eVel1));
+                float maxVel = Mathf.Max(Mathf.Abs(ui.eVel0), Mathf.Abs(ui.eVel1));
 
                 //              float maxVel = Mathf.Max (eVel0, eVel1);
                 //              if (maxVel > 0f && maxVel < 1f) {
