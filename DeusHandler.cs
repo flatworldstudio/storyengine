@@ -164,6 +164,27 @@ namespace StoryEngine
 
         }
 
+        void OnEnable()
+        {
+            Application.logMessageReceivedThreaded += HandleLog;
+        }
+
+        void OnDisable()
+        {
+            Application.logMessageReceivedThreaded -= HandleLog;
+        }
+
+        void HandleLog(string logString, string stackTrace, LogType type)
+        {
+            if (type == LogType.Exception || type == LogType.Error)
+            {
+                AddLogLine("echo: "+logString);
+            }
+              
+            
+        }
+
+       
 
         void Start()
         {
