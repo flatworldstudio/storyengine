@@ -75,7 +75,10 @@ namespace StoryEngine
             }
 
         }
-
+        static LOGLEVEL GetDefaultLevel()
+        {
+            return AssitantDirector.Instance == null ? LOGLEVEL.NORMAL : AssitantDirector.Instance.DefaultLogLevel;
+        }
 
         public static void Message(string message, string module = "Unkown", LOGLEVEL messageLevel = LOGLEVEL.NORMAL)
         {
@@ -86,7 +89,7 @@ namespace StoryEngine
             LOGLEVEL moduleLevel;
 
             if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
-                moduleLevel = AssitantDirector.Instance.DefaultLogLevel;
+                moduleLevel = GetDefaultLevel();
 
             if (messageLevel <= moduleLevel)
                 Debug.Log(module + ": " + message);
@@ -104,7 +107,7 @@ namespace StoryEngine
             LOGLEVEL moduleLevel;
 
             if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
-                moduleLevel = AssitantDirector.Instance.DefaultLogLevel;
+                moduleLevel = GetDefaultLevel();
 
             if (messageLevel <= moduleLevel)
             {
@@ -126,7 +129,7 @@ namespace StoryEngine
             LOGLEVEL moduleLevel;
 
             if (!moduleLogStatus.TryGetValue(module, out moduleLevel))
-                moduleLevel = AssitantDirector.Instance.DefaultLogLevel;
+                moduleLevel = GetDefaultLevel();
 
             if (messageLevel <= moduleLevel)
             {
