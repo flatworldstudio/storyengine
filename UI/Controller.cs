@@ -25,6 +25,9 @@ namespace StoryEngine.UI
 
         int cycle = 0; // for debugging
 
+
+        float doubleTapTimeLimit;
+
         List<Event> uiEventStack;
         List<Button> AnimatingButtons;
 
@@ -69,36 +72,29 @@ namespace StoryEngine.UI
         public UserCallBack updateUi(Layout _layout)
         {
             cycle = (cycle + 1) % 1000;
-
             UserCallBack callBack = new UserCallBack();
 
             int stackSize = uiEventStack.Count;
-
             activeUiEvent.GetUserActivity(); // get (unscaled) mouse movement, touches, taps
-
-
-            //activeUiEvent.plane = _layout.FindPlaneByPoint(activeUiEvent.position); // get the plane the user is active in
 
             // If a user touch/click just began, set targets and remove any old event targeting the same objects. 
 
             if (activeUiEvent.touch == TOUCH.BEGAN)
             {
-
                 activeUiEvent.plane = _layout.FindPlaneByPoint(activeUiEvent.position); // get the plane the user is active in by screen coordinates
 
-                if (activeUiEvent.plane != null && activeUiEvent.plane.interFace!=null)
+                if (activeUiEvent.plane != null && activeUiEvent.plane.interFace != null)
                 {
-                    Log("targeting interface " + activeUiEvent.plane.interFace.name);
+                    Verbose("targeting interface " + activeUiEvent.plane.interFace.name);
                 }
                 else
                 {
-                    Log("not targeting any interface");
+                    Verbose("not targeting any interface");
                 }
 
                 activeUiEvent.SetTargets();
 
                 int e = uiEventStack.Count - 1;
-
                 while (e >= 0)
                 {
 
@@ -106,60 +102,53 @@ namespace StoryEngine.UI
 
                     if (oldEvent != activeUiEvent)
                     {
-
                         bool removeOld = false;
 
                         if (activeUiEvent.targetButton != null)
                         {
-
                             //  we check all the new events button targets against the actual single target of the check event.
-
                             if (oldEvent.targetButton != null && activeUiEvent.targetButton.HasDragTarget(oldEvent.targetButton.GetDragTarget(oldEvent.direction)))
-
                             {
-
+                                if (oldEvent.tapTimeOut > 0)
+                                {
+                                    // the old event was in a tap when the new one started.
+                                    // we flag this so the new event will perform a double tap rather than a tap
+                                    activeUiEvent.targetJustTapped = true;
+                                }
                                 removeOld = true;
-                                //         Debug.Log("Removing ui event targeting the same dragtarget");
-
                             }
-
-
+                        }
+                        else if (activeUiEvent.target2D != null)
+                        {
+                            // if same 2d target, remove old.
+                            if (oldEvent.target2D == activeUiEvent.target2D)
+                            {
+                                if (oldEvent.tapTimeOut > 0)
+                                    activeUiEvent.targetJustTapped = true;
+                                removeOld = true;
+                            }
                         }
                         else if (activeUiEvent.target3D != null)
                         {
-
                             // if same 3d target, remove old.
-
                             if (oldEvent.target3D == activeUiEvent.target3D)
                             {
-
+                                if (oldEvent.tapTimeOut > 0)
+                                    activeUiEvent.targetJustTapped = true;
                                 removeOld = true;
                             }
-
-
                         }
                         else
                         {
-
                             // if both have no targets at all, remove old. 
-
                             if (oldEvent.targetButton == null && oldEvent.target2D == null && oldEvent.target3D == null)
-                            {
-
                                 removeOld = true;
-
-                            }
 
                         }
                         if (removeOld)
-                        {
-
                             uiEventStack.RemoveAt(e);
 
-                        }
-
                     }
-
                     e--;
                 }
 
@@ -183,116 +172,109 @@ namespace StoryEngine.UI
             {
 
                 Event uiEvent = uiEventStack[i];
-
-                //			Log.Message ( "handling event stack of size " + uiEventStack.Count);
-
                 processUiEvent(uiEvent);
 
-                // If an old event is no longer inert or springing, remove it.
-
-                if (uiEvent != activeUiEvent && uiEvent.isInert == false && uiEvent.isSpringing == false)
+                if (uiEvent.callback != "")
                 {
+                    // callback may come from old event, in case of a single tap
+                    Verbose("Triggering callback event.");
+                    callBack.label = uiEvent.callback;
+                    callBack.sender = uiEvent.target2D;
+                    callBack.trigger = true;
 
+                }
+
+                // If an old event is no longer inert or springing, remove it.
+                if (uiEvent != activeUiEvent && uiEvent.isInert == false && uiEvent.isSpringing == false && uiEvent.tapTimeOut < float.Epsilon)
+                {
                     uiEventStack.RemoveAt(i);
-                  Verbose("Removing event, total left " + uiEventStack.Count);
-
-
-
-
+                    Verbose("Removing event, total left " + uiEventStack.Count);
                     i--;
-
                 }
 
                 i++;
 
             }
-            //foreach (Event e in uiEventStack)
-            //{
-            //    if (e.target2D != null)
-            //        Verbose("event button " + e.target2D.name);
-            //    else
-            //        Verbose("event without target ");
 
-            //}
+           
 
 
-            if (activeUiEvent.callback != "")
-            {
-
-                callBack.label = activeUiEvent.callback;
-                callBack.sender = activeUiEvent.target2D;
-                callBack.trigger = true;
-
-                //Debug.Log ("callbackResult: " +  callBack.label);
-
-            }
+            // if the event ended, handle different outcomes.
 
             if (activeUiEvent.touch == TOUCH.ENDED)
             {
 
+                Verbose("Touch ended");
                 // the active event just ended. set inert and springing to true.
-
                 activeUiEvent.touch = TOUCH.NONE;
 
-               // if (activeUiEvent.action==ACTION.)
+                //if (activeUiEvent.action == ACTION.TAP)
+                //{
 
-                activeUiEvent.isInert = true;
+                //    // tap has been exectued in processevent
+                //    //  must only be executed once, after that make it a 'normal' singledrag event.
+
+                //    activeUiEvent.action = ACTION.SINGLEDRAG;
+                //    Verbose("Tapped, converting to singledrag");
+
+                //}
 
                 if (activeUiEvent.targetButton != null)
                 {
+                    // if the event had a button as target, set inertia and springing.
+
+                    activeUiEvent.isInert = true;
+                    Verbose("Set to inert");
+
+                    // if normal dragging
                     if (activeUiEvent.targetButton.GetDragTarget() != null)
                     {
                         activeUiEvent.isSpringing = true;
+                        Verbose("Setting to springing: free direction dragtarget is " + activeUiEvent.targetButton.GetDragTarget().name);
                     }
-                  
 
-                    // If we were dragging an ortho button, we want an event on the other direction to spring.
+                    // If ortho dragging
 
-                    //if (activeUiEvent.targetButton.orthoDragging)
-                    //{
-                    //    if (activeUiEvent.direction != DIRECTION.FREE)
-                    //    {
-                    //        //    Debug.Log("adding springing event for " + (activeUiEvent.direction == DIRECTION.HORIZONTAL ? "vertical" :"horizontal"));
+                    else if (activeUiEvent.targetButton.orthoDragging)
+                    {
+                        // if a direction is set, we create an additional event for the other direction.
+                        if (activeUiEvent.direction != DIRECTION.FREE)
+                        {
+                            Verbose("setting to ortho springing");
 
-                    //        Event springEvent = activeUiEvent.clone();
+                            activeUiEvent.isSpringing = true;
+                            Event springEvent = activeUiEvent.clone();
 
-                    //        springEvent.direction = activeUiEvent.direction == DIRECTION.HORIZONTAL ? DIRECTION.VERTICAL : DIRECTION.HORIZONTAL;
-                    //        springEvent.isSpringing = true;
-                    //        springEvent.action = ACTION.SINGLEDRAG;
-                    //        Verbose("cloning event for springing");
-                    //         uiEventStack.Add(springEvent);
+                            springEvent.direction = activeUiEvent.direction == DIRECTION.HORIZONTAL ? DIRECTION.VERTICAL : DIRECTION.HORIZONTAL;
 
-                    //    }
-                    //    else
-                    //    {
 
-                    //        //     Debug.Log("touch ended, ortho button, direction free");
+                            springEvent.action = ACTION.SINGLEDRAG;
+                            Verbose("cloning event for springing");
+                            uiEventStack.Add(springEvent);
 
-                    //        // Direction was never set. We'll create springing events for both direcionts.
-                    //        // ??? direction not set means it didn't go anywhere??
-                    //        //activeUiEvent.direction = DIRECTION.HORIZONTAL;
+                        }
+                        else
+                        {
 
-                    //        //Event springEvent = activeUiEvent.clone();
+                            Verbose("touch ended, ortho button, direction free");
 
-                    //        //springEvent.direction = DIRECTION.VERTICAL;
+                            // Direction was never set (tap) We'll create springing events for both direcionts.
+                            activeUiEvent.isSpringing = true;
+                            activeUiEvent.isInert = true; // if it was a tap, we're not going to use inertia
+                            activeUiEvent.direction = DIRECTION.VERTICAL;
 
-                    //        //Verbose("cloning event for ortho springing");
-                    //        //uiEventStack.Add(springEvent);
+                            Event springEvent = activeUiEvent.clone();
+                            springEvent.direction = DIRECTION.HORIZONTAL;
+                            springEvent.action = ACTION.SINGLEDRAG;
 
-                    //    }
-                    //}
+                            Verbose("cloning event for ortho springing");
+                            uiEventStack.Add(springEvent);
+
+                        }
+                    }
                 }
 
-                if (activeUiEvent.action == ACTION.TAP)
-                {
 
-                    // tap must only be executed once, after that it becomes an inert singledrag event.
-
-                    activeUiEvent.action = ACTION.SINGLEDRAG;
-                    Log("tap -> singledrag");
-                    //Debug.Log("tap -> singledrag");
-
-                }
 
                 // Create a new uievent to catch the next interaction 
 
@@ -330,7 +312,7 @@ namespace StoryEngine.UI
 
             while (i >= 0)
             {
-              
+
                 Button button = AnimatingButtons[i];
                 button.ApplyBrightness();
 
@@ -385,7 +367,7 @@ namespace StoryEngine.UI
 
             }
 
-            Log("Adding a springing event for spring, button "+_button.name);
+            Log("Adding a springing event for spring, button " + _button.name);
 
             Event springEvent = new Event();
 
@@ -406,6 +388,7 @@ namespace StoryEngine.UI
         void processUiEvent(Event ui)
         {
 
+
             if (ui.plane == null || ui.plane.interFace == null)
                 return;
 
@@ -423,14 +406,55 @@ namespace StoryEngine.UI
 
                 case ACTION.TAP:
 
-                    ui.action = ACTION.SINGLEDRAG; 
-                    
-                    if (ui.target2D != null)
-                        interFace.tap_2d(this, args);
-                    else if (ui.target3D != null)
-                        interFace.tap_3d(this, args);
+                    if (ui.targetJustTapped)
+                    {
+                        Verbose("Double tap.");
+
+                        if (ui.target2D != null)
+                            interFace.doubletap_2d(this, args);
+                        else if (ui.target3D != null)
+                            interFace.doubletap_3d(this, args);
+                        else
+                            interFace.doubletap_none(this, args);
+
+                        ui.action = ACTION.SINGLEDRAG;
+
+                    }
                     else
-                        interFace.tap_none(this, args);
+                    {
+                        if (ui.tapTimeOut < float.Epsilon)
+                        {
+                     //       Log("Setting tap time out");
+                            ui.tapTimeOut = Time.time + 0.1f;
+                        }
+                        else if (Time.time > ui.tapTimeOut)
+                        {
+                            Verbose("tap timed out, single tap.");
+                            ui.tapTimeOut = 0;
+
+                            if (ui.target2D != null)
+                                interFace.tap_2d(this, args);
+                            else if (ui.target3D != null)
+                                interFace.tap_3d(this, args);
+                            else
+                                interFace.tap_none(this, args);
+
+                            ui.action = ACTION.SINGLEDRAG;
+                        }
+                    }
+
+                    
+                    // also perform single drag (which'll allow things like springs to work while waiting for timeout)
+
+                    args.delta = new Vector3(ui.scaledDx, ui.scaledDy, 0);
+
+                    if (ui.target2D != null)
+                        interFace.single_2d(this, args);
+                    else if (ui.target3D != null)
+                        interFace.single_3d(this, args);
+                    else
+                        interFace.single_none(this, args);
+
 
                     break;
 
@@ -453,7 +477,7 @@ namespace StoryEngine.UI
                         }
 
                     }
-              //      Verbose("singledrag");
+                    //Verbose("singledrag");
                     args.delta = new Vector3(ui.scaledDx, ui.scaledDy, 0);
 
                     if (ui.target2D != null)
@@ -463,10 +487,10 @@ namespace StoryEngine.UI
                     else
                         interFace.single_none(this, args);
 
-                   // interFace.AddMapping
+                    // interFace.AddMapping
 
-              //      ui.isInert = false;
-              //    ui.isSpringing = false;
+                    //      ui.isInert = false;
+                    //    ui.isSpringing = false;
 
                     break;
 

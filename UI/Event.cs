@@ -37,14 +37,15 @@ namespace StoryEngine.UI
         public Button targetButton;
 
         public bool isInert, isSpringing;
-      public  float eVel0 = 0;
-  public       float eVel1 = 0;
+        public float eVel0 = 0;
+        public float eVel1 = 0;
         public float eVel2 = 0;
         public float eVel3 = 0;
 
         public int springIndex;
-
+      public  bool targetJustTapped;
         float tapCount;
+        //int numberOfTaps;
         public string callback;
 
         public Plane plane; // the plane (and possibly interface) that this event plays out in.
@@ -52,6 +53,7 @@ namespace StoryEngine.UI
         //public InterFace interFace;
 
         Vector2 __position;
+      public  float tapTimeOut;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
         void Log(string message) => StoryEngine.Log.Message(message, ID);
@@ -134,11 +136,13 @@ namespace StoryEngine.UI
             isSpringing = false;
             springIndex = -1;
             tapCount = 0;
+            //numberOfTaps = 0;
 
         }
 
         public Event clone()
         {
+
 
             Event result = new Event();
             result.dx = this.dx;
@@ -159,8 +163,14 @@ namespace StoryEngine.UI
             result.targetButton = this.targetButton;
             result.isInert = this.isInert;
             result.isSpringing = this.isSpringing;
+            result.springIndex = this.springIndex;
             result.tapCount = this.tapCount;
+            result.direction = this.direction;
+            result.plane = this.plane;
+
+            //result.numberOfTaps = this.numberOfTaps;
             return result;
+
         }
         float iVel = 0;
         Vector2 iVec = Vector2.zero;
@@ -171,8 +181,8 @@ namespace StoryEngine.UI
             if (isInert)
             {
 
-              //  float iVel = 0f;
-             //   Vector2 iVec = Vector2.zero;
+                //  float iVel = 0f;
+                //   Vector2 iVec = Vector2.zero;
 
                 // Dampen double touch distance inertia.
 
@@ -230,8 +240,8 @@ namespace StoryEngine.UI
 
             // relative = abs;
 #else
-     
-             Vector3 relative = abs;
+
+            Vector3 relative = abs;
 
 #endif
 
@@ -393,8 +403,8 @@ namespace StoryEngine.UI
                     // Leave x and y at the position of the first touch
                     // initialise the d value so we can get delta d in the next frame
                     d = Vector2.Distance(tp0, tp1);
-                    dd=dx=dy = 0;
-                 
+                    dd = dx = dy = 0;
+
                     touch = TOUCH.TOUCHING;
 
                 }
@@ -431,7 +441,7 @@ namespace StoryEngine.UI
                     pd = d;
                     d = Vector2.Distance(tp0, tp1);
                     dd = d - pd;
-                   
+
                     action = ACTION.DOUBLEDRAG;
                     touch = TOUCH.TOUCHING;
                 }
@@ -551,7 +561,7 @@ namespace StoryEngine.UI
             {
                 Warning("No gfx raycaster found.");
             }
-            
+
             if (results.Count > 0)
             {
                 Verbose("targeting something");
@@ -559,14 +569,25 @@ namespace StoryEngine.UI
                 target2D = results[0].gameObject;
 
                 //Verbose("Targeting object2d " + target2D.name);
-                // find out if this 2d object is a button.
+                // find out if this 2d object is a button. First by gameobject, then by name
+                // note that by name
 
-                if (plane.interFace.uiButtons.TryGetValue(target2D.transform.name, out Button checkButton))
-                    Verbose("targeting button: " + checkButton.name + " in interface: " + plane.interFace.name);
-                else
-                    Verbose("Targeting object2d: " + target2D.name + " in interface: " + plane.interFace.name);
+                targetButton = plane.interFace.GetButton(target2D);
 
-                targetButton = checkButton;
+    
+                if (targetButton == null) 
+                                    Verbose("Targeting object2d: " + target2D.name + " in interface: " + plane.interFace.name);
+                                else
+                                    Verbose("targeting button: " + targetButton.name + " in interface: " + plane.interFace.name);
+                           
+
+
+                //if (plane.interFace.uiButtons.TryGetValue(target2D.transform.name, out Button checkButton))
+                //    Verbose("targeting button: " + checkButton.name + " in interface: " + plane.interFace.name);
+                //else
+                //    Verbose("Targeting object2d: " + target2D.name + " in interface: " + plane.interFace.name);
+
+                //targetButton = checkButton;
 
                 // Set ui event drag target and constraint. We don't have any ortho direction as this point, so we get the 'free dragging' one.
 

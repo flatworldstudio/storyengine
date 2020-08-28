@@ -130,6 +130,7 @@ namespace StoryEngine
         public GameObject DebugCanvas, PointerBlock;
 
         public GameObject MessageCanvas;
+        public bool AllWaysShowDeusMessage;
 
         GameObject[] MessageCanvases;
 
@@ -626,7 +627,7 @@ namespace StoryEngine
 
             DebugCanvas.SetActive(GENERAL.Debugging);
 
-            if (MessageCanvases != null) foreach (GameObject o in MessageCanvases) o.SetActive(GENERAL.Debugging);
+            if (MessageCanvases != null) foreach (GameObject o in MessageCanvases) o.SetActive(AllWaysShowDeusMessage?true:GENERAL.Debugging);
 
             DeusMessageTimeOut();
 

@@ -85,7 +85,7 @@ namespace StoryEngine
 
             if (task.Instruction == "end")
             {
-                Log("Encountered end task, removing pointer " + task.Pointer.currentPoint.StoryLine);
+                Verbose("Encountered end task, removing pointer " + task.Pointer.currentPoint.StoryLine);
 
                 GENERAL.ALLPOINTERS.Remove(task.Pointer);
 

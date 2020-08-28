@@ -29,6 +29,7 @@ namespace StoryEngine.UI
         public static void Drag2D(object sender, UIArgs uxArgs)
         {
 
+       //     Log("Dragging");
 
             if (uxArgs.uiEvent.targetButton == null)
                 return;
@@ -37,14 +38,22 @@ namespace StoryEngine.UI
             Constraint constraint = uxArgs.uiEvent.targetButton.GetConstraint(uxArgs.uiEvent.direction);
 
             if (dragTarget == null || constraint == null)
+            {
+                // if no target or constraint don't drag, and also stop inertia and springing which may be set
+                uxArgs.uiEvent.isInert = false;
+                uxArgs.uiEvent.isSpringing = false;
+                //Log("no target or constraint, so setting inert and springing to false");
                 return; // don't drag if no target or constraint availabe.
-
+            }
+               
             Translate2D(dragTarget, uxArgs.delta, constraint, uxArgs.uiEvent);
 
         }
 
         static void Translate2D(GameObject target, Vector2 delta, Constraint constraint, Event ui)
         {
+
+       //     Log("Translating");
             Vector3 anchor = target.GetComponent<RectTransform>().anchoredPosition;
             anchor.y += delta.y;
             anchor.x += delta.x;
@@ -541,7 +550,19 @@ void HullClamp{
                 uxArgs.uiEvent.callback = uxArgs.uiEvent.targetButton.callback;
                 uxArgs.uiEvent.targetButton.Tap();
 
-                //Verbose("Tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callback);
+                Verbose("Tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callback);
+            }
+        }
+
+        public static void doubleTapButton2D(object sender, UIArgs uxArgs)
+        {
+
+            if (uxArgs.uiEvent.targetButton != null)
+            {
+                uxArgs.uiEvent.callback = uxArgs.uiEvent.targetButton.callbackDoubleTap;
+                uxArgs.uiEvent.targetButton.Tap();
+
+                Verbose("Double tap button 2d, callback: "+uxArgs.uiEvent.targetButton.callbackDoubleTap);
             }
         }
 

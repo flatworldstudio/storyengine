@@ -18,6 +18,7 @@ namespace StoryEngine.UI
         SINGLEDRAG,
         DOUBLEDRAG,
         TAP,
+        DOUBLETAP,
         VOID,
         DELETE
     }

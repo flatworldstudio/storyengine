@@ -18,8 +18,9 @@ namespace StoryEngine.UI
     public class Button
     {
         string ID = "Button";
+        //public int UID;
         public string name;
-        public string callback;
+        public string callback, callbackDoubleTap;
         public GameObject gameObject;
         GameObject dragTarget, dragTargetHorizontal, dragTargetVertical;
 
@@ -127,7 +128,7 @@ namespace StoryEngine.UI
             // Button with differentiated constraints for horizontal and vertical dragging. Dragging will snap to initial direction.
 
             constraint = Constraint.none;
-            dragTarget = gameObject;
+            //dragTarget = gameObject;
 
             dragTargetHorizontal = _dragTargetHorizontal;
             constraintHorizontal = _constraintHorizontal;
@@ -146,7 +147,7 @@ namespace StoryEngine.UI
             // Button with differentiated constraints for horizontal and vertical dragging. Dragging will snap to initial direction.
 
             constraint = Constraint.none;
-            dragTarget = gameObject;
+            //dragTarget = gameObject;
 
             dragTargetHorizontal = _dragTargetHorizontal;
             constraintHorizontal = _constraintHorizontal;
@@ -163,7 +164,10 @@ namespace StoryEngine.UI
         {
             gameObject = _go;
             callback = "";
+            callbackDoubleTap = "";
             name = gameObject.name;
+            //UID = gameObject.GetInstanceID();
+
             //    color = new Color(1, 1, 1, 1);
             brightness = 1f;
             targetBrightness = 1f;
@@ -188,7 +192,8 @@ namespace StoryEngine.UI
 
         void Initialise(string _name)
         {
-           
+
+            Warning("initialising buttons by object name is discouraged");
 
             gameObject = GameObject.Find(_name);
 
@@ -217,6 +222,14 @@ namespace StoryEngine.UI
             callback = _callBack;
 
         }
+
+        public void AddCallbackDoubleTap(string _callBack)
+        {
+
+            callbackDoubleTap = _callBack;
+
+        }
+
 
         public void AddConstraint(Constraint _constraint)
         {

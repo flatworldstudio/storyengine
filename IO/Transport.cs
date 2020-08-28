@@ -129,8 +129,11 @@ namespace StoryEngine.IO
 
             if (!Directory.Exists(Path.GetDirectoryName(_path)))
             {
+                //Log("path " + _path);
+                //Log("path " + Path.GetDirectoryName(_path));
+
                 Directory.CreateDirectory(Path.GetDirectoryName(_path));
-                Log("Created directory: " + Path.GetDirectoryName(_path));
+        //        Verbose("Created directory: " + Path.GetDirectoryName(_path));
             }
 
             try
@@ -177,7 +180,7 @@ namespace StoryEngine.IO
             else
             {
 
-                Warning("File not found: " + _path);
+                Log("File not found: " + _path);
                 result = "";
 
             }

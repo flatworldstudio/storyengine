@@ -72,7 +72,7 @@ namespace StoryEngine
                 Warning("New storyline name is empty.");
                 return;
             }
-            Log("new storyline " + _name);
+            Log("New storyline: " + _name);
 
 
 
@@ -164,7 +164,7 @@ namespace StoryEngine
             }
 
             if (pointerStack.Count > 0)
-                Log("Evaluating " + pointerStack.Count + " of " + GENERAL.ALLPOINTERS.Count + " storypointers.");
+                Verbose("Evaluating " + pointerStack.Count + " of " + GENERAL.ALLPOINTERS.Count + " storypointers.");
 
             while (pointerStack.Count > 0)
             {
@@ -178,7 +178,7 @@ namespace StoryEngine
 
                 pointer = pointerStack[0];
 
-                Log("Evaluating pointer: " + pointer.currentPoint.StoryLine);
+                Verbose("Evaluating pointer: " + pointer.currentPoint.StoryLine);
 
                 pointer.LoadPersistantData();
 
@@ -287,7 +287,7 @@ namespace StoryEngine
                                 if (GENERAL.GetPointerForStoryline(targetPointerName) == null)
                                 {
 
-                                    Log("Starting new pointer for storypoint: " + targetPointerName);
+                                    Log("New storyline: " + targetPointerName);
 
                                     //newPointer = new StoryPointer(targetPointerName, pointer.scope);
                                     newPointer = new StoryPointer(); // constructor adds pointer to GENERAL.allpointers
@@ -429,7 +429,7 @@ namespace StoryEngine
 
                             // A normal task to be executed. Assistant director will generate task.
 
-                            Log("Task to be executed: " + pointer.currentPoint.Instructions[0]);
+                            Log("Storyline: "+pointer.currentPoint.StoryLine+" Task: " + pointer.currentPoint.Instructions[0]);
 
                             pointer.SetStatus(POINTERSTATUS.NEWTASK);
 
@@ -455,10 +455,10 @@ namespace StoryEngine
                                 switch (pointer.currentTask.getStatus())
                                 {
                                     case TASKSTATUS.COMPLETE:
-                                        Log("Storyline " + pointer.currentPoint.StoryLine + " task " + pointer.currentTask.Instruction + " completed.");
+                                        Log("Storyline: " + pointer.currentPoint.StoryLine + " task: " + pointer.currentTask.Instruction + ": Completed.");
 
                                         pointer.SetStatus(POINTERSTATUS.EVALUATE);
-                                        Log("Moving storyline " + pointer.currentPoint.StoryLine + " to next point.");
+                                      //  Log("Moving storyline " + pointer.currentPoint.StoryLine + " to next point.");
                                         moveToNextPoint(pointer);
                                         break;
 

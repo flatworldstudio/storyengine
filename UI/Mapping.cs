@@ -13,7 +13,7 @@
     public class Mapping
     {
 
-        public event UIEventHandler ux_none, ux_tap_2d, ux_tap_3d, ux_tap_none, ux_single_2d, ux_single_3d, ux_single_none, ux_double_2d, ux_double_3d, ux_double_none;
+        public event UIEventHandler ux_none, ux_tap_2d, ux_tap_3d, ux_tap_none, ux_doubletap_2d, ux_doubletap_3d, ux_doubletap_none, ux_single_2d, ux_single_3d, ux_single_none, ux_double_2d, ux_double_3d, ux_double_none;
         static Mapping __empty;
 
         public Mapping()
@@ -47,6 +47,9 @@
             clone.ux_tap_2d += this.ux_tap_2d;
             clone.ux_tap_3d += this.ux_tap_3d;
             clone.ux_tap_none += this.ux_tap_none;
+            clone.ux_doubletap_2d += this.ux_doubletap_2d;
+            clone.ux_doubletap_3d += this.ux_doubletap_3d;
+            clone.ux_doubletap_none += this.ux_doubletap_none;
             clone.ux_single_2d += this.ux_single_2d;
             clone.ux_single_3d += this.ux_single_3d;
             clone.ux_single_none += this.ux_single_none;
@@ -75,6 +78,21 @@
         public void tap_none(object sender, UIArgs args)
         {
             ux_tap_none?.Invoke(sender, args);
+        }
+
+        public void doubletap_2d(object sender, UIArgs args)
+        {
+            ux_doubletap_2d?.Invoke(sender, args);
+        }
+
+        public void doubletap_3d(object sender, UIArgs args)
+        {
+            ux_doubletap_3d?.Invoke(sender, args);
+        }
+
+        public void doubletap_none(object sender, UIArgs args)
+        {
+            ux_doubletap_none?.Invoke(sender, args);
         }
 
         public void single_2d(object sender, UIArgs args)

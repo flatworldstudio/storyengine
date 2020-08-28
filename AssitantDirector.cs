@@ -347,7 +347,7 @@ namespace StoryEngine
 
                         Verbose("" + SIGNOFFS + " handlers registred at this time.");
 
-                        Log("Starting storyline " + launchStoryline);
+                        Verbose("Starting storyline " + launchStoryline);
 
                         theDirector.NewStoryLine(launchStoryline);
                         theDirector.status = DIRECTORSTATUS.ACTIVE;
@@ -394,11 +394,11 @@ namespace StoryEngine
                     {
                         // we have a reference to a local script file, so we'll attempt to load it (synchronous). we load it from a folder with the current version
 
-                        string script = Transport.FileToText(Application.persistentDataPath + "/scripts/" + JimEngine.App.Info.GetMinorNumber() + "/" + scriptFile);
+                        string script = Transport.FileToText(Application.persistentDataPath + "/scripts/" + App.GetMinorNumber() + "/" + scriptFile);
 
                         if (script == "")
                         {
-                            Warning("Error loading local script file, version folder " + JimEngine.App.Info.GetMinorNumber());
+                            Warning("Error loading local script file, version folder " + App.GetMinorNumber());
                         }
                         else
                         {
