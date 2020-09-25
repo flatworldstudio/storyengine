@@ -193,7 +193,7 @@ namespace StoryEngine.UI
         void Initialise(string _name)
         {
 
-            Warning("initialising buttons by object name is discouraged");
+            Log("initialising buttons by object name is discouraged");
 
             gameObject = GameObject.Find(_name);
 
