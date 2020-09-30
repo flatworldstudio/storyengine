@@ -128,7 +128,7 @@ namespace StoryEngine
     //    public LOGLEVEL LogLevel = LOGLEVEL.WARNINGS;
 
         public GameObject DebugCanvas, PointerBlock;
-
+        public string Action;
         public GameObject MessageCanvas;
         public bool AllWaysShowDeusMessage;
 
@@ -597,6 +597,11 @@ namespace StoryEngine
             }
 
 
+        }
+
+      public  void OnActionClick()
+        {
+            Director.Instance.NewStoryLineExclusive(Action);
         }
 
 
