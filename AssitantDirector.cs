@@ -85,7 +85,7 @@ namespace StoryEngine
             Verbose("Starting.");
 
 
-            
+
 
             //StoryEngine.Log.SetModuleLevel("Director", DirectorLogLevel);
             //StoryEngine.Log.SetModuleLevel("AD", ADLogLevel);
@@ -365,7 +365,7 @@ namespace StoryEngine
                     //    // pause while loading
                     //    theDirector.status = DIRECTORSTATUS.PAUSED;
 
-                
+
 
                     //    Addressables.LoadAssetAsync<TextAsset>(scriptAddressable).Completed += obj =>
                     //    {
@@ -392,13 +392,13 @@ namespace StoryEngine
 
                     if (scriptFile != null && scriptFile != "")
                     {
-                        // we have a reference to a local script file, so we'll attempt to load it (synchronous). we load it from a folder with the current version
+                        // we have a reference to a local script file, so we'll attempt to load it (synchronous). we try to load it from a folder with the current version
 
-                        string script = Transport.FileToText(Application.persistentDataPath + "/scripts/" + App.GetMinorNumber() + "/" + scriptFile);
+                        string script = Transport.FileToText(Application.persistentDataPath + "/scripts/" + App.GetMinor() + "/" + scriptFile);
 
                         if (script == "")
                         {
-                            Warning("Error loading local script file, version folder " + App.GetMinorNumber());
+                            Log("No script on disk for version: " + App.GetMinor());
                         }
                         else
                         {

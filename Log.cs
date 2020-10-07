@@ -80,6 +80,11 @@ namespace StoryEngine
             return AssitantDirector.Instance == null ? LOGLEVEL.NORMAL : AssitantDirector.Instance.DefaultLogLevel;
         }
 
+        public static void Force(string message)
+        {
+            Debug.Log(message);
+        }
+
         public static void Message(string message, string module = "Unkown", LOGLEVEL messageLevel = LOGLEVEL.NORMAL)
         {
 
@@ -114,7 +119,7 @@ namespace StoryEngine
                 Debug.LogWarning(module + ": " + message);
                 DeusHandler.Instance?.AddLogLine(module + ": " + message);
             }
-                
+
 
 #endif
 

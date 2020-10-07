@@ -126,7 +126,7 @@ namespace StoryEngine
         public List<StoryTask> taskList;
 
         string ID = "NetworkHandler";
-
+        bool Mounted = false;
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
         void Log(string message) => StoryEngine.Log.Message(message, ID);
         void Warning(string message) => StoryEngine.Log.Warning(message, ID);
@@ -142,20 +142,31 @@ namespace StoryEngine
             state = STATE.AWAKE;
         }
 
-        public void PassVariables(MountPrefab prefab)
+        public void Mount(MountPrefab prefab)
         {
-
-            ID = prefab.Name;
-
+            // NOTE: not implemented yet mounted vs unmounted logic. a lot happening in start and awake etc.
+            Mounted = true;
         }
 
         public void UnMount()
         {
             Log("Shutting down network object.");
-
             NetworkObjectShutdown();
 
+            for (int t = 0; t < taskList.Count; t++) taskList[t].signOff(ID);
+            taskList.Clear();
+
         }
+
+        void OnDestroy()
+        {
+            if (Mounted)
+            {
+                Warning("Destroying while mounted, unmount first.");
+                UnMount();
+            }
+        }
+
 
         public void SetBroadcastInfo(int key, string message)
         {
@@ -209,19 +220,14 @@ namespace StoryEngine
 
         }
 
-        private void OnApplicationQuit()
-        {
-            Log("Application stopping, shutting down network object.");
+        //private void OnApplicationQuit()
+        //{
+        //    Log("Application stopping, shutting down network object.");
 
-            NetworkObjectShutdown();
+        //    NetworkObjectShutdown();
 
-        }
+        //}
 
-        private void OnDestroy()
-        {
-            Log("Scene stopping, shutting down network object.");
-            NetworkObjectShutdown();
-        }
 
 
 

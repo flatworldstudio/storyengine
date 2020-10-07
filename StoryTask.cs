@@ -232,7 +232,7 @@ namespace StoryEngine
             if (signedOn.Exists(x => x == fromMe))
             {
                 signedOn.Remove(fromMe);
-                Verbose(Instruction + " signing off " + fromMe);
+                Verbose(Instruction + " signing off " + fromMe + " signees left " + signedOn.Count);
 
             }
             else
