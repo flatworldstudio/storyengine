@@ -866,9 +866,9 @@ namespace StoryEngine
 #if UNITY_IOS
                     if (!Broadcasting)
                     {
-                        Log("Starting broadcast server, key " + BroadcastKey + " message " + BroadcastMessage);
+                        Log("Starting broadcast server, key " + BroadcastKey + " message " + BroadcastMessageString);
                         //startBroadcastServer(ConnectionKey, ConnectionMessage);
-                        startBroadcastServer(BroadcastKey, BroadcastMessage);
+                        startBroadcastServer(BroadcastKey, BroadcastMessageString);
                     }
 
                     if (!Serving)
