@@ -155,7 +155,7 @@ namespace StoryEngine
 
             for (int t = 0; t < taskList.Count; t++) taskList[t].signOff(ID);
             taskList.Clear();
-
+            Mounted = false;
         }
 
         void OnDestroy()
