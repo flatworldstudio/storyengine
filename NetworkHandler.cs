@@ -42,7 +42,7 @@ namespace StoryEngine
 
         const short connectionMessageCode = 1001;
 
-        string BroadcastMessage = "";
+        string BroadcastMessageString = "";
         int BroadcastKey = 0;
 
 
@@ -171,7 +171,7 @@ namespace StoryEngine
         public void SetBroadcastInfo(int key, string message)
         {
             BroadcastKey = key;
-            BroadcastMessage = message;
+            BroadcastMessageString = message;
         }
 
         public void SetBroadcastKey(int key)
@@ -183,13 +183,13 @@ namespace StoryEngine
         public void SetBroadcastMessage(string message)
         {
 
-            BroadcastMessage = message;
+            BroadcastMessageString = message;
         }
 
         public void ResetBroadcastInfo()
         {
             BroadcastKey = 0;
-            BroadcastMessage = "";
+            BroadcastMessageString = "";
         }
 
         void Start()
@@ -805,7 +805,7 @@ namespace StoryEngine
                     {
 
 
-                        if (BroadcastKey == 0 || BroadcastMessage == null || BroadcastMessage.Length == 0)
+                        if (BroadcastKey == 0 || BroadcastMessageString == null || BroadcastMessageString.Length == 0)
                         {
                             // no info on how to configure broadcasterver
 
@@ -813,8 +813,8 @@ namespace StoryEngine
                         }
                         else
                         {
-                            startBroadcastServer(BroadcastKey, BroadcastMessage);
-                            Log("Starting broadcast server, key: " + BroadcastKey + " message: " + BroadcastMessage);
+                            startBroadcastServer(BroadcastKey, BroadcastMessageString);
+                            Log("Starting broadcast server, key: " + BroadcastKey + " message: " + BroadcastMessageString);
                         }
 
                         //ModuleInfo mi = SessionData.GetModuleInfo();

@@ -44,13 +44,11 @@ namespace StoryEngine
         List<string> signedOn;
 
         TASKSTATUS status;
-
-        //StoryTaskUpdate updateSend, updateReceive;
-
-        int LastUpdateFrame = -1;
-        int UpdatesPerFrame = 0;
-        public int LastUpdatesPerFrame = 0;
-        public int MaxUpdatesPerFrame = 0;
+        
+        //int LastUpdateFrame = -1;
+        //int UpdatesPerFrame = 0;
+        //public int LastUpdatesPerFrame = 0;
+        //public int MaxUpdatesPerFrame = 0;
         // ------------------------------------------------
 
         #region CONSTRUCTOR
