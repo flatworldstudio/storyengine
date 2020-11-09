@@ -44,8 +44,7 @@ namespace StoryEngine
         public string[] id;
         public LOGLEVEL[] loglevel;
 
-
-
+        
         string ID = "AssistantDirector";
         private NewTasksEventUnity newTasksEventUnity;
 
@@ -83,19 +82,7 @@ namespace StoryEngine
         {
 
             Verbose("Starting.");
-
-
-            
-
-            //StoryEngine.Log.SetModuleLevel("Director", DirectorLogLevel);
-            //StoryEngine.Log.SetModuleLevel("AD", ADLogLevel);
-            ////       StoryEngine.Log.SetModuleLevel("DataController", DataControllerLogLevel);
-
-            //StoryEngine.Log.SetModuleLevel("Controller", ControllerLogLevel);
-            //StoryEngine.Log.SetModuleLevel("Event", EventLogLevel);
-
-
-
+                                 
 
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
 
@@ -841,8 +828,7 @@ namespace StoryEngine
 
                 GENERAL.ALLPOINTERS.Remove(pointer);
                 Log("Removing pointer: " + pointer.currentPoint.StoryLine);
-
-
+                
                 // Remove tasks for pointer
                 // Server passes tasks, so if it is faster, client may be processing more than one task for a storyline. (Even if the deus dash would show it)
 
