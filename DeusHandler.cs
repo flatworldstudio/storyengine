@@ -288,7 +288,24 @@ namespace StoryEngine
                     break;
 
 
+                case "pause10":
 
+                    float timeOut10;
+
+                    if (!task.GetFloatValue("timeOut", out timeOut10))
+                    {
+                        task.SetFloatValue("timeOut", Time.time + 5f);
+
+                    }
+                    else
+                    {
+                        if (Time.time > timeOut10)
+                        {
+                            done = true;
+                        }
+
+                    }
+                    break;
 
                 case "debugon":
 

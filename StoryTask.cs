@@ -44,13 +44,11 @@ namespace StoryEngine
         List<string> signedOn;
 
         TASKSTATUS status;
-
-        //StoryTaskUpdate updateSend, updateReceive;
-
-        int LastUpdateFrame = -1;
-        int UpdatesPerFrame = 0;
-        public int LastUpdatesPerFrame = 0;
-        public int MaxUpdatesPerFrame = 0;
+        
+        //int LastUpdateFrame = -1;
+        //int UpdatesPerFrame = 0;
+        //public int LastUpdatesPerFrame = 0;
+        //public int MaxUpdatesPerFrame = 0;
         // ------------------------------------------------
 
         #region CONSTRUCTOR
@@ -232,7 +230,7 @@ namespace StoryEngine
             if (signedOn.Exists(x => x == fromMe))
             {
                 signedOn.Remove(fromMe);
-                Verbose(Instruction + " signing off " + fromMe);
+                Verbose(Instruction + " signing off " + fromMe + " signees left " + signedOn.Count);
 
             }
             else

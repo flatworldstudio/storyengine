@@ -42,7 +42,7 @@ namespace StoryEngine
 
         const short connectionMessageCode = 1001;
 
-        string BroadcastMessage = "";
+        string BroadcastMessageString = "";
         int BroadcastKey = 0;
 
 
@@ -126,7 +126,7 @@ namespace StoryEngine
         public List<StoryTask> taskList;
 
         string ID = "NetworkHandler";
-
+        bool Mounted = false;
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
         void Log(string message) => StoryEngine.Log.Message(message, ID);
         void Warning(string message) => StoryEngine.Log.Warning(message, ID);
@@ -142,25 +142,36 @@ namespace StoryEngine
             state = STATE.AWAKE;
         }
 
-        public void PassVariables(MountPrefab prefab)
+        public void Mount(MountPrefab prefab)
         {
-
-            ID = prefab.Name;
-
+            // NOTE: not implemented yet mounted vs unmounted logic. a lot happening in start and awake etc.
+            Mounted = true;
         }
 
         public void UnMount()
         {
             Log("Shutting down network object.");
-
             NetworkObjectShutdown();
 
+            for (int t = 0; t < taskList.Count; t++) taskList[t].signOff(ID);
+            taskList.Clear();
+            Mounted = false;
         }
+
+        void OnDestroy()
+        {
+            if (Mounted)
+            {
+                Warning("Destroying while mounted, unmount first.");
+                UnMount();
+            }
+        }
+
 
         public void SetBroadcastInfo(int key, string message)
         {
             BroadcastKey = key;
-            BroadcastMessage = message;
+            BroadcastMessageString = message;
         }
 
         public void SetBroadcastKey(int key)
@@ -172,13 +183,13 @@ namespace StoryEngine
         public void SetBroadcastMessage(string message)
         {
 
-            BroadcastMessage = message;
+            BroadcastMessageString = message;
         }
 
         public void ResetBroadcastInfo()
         {
             BroadcastKey = 0;
-            BroadcastMessage = "";
+            BroadcastMessageString = "";
         }
 
         void Start()
@@ -209,19 +220,14 @@ namespace StoryEngine
 
         }
 
-        private void OnApplicationQuit()
-        {
-            Log("Application stopping, shutting down network object.");
+        //private void OnApplicationQuit()
+        //{
+        //    Log("Application stopping, shutting down network object.");
 
-            NetworkObjectShutdown();
+        //    NetworkObjectShutdown();
 
-        }
+        //}
 
-        private void OnDestroy()
-        {
-            Log("Scene stopping, shutting down network object.");
-            NetworkObjectShutdown();
-        }
 
 
 
@@ -799,7 +805,7 @@ namespace StoryEngine
                     {
 
 
-                        if (BroadcastKey == 0 || BroadcastMessage == null || BroadcastMessage.Length == 0)
+                        if (BroadcastKey == 0 || BroadcastMessageString == null || BroadcastMessageString.Length == 0)
                         {
                             // no info on how to configure broadcasterver
 
@@ -807,8 +813,8 @@ namespace StoryEngine
                         }
                         else
                         {
-                            startBroadcastServer(BroadcastKey, BroadcastMessage);
-                            Log("Starting broadcast server, key: " + BroadcastKey + " message: " + BroadcastMessage);
+                            startBroadcastServer(BroadcastKey, BroadcastMessageString);
+                            Log("Starting broadcast server, key: " + BroadcastKey + " message: " + BroadcastMessageString);
                         }
 
                         //ModuleInfo mi = SessionData.GetModuleInfo();
@@ -860,9 +866,9 @@ namespace StoryEngine
 #if UNITY_IOS
                     if (!Broadcasting)
                     {
-                        Log("Starting broadcast server, key " + BroadcastKey + " message " + BroadcastMessage);
+                        Log("Starting broadcast server, key " + BroadcastKey + " message " + BroadcastMessageString);
                         //startBroadcastServer(ConnectionKey, ConnectionMessage);
-                        startBroadcastServer(BroadcastKey, BroadcastMessage);
+                        startBroadcastServer(BroadcastKey, BroadcastMessageString);
                     }
 
                     if (!Serving)

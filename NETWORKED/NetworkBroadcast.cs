@@ -20,8 +20,8 @@ namespace StoryEngine.Network
 
         string ID = "Networkbroadcast";
 
-        bool resumeClient = false;
-        bool resumeServer = false;
+        //bool resumeClient = false;
+        //bool resumeServer = false;
 
         // Copy these into every class for easy debugging. This way we don't have to pass an ID. Stack-based ID doesn't work across platforms.
 
