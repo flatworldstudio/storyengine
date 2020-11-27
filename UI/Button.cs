@@ -51,7 +51,7 @@ namespace StoryEngine.UI
         //}
 
      
-
+            // single draggable button
 
         public Button(string _name)
         {
@@ -61,6 +61,17 @@ namespace StoryEngine.UI
             lastPosition = Vector2.zero;
             orthoDragging = false;
         }
+
+        public Button(GameObject obj)
+        {
+            Initialise(obj);
+            constraint = Constraint.none;
+            dragTarget = gameObject;
+            lastPosition = Vector2.zero;
+            orthoDragging = false;
+        }
+
+        // single lockable button
 
         public Button(string _name, bool locked)
         {
@@ -102,6 +113,7 @@ namespace StoryEngine.UI
         
     }
 
+        // button with dragtarget (so dragging drags the target not the button)
 
         public Button(string _name, GameObject _dragTarget)
         {
@@ -112,6 +124,8 @@ namespace StoryEngine.UI
             orthoDragging = false;
         }
 
+        // button with dragtarget (so dragging drags the target not the button) and drag constraint
+        
         public Button(string _name, GameObject _dragTarget, Constraint _constraint)
         {
             Initialise(_name);
@@ -120,6 +134,16 @@ namespace StoryEngine.UI
             lastPosition = Vector2.zero;
             orthoDragging = false;
         }
+
+        public Button(GameObject obj , GameObject _dragTarget, Constraint _constraint)
+        {
+            Initialise(obj);
+            dragTarget = _dragTarget;
+            constraint = _constraint;
+            lastPosition = Vector2.zero;
+            orthoDragging = false;
+        }
+
 
         public Button(string _name, GameObject _dragTargetHorizontal, Constraint _constraintHorizontal, GameObject _dragTargetVertical, Constraint _constraintVertical)
         {

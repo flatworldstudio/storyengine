@@ -190,7 +190,21 @@ namespace StoryEngine.IO
 
         }
 
+        public static bool DeleteFile(string _path)
+        {
+            if (_path.Length < 1) return false;
 
+            try
+            {
+                File.Delete(_path);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Warning("delete failed " + e.Message);
+                return false;
+            }
+        }
 
     }
 
