@@ -654,11 +654,11 @@ namespace StoryEngine
             DeusMessageTimeOut();
 
 
-            if (Input.GetKey("escape"))
-            {
-                Warning("Quitting application.");
-                Application.Quit();
-            }
+            //if (Input.GetKey("escape"))
+            //{
+            //    Warning("Quitting application.");
+            //    Application.Quit();
+            //}
 
 
             int t = 0;
