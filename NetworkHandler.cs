@@ -349,6 +349,7 @@ namespace StoryEngine
                 NetworkTransport.Init();
             }
 
+
         }
 
         #endregion
@@ -1350,7 +1351,7 @@ namespace StoryEngine
                 Destroy(NetworkObject);
 
                 Log("Shutting down networktransport.");
-                NetworkTransport.Shutdown();
+            //    NetworkTransport.Shutdown();
 
             }
 
